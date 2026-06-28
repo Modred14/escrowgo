@@ -1,5 +1,5 @@
 import Link from "next/link";
-import SealMark from "@/components/SealMark";
+import SealMark from "@/components/Sealmark";
 
 export default function NotFound() {
   return (

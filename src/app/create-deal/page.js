@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ImageUploader from "@/components/ImageUploader";
-import { Spinner } from "@/components/Loaders";
+import { Spinner } from "@/components/Loader";
 import { checkDeliveryCoverage, COVERED_LOCATIONS } from "@/lib/delivery-coverage";
 import { formatNaira } from "@/lib/utils";
 

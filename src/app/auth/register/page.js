@@ -5,8 +5,8 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import toast from "react-hot-toast";
-import SealMark from "@/components/SealMark";
-import { Spinner } from "@/components/Loaders";
+import SealMark from "@/components/Sealmark";
+import { Spinner } from "@/components/Loader";
 
 export default function RegisterPage() {
   const router = useRouter();

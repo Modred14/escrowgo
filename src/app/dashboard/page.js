@@ -5,9 +5,9 @@ import { useSession } from "next-auth/react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import DealCard from "@/components/DealCard";
-import EmptyState from "@/components/EmptyState";
-import StatCard from "@/components/StatCard";
-import { CardSkeleton } from "@/components/Loaders";
+import EmptyState from "@/components/Emptystate";
+import StatCard from "@/components/Statcard";
+import { CardSkeleton } from "@/components/Loader";
 import { formatNaira } from "@/lib/utils";
 
 export default function DashboardPage() {

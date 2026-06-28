@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import SealMark from "@/components/SealMark";
+import SealMark from "@/components/Sealmark";
 
 export const metadata = {
   title: "escrowgo — Secure deals, verified delivery",

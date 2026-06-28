@@ -6,9 +6,9 @@ import { useSession } from "next-auth/react";
 import toast from "react-hot-toast";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import StatusBadge from "@/components/StatusBadge";
+import StatusBadge from "@/components/Statusbadge";
 import Timeline from "@/components/Timeline";
-import { PageLoader, Spinner } from "@/components/Loaders";
+import { PageLoader, Spinner } from "@/components/Loader";
 import { formatNaira, formatDate } from "@/lib/utils";
 
 export default function DealPage() {

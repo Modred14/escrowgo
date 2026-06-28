@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import StatCard from "@/components/StatCard";
-import StatusBadge from "@/components/StatusBadge";
-import { PageLoader } from "@/components/Loaders";
+import StatCard from "@/components/Statcard";
+import StatusBadge from "@/components/Statusbadge";
+import { PageLoader } from "@/components/Loader";
 import { formatNaira, formatDate } from "@/lib/utils";
 
 export default function AdminPage() {

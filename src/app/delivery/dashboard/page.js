@@ -4,10 +4,10 @@ import { useEffect, useState, useCallback } from "react";
 import toast from "react-hot-toast";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import EmptyState from "@/components/EmptyState";
-import StatCard from "@/components/StatCard";
-import StatusBadge from "@/components/StatusBadge";
-import { CardSkeleton, Spinner } from "@/components/Loaders";
+import EmptyState from "@/components/Emptystate";
+import StatCard from "@/components/Statcard";
+import StatusBadge from "@/components/Statusbadge";
+import { CardSkeleton, Spinner } from "@/components/Loader";
 import { formatNaira, formatDate } from "@/lib/utils";
 
 const TABS = ["available", "assigned", "earnings"];

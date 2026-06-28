@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import SealMark from "@/components/SealMark";
-import { Spinner, PageLoader } from "@/components/Loaders";
+import SealMark from "@/components/Sealmark";
+import { Spinner, PageLoader } from "@/components/Loader";
 import { formatNaira } from "@/lib/utils";
 
 export default function PayPage() {

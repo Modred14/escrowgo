@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import QRScanner from "@/components/QRScanner";
-import { Spinner } from "@/components/Loaders";
+import { Spinner } from "@/components/Loader";
 
 export default function ScannerPage() {
   const [verifying, setVerifying] = useState(false);
