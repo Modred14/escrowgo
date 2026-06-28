@@ -37,25 +37,27 @@ Built as a hackathon MVP — JavaScript only (no TypeScript), Next.js App Router
 
 ```
 escrowgo/
-├── app/
-│   ├── page.js                      # Landing page
-│   ├── layout.js                    # Root layout (fonts, SEO, providers)
-│   ├── auth/login, auth/register    # Buyer/seller auth
-│   ├── dashboard/                   # Selling/buying deal lists
-│   ├── create-deal/                 # Seller: create a secure deal
-│   ├── deal/[slug]/                 # Public deal page (pay, track, QR, self-delivery controls)
-│   ├── pay/[id]/                    # Checkout / mock-checkout page
-│   ├── delivery/register/           # Courier signup
-│   ├── delivery/dashboard/          # Courier: available/assigned/earnings
-│   ├── scanner/                     # Release-flow QR scanner
-│   ├── admin/                       # Platform-wide stats + transactions
-│   └── api/                         # All API routes (see section 7)
-├── components/                      # Navbar, Footer, Timeline, DealCard, QRScanner, etc.
-├── lib/                              # prisma client, auth config, nomba client, delivery-coverage, qr, notifications, cloudinary
+├── src/
+│   ├── app/
+│   │   ├── page.js                      # Landing page
+│   │   ├── layout.js                    # Root layout (fonts, SEO, providers)
+│   │   ├── auth/login, auth/register    # Buyer/seller auth
+│   │   ├── dashboard/                   # Selling/buying deal lists
+│   │   ├── create-deal/                 # Seller: create a secure deal
+│   │   ├── deal/[slug]/                 # Public deal page (pay, track, QR, self-delivery controls)
+│   │   ├── pay/[id]/                    # Checkout / mock-checkout page
+│   │   ├── delivery/register/           # Courier signup
+│   │   ├── delivery/dashboard/          # Courier: available/assigned/earnings
+│   │   ├── scanner/                     # Release-flow QR scanner
+│   │   ├── admin/                       # Platform-wide stats + transactions
+│   │   └── api/                         # All API routes (see section 7)
+│   ├── components/                      # Navbar, Footer, Timeline, DealCard, QRScanner, etc.
+│   ├── lib/                              # prisma client, auth config, nomba client, delivery-coverage, qr, notifications, cloudinary
+│   └── middleware.js                     # Route protection
 ├── prisma/
-│   ├── schema.prisma                 # 9 models: User, Deal, Product, Payment, Delivery, DeliveryAgent, Escrow, QRCode, Notification
-│   └── seed.js                       # Demo accounts + sample deals at every stage
-├── middleware.js                     # Route protection
+│   ├── schema.prisma                     # 9 models: User, Deal, Product, Payment, Delivery, DeliveryAgent, Escrow, QRCode, Notification
+│   └── seed.js                           # Demo accounts + sample deals at every stage
+├── public/
 ├── netlify.toml
 └── .env.example
 ```
@@ -69,7 +71,7 @@ escrowgo/
 npm install
 
 # 2. Configure environment
-cp .env.local .env
+cp .env.example .env
 # then fill in DATABASE_URL, NEXTAUTH_SECRET, Cloudinary keys (Nomba keys optional — see section 6)
 
 # 3. Push the schema to your Neon database
