@@ -2,6 +2,23 @@
   "name": "escrowgo",
   "version": "0.1.0",
   "private": true,
+  "description": "a delivery system with escrow payment",
+  "keywords": [
+    "escrow",
+    "delivery"
+  ],
+  "homepage": "https://github.com/Modred14/escrowgo#readme",
+  "bugs": {
+    "url": "https://github.com/Modred14/escrowgo/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Modred14/escrowgo.git"
+  },
+  "license": "ISC",
+  "author": "Modred",
+  "type": "commonjs",
+  "main": "index.js",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
