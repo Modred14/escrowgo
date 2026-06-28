@@ -1,4 +1,4 @@
-// Mock EscrowGO delivery network coverage for the MVP.
+// Mock escrowgo delivery network coverage for the MVP.
 // In production this would call a logistics-partner API.
 export const COVERED_LOCATIONS = [
   "Lagos",
@@ -22,20 +22,14 @@ function normalize(location) {
 }
 
 export function isCovered(location) {
-  return COVERED_LOCATIONS.some(
-    (city) => normalize(city) === normalize(location),
-  );
+  return COVERED_LOCATIONS.some((city) => normalize(city) === normalize(location));
 }
 
 /**
  * Checks coverage for both ends of a delivery and returns fee + buffer info.
- * This is the single source of truth for the "EscrowGO Delivery" business logic.
+ * This is the single source of truth for the "escrowgo Delivery" business logic.
  */
-export function checkDeliveryCoverage({
-  sellerLocation,
-  buyerLocation,
-  estimatedDeliveryDays,
-}) {
+export function checkDeliveryCoverage({ sellerLocation, buyerLocation, estimatedDeliveryDays }) {
   const sellerCovered = isCovered(sellerLocation);
   const buyerCovered = isCovered(buyerLocation);
   const available = sellerCovered && buyerCovered;
@@ -43,12 +37,11 @@ export function checkDeliveryCoverage({
   if (!available) {
     return {
       available: false,
-      reason:
-        !sellerCovered && !buyerCovered
-          ? "EscrowGO Delivery does not yet operate in either location."
-          : !sellerCovered
-            ? `EscrowGO Delivery does not yet operate in ${sellerLocation}.`
-            : `EscrowGO Delivery does not yet operate in ${buyerLocation}.`,
+      reason: !sellerCovered && !buyerCovered
+        ? "escrowgo Delivery does not yet operate in either location."
+        : !sellerCovered
+        ? `escrowgo Delivery does not yet operate in ${sellerLocation}.`
+        : `escrowgo Delivery does not yet operate in ${buyerLocation}.`,
       fee: 0,
       bufferDays: 0,
       totalEstimatedDays: estimatedDeliveryDays,

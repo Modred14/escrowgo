@@ -24,37 +24,24 @@ const mono = IBM_Plex_Mono({
 });
 
 export const metadata = {
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
-  ),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
   title: {
-    default: "EscrowGO — Secure deals, verified delivery",
-    template: "%s · EscrowGO",
+    default: "escrowgo — Secure deals, verified delivery",
+    template: "%s · escrowgo",
   },
   description:
-    "EscrowGO holds payment in escrow until delivery is confirmed by QR scan, protecting both buyers and sellers on every transaction.",
-  keywords: [
-    "escrow",
-    "secure payments",
-    "delivery",
-    "Nigeria",
-    "Nomba",
-    "buyer protection",
-  ],
+    "escrowgo holds payment in escrow until delivery is confirmed by QR scan, protecting both buyers and sellers on every transaction.",
+  keywords: ["escrow", "secure payments", "delivery", "Nigeria", "Nomba", "buyer protection"],
   openGraph: {
-    title: "EscrowGO — Secure deals, verified delivery",
-    description:
-      "Funds stay locked in escrow until delivery is verified. No trust required.",
+    title: "escrowgo — Secure deals, verified delivery",
+    description: "Funds stay locked in escrow until delivery is verified. No trust required.",
     type: "website",
   },
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html
-      lang="en"
-      className={`${fraunces.variable} ${manrope.variable} ${mono.variable}`}
-    >
+    <html lang="en" className={`${fraunces.variable} ${manrope.variable} ${mono.variable}`}>
       <body className="font-sans antialiased">
         <Providers>{children}</Providers>
       </body>

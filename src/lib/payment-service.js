@@ -20,12 +20,8 @@ export async function markPaymentSuccess(paymentId) {
 
   const deal = payment.deal;
   const now = new Date();
-  const totalDays =
-    deal.estimatedDeliveryDays +
-    (deal.deliveryOption === "EscrowGO" ? deal.bufferDays : 0);
-  const expectedDeliveryDate = new Date(
-    now.getTime() + totalDays * 24 * 60 * 60 * 1000,
-  );
+  const totalDays = deal.estimatedDeliveryDays + (deal.deliveryOption === "ESCROWGO" ? deal.bufferDays : 0);
+  const expectedDeliveryDate = new Date(now.getTime() + totalDays * 24 * 60 * 60 * 1000);
 
   const updatedPayment = await prisma.payment.update({
     where: { id: paymentId },

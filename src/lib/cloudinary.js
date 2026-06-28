@@ -1,12 +1,31 @@
-import { prisma } from "@/lib/prisma";
+/**
+ * Uploads a File to Cloudinary using an unsigned upload preset.
+ * Only the cloud name + preset (both public, non-secret config) are used
+ * client-side — the Cloudinary API secret never appears in the browser.
+ */
+export async function uploadToCloudinary(file) {
+  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+  const preset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
 
-export async function notify(userId, { title, message, type = "INFO" }) {
-  if (!userId) return null;
-  return prisma.notification.create({
-    data: { userId, title, message, type },
+  if (!cloudName || !preset) {
+    throw new Error("Cloudinary is not configured. Set NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME and NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET.");
+  }
+
+  const form = new FormData();
+  form.append("file", file);
+  form.append("upload_preset", preset);
+  form.append("folder", "escrowgo");
+
+  const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+    method: "POST",
+    body: form,
   });
-}
 
-export async function notifyMany(userIds, payload) {
-  return Promise.all(userIds.filter(Boolean).map((id) => notify(id, payload)));
+  if (!res.ok) {
+    const errBody = await res.json().catch(() => ({}));
+    throw new Error(errBody?.error?.message || "Image upload failed.");
+  }
+
+  const data = await res.json();
+  return data.secure_url;
 }

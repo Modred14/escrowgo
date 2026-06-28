@@ -1,0 +1,206 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  DELIVERY_AGENT
+  ADMIN
+}
+
+enum DeliveryOption {
+  ESCROWGO
+  SELF
+}
+
+enum DealStatus {
+  PENDING_PAYMENT
+  FUNDS_HELD
+  OUT_FOR_DELIVERY
+  DELIVERED
+  PAYMENT_RELEASED
+  REFUNDED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+enum EscrowStatus {
+  HELD
+  RELEASED
+  REFUNDED
+}
+
+enum DeliveryStatus {
+  UNASSIGNED
+  ACCEPTED
+  PICKED_UP
+  DELIVERED
+}
+
+enum NotificationType {
+  INFO
+  SUCCESS
+  WARNING
+  ERROR
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  password      String
+  phone         String?
+  role          Role      @default(USER)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  dealsAsSeller Deal[]         @relation("SellerDeals")
+  dealsAsBuyer  Deal[]         @relation("BuyerDeals")
+  payments      Payment[]
+  notifications Notification[]
+  deliveryAgent DeliveryAgent?
+
+  @@map("users")
+}
+
+model Deal {
+  id                    String         @id @default(cuid())
+  slug                  String         @unique
+  sellerId              String
+  seller                User           @relation("SellerDeals", fields: [sellerId], references: [id])
+  buyerId               String?
+  buyer                 User?          @relation("BuyerDeals", fields: [buyerId], references: [id])
+
+  sellerLocation        String
+  buyerLocation         String
+  deliveryOption        DeliveryOption
+  estimatedDeliveryDays Int
+  bufferDays            Int            @default(0)
+  expectedDeliveryDate  DateTime?
+  deliveryFee           Float          @default(0)
+  deliveryAvailable     Boolean        @default(true)
+
+  status                DealStatus     @default(PENDING_PAYMENT)
+
+  product               Product?
+  payments              Payment[]
+  escrow                Escrow?
+  delivery              Delivery?
+  qrCode                QRCode?
+
+  createdAt             DateTime       @default(now())
+  updatedAt              DateTime      @updatedAt
+
+  @@map("deals")
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  dealId      String   @unique
+  deal        Deal     @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  name        String
+  description String
+  price       Float
+  images      String[]
+  createdAt   DateTime @default(now())
+
+  @@map("products")
+}
+
+model Payment {
+  id          String        @id @default(cuid())
+  dealId      String
+  deal        Deal          @relation(fields: [dealId], references: [id])
+  buyerId     String?
+  buyer       User?         @relation(fields: [buyerId], references: [id])
+  amount      Float
+  currency    String        @default("NGN")
+  provider    String        @default("nomba")
+  providerRef String?       @unique
+  checkoutUrl String?
+  status      PaymentStatus @default(PENDING)
+  paidAt      DateTime?
+  createdAt   DateTime      @default(now())
+
+  @@map("payments")
+}
+
+model Escrow {
+  id         String       @id @default(cuid())
+  dealId     String       @unique
+  deal       Deal         @relation(fields: [dealId], references: [id])
+  amount     Float
+  status     EscrowStatus @default(HELD)
+  releasedAt DateTime?
+  refundedAt DateTime?
+  createdAt  DateTime     @default(now())
+
+  @@map("escrows")
+}
+
+model Delivery {
+  id              String         @id @default(cuid())
+  dealId          String         @unique
+  deal            Deal           @relation(fields: [dealId], references: [id])
+  agentId         String?
+  agent           DeliveryAgent? @relation(fields: [agentId], references: [id])
+  pickupLocation  String
+  dropoffLocation String
+  fee             Float          @default(0)
+  status          DeliveryStatus @default(UNASSIGNED)
+  acceptedAt      DateTime?
+  pickedUpAt      DateTime?
+  deliveredAt     DateTime?
+  createdAt       DateTime       @default(now())
+
+  @@map("deliveries")
+}
+
+model DeliveryAgent {
+  id          String     @id @default(cuid())
+  userId      String     @unique
+  user        User       @relation(fields: [userId], references: [id])
+  vehicleType String?
+  location    String
+  isAvailable Boolean    @default(true)
+  earnings    Float      @default(0)
+  deliveries  Delivery[]
+  createdAt   DateTime   @default(now())
+
+  @@map("delivery_agents")
+}
+
+model QRCode {
+  id        String    @id @default(cuid())
+  dealId    String    @unique
+  deal      Deal      @relation(fields: [dealId], references: [id])
+  code      String    @unique
+  isUsed    Boolean   @default(false)
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@map("qr_codes")
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id])
+  title     String
+  message   String
+  type      NotificationType @default(INFO)
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  @@map("notifications")
+}
