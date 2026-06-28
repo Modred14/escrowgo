@@ -2,23 +2,6 @@
   "name": "escrowgo",
   "version": "0.1.0",
   "private": true,
-  "description": "a delivery system with escrow payment",
-  "keywords": [
-    "escrow",
-    "delivery"
-  ],
-  "homepage": "https://github.com/Modred14/escrowgo#readme",
-  "bugs": {
-    "url": "https://github.com/Modred14/escrowgo/issues"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Modred14/escrowgo.git"
-  },
-  "license": "ISC",
-  "author": "Modred",
-  "type": "commonjs",
-  "main": "index.js",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -27,6 +10,7 @@
   },
   "dependencies": {
     "@prisma/client": "^7.8.0",
+    "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.3",
     "clsx": "^2.1.1",
     "next": "16.2.9",
@@ -42,5 +26,18 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.9",
     "tailwindcss": "^4"
-  }
+  },
+  "description": "This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Modred14/escrowgo.git"
+  },
+  "keywords": [],
+  "author": "Modred",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Modred14/escrowgo/issues"
+  },
+  "homepage": "https://github.com/Modred14/escrowgo#readme"
 }
