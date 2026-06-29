@@ -1,6 +1,6 @@
 import crypto from "crypto";
 
-const BASE_URL = process.env.NOMBA_BASE_URL || "https://sandbox.nomba.com";
+const BASE_URL = process.env.NOMBA_BASE_URL || "https://sandbox.api.nomba.com";
 
 export function isMockMode() {
   return (
@@ -95,12 +95,23 @@ export async function createCheckoutOrder({ orderReference, amount, currency, ca
  */
 export function verifyWebhookSignature(rawBody, signature) {
   if (isMockMode()) return true;
-  if (!signature || !process.env.NOMBA_WEBHOOK_SECRET) return false;
+  if (!signature || !process.env.NOMBA_WEBHOOK_SECRET) {
+    console.log("[webhook debug] missing signature or secret", {
+      signaturePresent: !!signature,
+      secretPresent: !!process.env.NOMBA_WEBHOOK_SECRET,
+    });
+    return false;
+  }
 
   const expected = crypto
     .createHmac("sha256", process.env.NOMBA_WEBHOOK_SECRET)
     .update(rawBody)
     .digest("hex");
+
+  console.log("[webhook debug] secret loaded:", JSON.stringify(process.env.NOMBA_WEBHOOK_SECRET));
+  console.log("[webhook debug] signature received:", signature);
+  console.log("[webhook debug] signature expected:", expected);
+  console.log("[webhook debug] match:", signature === expected);
 
   try {
     return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(signature));
