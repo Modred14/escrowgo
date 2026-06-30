@@ -107,11 +107,10 @@ export default function LandingPage() {
             </h1>
 
             <p className="animate-fade-in-up [animation-delay:160ms] mx-auto mt-6 max-w-2xl text-balance text-base leading-relaxed text-ink/60 md:text-lg">
-              <span className="text-brass font-bold">EscrowGo</span> allows
-              you to complete every transaction with confidence using secure
-              QR verification, instant payment release after delivery, and
-              detailed business records that support growth and future
-              opportunities.
+              <span className="text-brass font-bold">EscrowGo</span> allows you
+              to complete every transaction with confidence using secure QR
+              verification, instant payment release after delivery, and detailed
+              business records that support growth and future opportunities.
             </p>
 
             <div className="animate-fade-in-up [animation-delay:240ms] mt-9 flex flex-wrap items-center justify-center gap-3">
@@ -172,7 +171,7 @@ export default function LandingPage() {
         </section>
         <main className="bg-paper">
           {/* HOW IT WORKS */}
-          <section
+          {/* <section
             id="how-it-works"
             className="border-b border-ink/10 px-5 py-20"
           >
@@ -202,10 +201,10 @@ export default function LandingPage() {
                 ))}
               </div>
             </div>
-          </section>
+          </section> */}
 
           {/* ROLES */}
-          <section className="border-b border-ink/10 bg-paper-dim px-5 py-20">
+          {/* <section className="border-b border-ink/10 bg-paper-dim px-5 py-20">
             <div className="mx-auto max-w-6xl">
               <h2 className="max-w-lg font-display text-3xl font-semibold text-ink">
                 Built for everyone in the handoff.
@@ -241,10 +240,10 @@ export default function LandingPage() {
                 ))}
               </div>
             </div>
-          </section>
+          </section> */}
 
           {/* ESCROW EXPLAINER */}
-          <section className="px-5 py-20">
+          {/* <section className="px-5 py-20">
             <div className="mx-auto grid max-w-6xl gap-10 md:grid-cols-2 md:items-start">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-widest text-brass-dark">
@@ -296,7 +295,7 @@ export default function LandingPage() {
                 ))}
               </div>
             </div>
-          </section>
+          </section> */}
 
           {/* DIFFERENCE / COMPARISON */}
           <section className="border-t border-ink/10 bg-paper-dim px-5 py-20">
@@ -306,7 +305,7 @@ export default function LandingPage() {
               </h2>
 
               <div className="mt-12 grid gap-6 md:grid-cols-2">
-                {/* WITHOUT */}
+              
                 <div className="animate-fade-in-up [animation-delay:120ms] rounded-2xl border border-ink/10 bg-ink/[0.04] p-7 transition-all duration-300 hover:-translate-y-1 hover:shadow-md md:p-8">
                   <span className="inline-flex items-center gap-1.5 rounded-full border border-ink/15 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-ink/60">
                     <span aria-hidden>⏱️</span> Without EscrowGo
@@ -359,7 +358,7 @@ export default function LandingPage() {
                     ))}
                   </ul>
                 </div>
-              </div>
+              </div> 
 
               {/* FEATURE CARDS */}
               <div className="mt-6 grid gap-5 sm:grid-cols-2 md:grid-cols-3">
@@ -396,82 +395,123 @@ export default function LandingPage() {
             </div>
           </section>
           {/* POWERED BY NOMBA */}
-{/* POWERED BY NOMBA */}
-<section className="relative overflow-hidden border-t border-ink/10 px-5 py-24 text-center">
-  {/* ambient cream gradient backdrop */}
-  <div
-    aria-hidden
-    className="absolute inset-0 bg-[radial-gradient(circle_at_18%_15%,#fff7e6_0%,transparent_45%),radial-gradient(circle_at_85%_75%,#fdf2e0_0%,transparent_50%)] bg-paper"
-  />
-  {/* faint dot-grid texture */}
-  <div
-    aria-hidden
-    className="absolute inset-0 opacity-[0.35] [background-image:radial-gradient(theme(colors.ink/12%)_1px,transparent_1px)] [background-size:22px_22px] [mask-image:radial-gradient(ellipse_70%_70%_at_50%_40%,black_30%,transparent_85%)]"
-  />
-  {/* watermark padlock, top-right */}
-  <svg
-    aria-hidden
-    viewBox="0 0 100 100"
-    className="absolute -right-4 top-6 h-32 w-32 text-brass/[0.10] md:h-44 md:w-44"
-  >
-    <rect x="22" y="44" width="56" height="44" rx="10" fill="currentColor" />
-    <path
-      d="M32 44V32a18 18 0 0 1 36 0v12"
-      stroke="currentColor"
-      strokeWidth="9"
-      fill="none"
-    />
-  </svg>
-  {/* faint world-map style arcs, bottom-left */}
-  <svg
-    aria-hidden
-    viewBox="0 0 200 200"
-    className="absolute -left-10 bottom-0 h-48 w-48 text-ink/[0.05] md:h-64 md:w-64"
-  >
-    <circle cx="100" cy="100" r="90" stroke="currentColor" strokeWidth="1" fill="none" />
-    <circle cx="100" cy="100" r="60" stroke="currentColor" strokeWidth="1" fill="none" />
-    <circle cx="100" cy="100" r="30" stroke="currentColor" strokeWidth="1" fill="none" />
-  </svg>
+          {/* POWERED BY NOMBA */}
+          <section className="relative overflow-hidden border-t border-ink/10 px-5 py-24 text-center">
+            {/* ambient cream gradient backdrop */}
+            <div
+              aria-hidden
+              className="absolute inset-0 bg-[radial-gradient(circle_at_18%_15%,#fff7e6_0%,transparent_45%),radial-gradient(circle_at_85%_75%,#fdf2e0_0%,transparent_50%)] bg-paper"
+            />
+            {/* faint dot-grid texture */}
+            <div
+              aria-hidden
+              className="absolute inset-0 opacity-[0.35] [background-image:radial-gradient(theme(colors.ink/12%)_1px,transparent_1px)] [background-size:22px_22px] [mask-image:radial-gradient(ellipse_70%_70%_at_50%_40%,black_30%,transparent_85%)]"
+            />
+            {/* watermark padlock, top-right */}
+            <svg
+              aria-hidden
+              viewBox="0 0 100 100"
+              className="absolute -right-4 top-6 h-32 w-32 text-brass/[0.10] md:h-44 md:w-44"
+            >
+              <rect
+                x="22"
+                y="44"
+                width="56"
+                height="44"
+                rx="10"
+                fill="currentColor"
+              />
+              <path
+                d="M32 44V32a18 18 0 0 1 36 0v12"
+                stroke="currentColor"
+                strokeWidth="9"
+                fill="none"
+              />
+            </svg>
+            {/* faint world-map style arcs, bottom-left */}
+            <svg
+              aria-hidden
+              viewBox="0 0 200 200"
+              className="absolute -left-10 bottom-0 h-48 w-48 text-ink/[0.05] md:h-64 md:w-64"
+            >
+              <circle
+                cx="100"
+                cy="100"
+                r="90"
+                stroke="currentColor"
+                strokeWidth="1"
+                fill="none"
+              />
+              <circle
+                cx="100"
+                cy="100"
+                r="60"
+                stroke="currentColor"
+                strokeWidth="1"
+                fill="none"
+              />
+              <circle
+                cx="100"
+                cy="100"
+                r="30"
+                stroke="currentColor"
+                strokeWidth="1"
+                fill="none"
+              />
+            </svg>
 
-  <div className="relative mx-auto max-w-2xl">
-    <h2 className="animate-fade-in-up text-balance font-display text-3xl font-semibold text-ink md:text-4xl">
-      Powered by <span className="text-brass">Nomba.</span>
-    </h2>
+            <div className="relative mx-auto max-w-5xl">
+              <div className="bg-white rounded-2xl backdrop-blur-sm w-fit mx-auto p-2 px-3 border border-gray-800/20">
+                <h2 className="animate-fade-in-up text-balance font-display text-2xl font-semibold text-ink md:text-3xl">
+                  Powered by <span className="text-brass">Nomba</span>
+                </h2>
+              </div>
 
-    <p className="animate-fade-in-up [animation-delay:80ms] mx-auto mt-6 max-w-xl text-balance text-sm leading-relaxed text-ink/60 md:text-[15px]">
-      Every payment is securely processed through Nomba&apos;s trusted
-      payment infrastructure, while encrypted QR verification confirms
-      every successful delivery before funds are released. Each completed
-      transaction is automatically recorded, giving businesses a reliable
-      digital sales history they can download, track, and use to support
-      growth, bookkeeping, and future opportunities.
-    </p>
+              <p className="animate-fade-in-up [animation-delay:80ms] mx-auto mt-6 max-w-5xl text-balance text-sm sm:text-base leading-relaxed font-bold ">
+                Every payment is securely processed through Nomba&apos;s trusted
+                payment infrastructure, while encrypted QR verification confirms
+                every successful delivery before funds are released. Each
+                completed transaction is automatically recorded, giving
+                businesses a reliable digital sales history they can download,
+                track, and use to support growth, bookkeeping, and future
+                opportunities.
+              </p>
 
-    <div className="animate-fade-in-up [animation-delay:180ms] mt-5 flex justify-center">
-  <div className="group flex h-15 w-40 items-center justify-center overflow-hidden rounded-[22px] bg-brass shadow-[0_12px_30px_-8px_theme(colors.brass/55%)] transition-transform duration-300 hover:-translate-y-1 hover:scale-105 ">
-    <img
-      src="https://nomba.com/nomba-social-preview.png"
-      alt="Nomba"
-      className="h-full w-full scale-170 object-cover object-center"
-     
-    />
-    <div className="hidden h-full w-full items-center justify-center">
-      <svg viewBox="0 0 48 48" className="h-9 w-9 md:h-11 md:w-11" fill="none">
-        <path
-          d="M10 10 L38 38 M38 10 L10 38"
-          stroke="#161311"
-          strokeWidth="8"
-          strokeLinecap="round"
-        />
-      </svg>
-    </div>
-  </div>
-</div>
-  </div>
-</section>
+              <div className="animate-fade-in-up [animation-delay:180ms] mt-5 flex justify-center">
+                <Link
+                  href="https://nomba.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {" "}
+                  <div className="group flex h-15 w-40 items-center justify-center overflow-hidden rounded-[22px] bg-brass shadow-[0_12px_30px_-8px_theme(colors.brass/55%)] transition-transform duration-300 hover:-translate-y-1 hover:scale-105 ">
+                    <img
+                      src="https://nomba.com/nomba-social-preview.png"
+                      alt="Nomba"
+                      className="h-full w-full scale-170 object-cover object-center"
+                    />
+                    <div className="hidden h-full w-full items-center justify-center">
+                      <svg
+                        viewBox="0 0 48 48"
+                        className="h-9 w-9 md:h-11 md:w-11"
+                        fill="none"
+                      >
+                        <path
+                          d="M10 10 L38 38 M38 10 L10 38"
+                          stroke="#161311"
+                          strokeWidth="8"
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                    </div>
+                  </div>{" "}
+                </Link>
+              </div>
+            </div>
+          </section>
 
           {/* CTA */}
-          <section className="border-t border-ink/10 bg-ink px-5 py-20 text-center">
+          {/* <section className="border-t border-ink/10 bg-ink px-5 py-20 text-center">
             <SealMark size={40} className="mx-auto" />
             <h2 className="mx-auto mt-5 max-w-md font-display text-3xl font-semibold text-paper">
               Stop wiring money on trust alone.
@@ -482,7 +522,7 @@ export default function LandingPage() {
             >
               Create your first secure deal
             </Link>
-          </section>
+          </section> */}
         </main>
         <Footer />
       </div>
