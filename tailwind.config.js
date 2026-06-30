@@ -18,8 +18,8 @@ module.exports = {
           deep: "#0A2018",
         },
         brass: {
-          DEFAULT: "#C8932F",
-          light: "#E0B45C",
+          DEFAULT: "#FEC417",
+          light: "#E4BC6C",
           dark: "#9C7320",
         },
         seal: {

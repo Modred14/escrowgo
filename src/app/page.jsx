@@ -57,145 +57,229 @@ const ROLES = [
 export default function LandingPage() {
   return (
     <>
-      <Navbar />
-      <main className="bg-paper">
-        {/* HERO */}
-        <section className="relative overflow-hidden border-b border-ink/10 bg-ink">
-          <div className="absolute inset-0 bg-grain opacity-40" />
-          <div className="relative mx-auto grid max-w-6xl gap-12 px-5 py-20 md:grid-cols-2 md:items-center md:py-28">
-            <div>
-              <span className="inline-flex items-center gap-2 rounded-full border border-brass/30 bg-brass/10 px-3.5 py-1.5 text-xs font-semibold text-brass-light">
-                <span className="h-1.5 w-1.5 rounded-full bg-brass" /> Escrow held until delivery is verified
+      {" "}
+      <div className="bg-home">
+        <Navbar />
+     
+          <section className="relative overflow-hidden border-b border-ink/10">
+            <div className="relative mx-auto max-w-4xl px-5 pb-20 pt-16 text-center md:pb-28 md:pt-24">
+              <span className="animate-fade-in-up inline-flex items-center gap-2 rounded-full border border-brass/30 bg-brass/10 px-3.5 py-1.5 text-xs font-semibold text-brass-dark">
+                <span className="h-1.5 w-1.5 rounded-full bg-brass" /> Powering
+                the future of e-Business
               </span>
-              <h1 className="mt-6 font-display text-4xl font-semibold leading-[1.08] text-paper text-balance md:text-5xl">
-                Nobody loses money to a stranger again.
+
+              <h1 className="animate-fade-in-up [animation-delay:80ms] mt-6 text-balance font-display text-5xl font-semibold leading-[1.05] text-ink md:text-7xl">
+                Scan, Deliver, <span className="text-brass">Get paid</span>
               </h1>
-              <p className="mt-5 max-w-md text-base leading-relaxed text-paper/65">
-                escrowgo holds the buyer's payment in a sealed escrow account the moment they pay — and only
-                releases it to the seller once a QR scan confirms the item actually arrived.
+
+              <p className="animate-fade-in-up [animation-delay:160ms] mx-auto mt-6 max-w-2xl text-balance text-base leading-relaxed text-ink/60 md:text-lg">
+                <span className="text-brass font-bold">EscrowGo</span> allows
+                you to complete every transaction with confidence using secure
+                QR verification, instant payment release after delivery, and
+                detailed business records that support growth and future
+                opportunities.
               </p>
-              <div className="mt-8 flex flex-wrap items-center gap-3">
+
+              <div className="animate-fade-in-up [animation-delay:240ms] mt-9 flex flex-wrap items-center justify-center gap-3">
                 <Link
-                  href="/auth/register"
-                  className="rounded-full bg-brass px-6 py-3 text-sm font-semibold text-ink transition hover:bg-brass-light"
+                  href="/auth/login"
+                  className="group inline-flex items-center gap-2 rounded-full bg-brass px-7 py-3.5 text-sm font-semibold hover:text-gray-100 text-ink shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#705A2F] hover:shadow-lg"
                 >
-                  Create a secure deal
+                  Get Started
+                  <span
+                    aria-hidden
+                    className="transition-transform duration-300 group-hover:translate-x-1"
+                  >
+                    →
+                  </span>
                 </Link>
                 <Link
-                  href="/delivery/register"
-                  className="rounded-full border border-paper/20 px-6 py-3 text-sm font-semibold text-paper transition hover:border-brass hover:text-brass-light"
+                  href="#how-it-works"
+                  className="rounded-full border border-ink/15 bg-white px-7 py-3.5 text-sm font-semibold text-brass-dark transition-all duration-300 hover:-translate-y-0.5 hover:border-brass/40 hover:shadow-md"
                 >
-                  Become a courier
+                  How it works
                 </Link>
               </div>
-              <div className="mt-10 flex items-center gap-6 text-xs text-paper/40">
-                <span>Powered by Nomba (test mode)</span>
-                <span className="h-1 w-1 rounded-full bg-paper/20" />
-                <span>QR-verified release</span>
-                <span className="h-1 w-1 rounded-full bg-paper/20" />
-                <span>Auto-refund on missed delivery</span>
-              </div>
-            </div>
 
-            <div className="relative mx-auto flex h-72 w-72 items-center justify-center md:h-80 md:w-80">
-              <div className="absolute inset-0 animate-spin-slow rounded-full border border-dashed border-brass/30" />
-              <div className="absolute inset-6 rounded-full border border-vault-light/40" />
-              <div className="flex h-44 w-44 flex-col items-center justify-center rounded-full bg-vault shadow-seal md:h-52 md:w-52">
-                <SealMark size={56} />
-                <span className="mt-3 font-mono text-[11px] tracking-widest text-paper/50">FUNDS HELD</span>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* HOW IT WORKS */}
-        <section className="border-b border-ink/10 px-5 py-20">
-          <div className="mx-auto max-w-6xl">
-            <p className="text-xs font-semibold uppercase tracking-widest text-brass-dark">The escrow ledger</p>
-            <h2 className="mt-2 max-w-lg font-display text-3xl font-semibold text-ink">
-              Four steps, in order — nothing released out of sequence.
-            </h2>
-            <div className="ledger-rule mt-12 grid gap-8 md:grid-cols-4 md:gap-6">
-              {STEPS.map((s) => (
-                <div key={s.n} className="relative pt-2">
-                  <span className="font-display text-4xl font-semibold text-ink/10">{s.n}</span>
-                  <h3 className="mt-3 font-display text-base font-semibold text-ink">{s.title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-ink/55">{s.body}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ROLES */}
-        <section className="border-b border-ink/10 bg-paper-dim px-5 py-20">
-          <div className="mx-auto max-w-6xl">
-            <h2 className="max-w-lg font-display text-3xl font-semibold text-ink">Built for everyone in the handoff.</h2>
-            <div className="mt-10 grid gap-5 md:grid-cols-3">
-              {ROLES.map((r) => (
-                <div key={r.label} className="flex flex-col rounded-2xl border border-ink/10 bg-white p-7">
-                  <span className="text-xs font-bold uppercase tracking-wide text-brass-dark">{r.label}</span>
-                  <h3 className="mt-3 font-display text-xl font-semibold text-ink">{r.title}</h3>
-                  <p className="mt-2.5 flex-1 text-sm leading-relaxed text-ink/55">{r.body}</p>
-                  <Link href={r.href} className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-vault hover:underline">
-                    {r.cta} <span aria-hidden>→</span>
-                  </Link>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ESCROW EXPLAINER */}
-        <section className="px-5 py-20">
-          <div className="mx-auto grid max-w-6xl gap-10 md:grid-cols-2 md:items-start">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-widest text-brass-dark">Where's my money?</p>
-              <h2 className="mt-2 font-display text-3xl font-semibold text-ink">It sits in escrow. Not with us, not with them.</h2>
-              <p className="mt-4 text-sm leading-relaxed text-ink/60">
-                "Escrow" means a trusted third party holds the money mid-transaction so neither side has to go
-                first. escrowgo plays that role: the buyer's payment is marked <em>held</em>, never paid out, until
-                proof of delivery exists in the form of a scanned QR code only the buyer can generate.
-              </p>
-              <p className="mt-3 text-sm leading-relaxed text-ink/60">
-                If delivery never happens by the agreed date, escrowgo refunds the buyer automatically — no
-                support ticket required.
-              </p>
-            </div>
-            <div className="grid gap-4 rounded-2xl border border-ink/10 bg-vault p-7 text-paper">
-              {[
-                ["Funds secured in escrow", "Buyer paid. Money is locked, not yet sent to seller."],
-                ["Out for delivery", "Item is in transit to the buyer."],
-                ["Delivered — awaiting confirmation", "Buyer holds a QR code to confirm receipt."],
-                ["Payment released", "QR scanned and verified. Seller is paid."],
-              ].map(([title, body]) => (
-                <div key={title} className="flex gap-3 border-b border-paper/10 pb-4 last:border-0 last:pb-0">
-                  <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-brass" />
-                  <div>
-                    <p className="text-sm font-semibold text-paper">{title}</p>
-                    <p className="mt-0.5 text-xs text-paper/55">{body}</p>
+              {/* availability strip */}
+              <div className="animate-fade-in-up [animation-delay:320ms] mx-auto mt-16 grid max-w-3xl gap-10 sm:grid-cols-2">
+                <div>
+                  <p className="text-xs font-medium text-ink/50">
+                    Available in cities near you
+                  </p>
+                  <div className="mt-3 flex items-center justify-center gap-3 sm:justify-start">
+                    {["🏝️", "🌆", "🏙️", "🏛️", "🌇"].map((e, i) => (
+                      <span
+                        key={i}
+                        className="flex h-9 w-9 items-center justify-center rounded-full border border-ink/10 bg-white text-sm shadow-sm transition-transform duration-300 hover:-translate-y-1"
+                      >
+                        {e}
+                      </span>
+                    ))}
                   </div>
                 </div>
-              ))}
+                <div>
+                  <p className="text-xs font-medium text-ink/50">
+                    Supports all types of physical &amp; online businesses
+                  </p>
+                  <div className="mt-3 flex items-center justify-center gap-3 sm:justify-start">
+                    {["📦", "👗", "💻", "🛒", "🚚"].map((e, i) => (
+                      <span
+                        key={i}
+                        className="flex h-9 w-9 items-center justify-center rounded-full border border-ink/10 bg-white text-sm shadow-sm transition-transform duration-300 hover:-translate-y-1"
+                      >
+                        {e}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
-        </section>
-
-        {/* CTA */}
-        <section className="border-t border-ink/10 bg-ink px-5 py-20 text-center">
-          <SealMark size={40} className="mx-auto" />
-          <h2 className="mx-auto mt-5 max-w-md font-display text-3xl font-semibold text-paper">
-            Stop wiring money on trust alone.
-          </h2>
-          <Link
-            href="/auth/register"
-            className="mt-7 inline-flex rounded-full bg-brass px-7 py-3.5 text-sm font-semibold text-ink transition hover:bg-brass-light"
+          </section>
+   <main className="bg-paper">
+          {/* HOW IT WORKS */}
+          <section
+            id="how-it-works"
+            className="border-b border-ink/10 px-5 py-20"
           >
-            Create your first secure deal
-          </Link>
-        </section>
-      </main>
-      <Footer />
+            <div className="mx-auto max-w-6xl">
+              <p className="text-xs font-semibold uppercase tracking-widest text-brass-dark">
+                The escrow ledger
+              </p>
+              <h2 className="mt-2 max-w-lg font-display text-3xl font-semibold text-ink">
+                Four steps, in order — nothing released out of sequence.
+              </h2>
+              <div className="ledger-rule mt-12 grid gap-8 md:grid-cols-4 md:gap-6">
+                {STEPS.map((s) => (
+                  <div
+                    key={s.n}
+                    className="group relative rounded-2xl pt-2 transition-transform duration-300 hover:-translate-y-1"
+                  >
+                    <span className="font-display text-4xl font-semibold text-ink/10 transition-colors duration-300 group-hover:text-brass/30">
+                      {s.n}
+                    </span>
+                    <h3 className="mt-3 font-display text-base font-semibold text-ink">
+                      {s.title}
+                    </h3>
+                    <p className="mt-2 text-sm leading-relaxed text-ink/55">
+                      {s.body}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* ROLES */}
+          <section className="border-b border-ink/10 bg-paper-dim px-5 py-20">
+            <div className="mx-auto max-w-6xl">
+              <h2 className="max-w-lg font-display text-3xl font-semibold text-ink">
+                Built for everyone in the handoff.
+              </h2>
+              <div className="mt-10 grid gap-5 md:grid-cols-3">
+                {ROLES.map((r) => (
+                  <div
+                    key={r.label}
+                    className="flex flex-col rounded-2xl border border-ink/10 bg-white p-7 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+                  >
+                    <span className="text-xs font-bold uppercase tracking-wide text-brass-dark">
+                      {r.label}
+                    </span>
+                    <h3 className="mt-3 font-display text-xl font-semibold text-ink">
+                      {r.title}
+                    </h3>
+                    <p className="mt-2.5 flex-1 text-sm leading-relaxed text-ink/55">
+                      {r.body}
+                    </p>
+                    <Link
+                      href={r.href}
+                      className="group mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-vault transition-colors hover:text-brass-dark"
+                    >
+                      {r.cta}{" "}
+                      <span
+                        aria-hidden
+                        className="transition-transform duration-300 group-hover:translate-x-1"
+                      >
+                        →
+                      </span>
+                    </Link>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* ESCROW EXPLAINER */}
+          <section className="px-5 py-20">
+            <div className="mx-auto grid max-w-6xl gap-10 md:grid-cols-2 md:items-start">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-widest text-brass-dark">
+                  Where's my money?
+                </p>
+                <h2 className="mt-2 font-display text-3xl font-semibold text-ink">
+                  It sits in escrow. Not with us, not with them.
+                </h2>
+                <p className="mt-4 text-sm leading-relaxed text-ink/60">
+                  "Escrow" means a trusted third party holds the money
+                  mid-transaction so neither side has to go first. escrowgo
+                  plays that role: the buyer's payment is marked <em>held</em>,
+                  never paid out, until proof of delivery exists in the form of
+                  a scanned QR code only the buyer can generate.
+                </p>
+                <p className="mt-3 text-sm leading-relaxed text-ink/60">
+                  If delivery never happens by the agreed date, escrowgo refunds
+                  the buyer automatically — no support ticket required.
+                </p>
+              </div>
+              <div className="grid gap-4 rounded-2xl border border-ink/10 bg-vault p-7 text-paper">
+                {[
+                  [
+                    "Funds secured in escrow",
+                    "Buyer paid. Money is locked, not yet sent to seller.",
+                  ],
+                  ["Out for delivery", "Item is in transit to the buyer."],
+                  [
+                    "Delivered — awaiting confirmation",
+                    "Buyer holds a QR code to confirm receipt.",
+                  ],
+                  [
+                    "Payment released",
+                    "QR scanned and verified. Seller is paid.",
+                  ],
+                ].map(([title, body]) => (
+                  <div
+                    key={title}
+                    className="flex gap-3 border-b border-paper/10 pb-4 transition-colors duration-300 last:border-0 last:pb-0 hover:bg-white/5"
+                  >
+                    <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-brass" />
+                    <div>
+                      <p className="text-sm font-semibold text-paper">
+                        {title}
+                      </p>
+                      <p className="mt-0.5 text-xs text-paper/55">{body}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* CTA */}
+          <section className="border-t border-ink/10 bg-ink px-5 py-20 text-center">
+            <SealMark size={40} className="mx-auto" />
+            <h2 className="mx-auto mt-5 max-w-md font-display text-3xl font-semibold text-paper">
+              Stop wiring money on trust alone.
+            </h2>
+            <Link
+              href="/auth/register"
+              className="mt-7 inline-flex rounded-full bg-brass px-7 py-3.5 text-sm font-semibold text-ink transition-all duration-300 hover:-translate-y-0.5 hover:bg-brass-light hover:shadow-lg"
+            >
+              Create your first secure deal
+            </Link>
+          </section>
+        </main>
+        <Footer />
+      </div>
     </>
   );
 }

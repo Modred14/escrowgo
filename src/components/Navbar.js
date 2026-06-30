@@ -1,154 +1,107 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useSession, signOut } from "next-auth/react";
 import SealMark from "@/components/Sealmark";
-import NotificationBell from "@/components/NotificationBell";
+
+const NAV_LINKS = [
+  { label: "How it works", href: "#how-it-works" },
+  { label: "Features", href: "#features" },
+  { label: "Privacy", href: "#privacy" },
+];
 
 export default function Navbar() {
-  const { data: session, status } = useSession();
-  const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
-  const links = [{ href: "/dashboard", label: "Dashboard" }];
-  if (session?.user?.role === "DELIVERY_AGENT") {
-    links.push({ href: "/delivery/dashboard", label: "Delivery" });
-  }
-  if (session?.user?.role === "ADMIN") {
-    links.push({ href: "/admin", label: "Admin" });
-  }
-  links.push({ href: "/scanner", label: "Scanner" });
-
   return (
-    <header className="sticky top-0 z-50 border-b border-ink/10 bg-paper/90 backdrop-blur-md">
-      <nav className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3.5">
-        <Link href="/" className="flex items-center gap-2.5">
-          <SealMark size={32} />
-          <span className="font-display text-lg font-semibold text-ink">
-            EscrowGO
+    <header className="sticky top-0 z-50 px-5 pt-4 bg-transparent">
+      <nav className="mx-auto flex max-w-6xl items-center justify-between rounded-full border border-ink/10 bg-white px-4 py-2.5 shadow-sm transition-shadow duration-300 hover:shadow-md">
+        <Link href="/" className="flex items-center gap-2">
+          <span className="">
+            <Image src="/logo.png" alt="EscrowGo logo" className="object-contain" width={25} height={24} />
+          </span>
+          <span className="font-display text-base font-semibold text-ink">
+            EscrowGo<span className="text-brass">.</span>
           </span>
         </Link>
 
-        <div className="hidden items-center gap-6 md:flex">
-          {status === "authenticated" &&
-            links.map((l) => (
-              <Link
-                key={l.href}
-                href={l.href}
-                className={`text-sm font-medium transition hover:text-vault ${
-                  pathname.startsWith(l.href) ? "text-vault" : "text-ink/60"
-                }`}
-              >
-                {l.label}
-              </Link>
-            ))}
+        {/* desktop nav */}
+        <div className="hidden items-center gap-8 md:flex">
+          {NAV_LINKS.map((l) => (
+            <Link
+              key={l.label}
+              href={l.href}
+              className="text-sm font-medium text-ink/70 transition-colors duration-200 hover:text-brass-dark"
+            >
+              {l.label}
+            </Link>
+          ))}
         </div>
 
-        <div className="hidden items-center gap-3 md:flex">
-          {status === "authenticated" ? (
-            <>
-              <NotificationBell />
-              <Link
-                href="/create-deal"
-                className="rounded-full bg-vault px-4 py-2 text-sm font-semibold text-paper transition hover:bg-vault-light"
-              >
-                Create Secure Deal
-              </Link>
-              <button
-                onClick={() => signOut({ callbackUrl: "/" })}
-                className="text-sm font-medium text-ink/50 hover:text-seal"
-              >
-                Sign out
-              </button>
-            </>
-          ) : status === "loading" ? (
-            <div className="h-9 w-24 animate-pulse rounded-full bg-ink/5" />
-          ) : (
-            <>
-              <Link
-                href="/auth/login"
-                className="text-sm font-medium text-ink/70 hover:text-vault"
-              >
-                Log in
-              </Link>
-              <Link
-                href="/auth/register"
-                className="rounded-full bg-vault px-4 py-2 text-sm font-semibold text-paper transition hover:bg-vault-light"
-              >
-                Get started
-              </Link>
-            </>
-          )}
+        <div className="hidden md:block">
+          <Link
+            href="/auth/login"
+            className="inline-flex items-center rounded-full bg-brass px-5 py-2.5 text-sm font-semibold text-ink transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#705A2F] hover:text-gray-100 hover:shadow-md"
+          >
+            Get Started
+          </Link>
         </div>
 
+        {/* mobile hamburger / close icon */}
         <button
-          className="rounded-lg p-2 text-ink md:hidden"
+          type="button"
+          aria-label={open ? "Close menu" : "Open menu"}
+          aria-expanded={open}
           onClick={() => setOpen((v) => !v)}
-          aria-label="Toggle menu"
+          className="flex h-9 w-9 items-center justify-center rounded-full border border-ink/10 text-ink transition-colors duration-200 hover:border-brass/40 md:hidden"
         >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M4 6h16M4 12h16M4 18h16"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
+          <span className="relative block h-3.5 w-4">
+            <span
+              className={`absolute left-0 top-0 h-[1.5px] w-full bg-ink transition-all duration-300 ${
+                open ? "top-1/2 -translate-y-1/2 rotate-45" : ""
+              }`}
             />
-          </svg>
+            <span
+              className={`absolute left-0 top-1/2 h-[1.5px] w-full -translate-y-1/2 bg-ink transition-opacity duration-200 ${
+                open ? "opacity-0" : "opacity-100"
+              }`}
+            />
+            <span
+              className={`absolute bottom-0 left-0 h-[1.5px] w-full bg-ink transition-all duration-300 ${
+                open ? "bottom-1/2 translate-y-1/2 -rotate-45" : ""
+              }`}
+            />
+          </span>
         </button>
       </nav>
 
-      {open && (
-        <div className="border-t border-ink/10 bg-paper px-5 py-4 md:hidden">
-          <div className="flex flex-col gap-3">
-            {status === "authenticated" ? (
-              <>
-                {links.map((l) => (
-                  <Link
-                    key={l.href}
-                    href={l.href}
-                    className="text-sm font-medium text-ink/70"
-                    onClick={() => setOpen(false)}
-                  >
-                    {l.label}
-                  </Link>
-                ))}
-                <Link
-                  href="/create-deal"
-                  className="rounded-full bg-vault px-4 py-2.5 text-center text-sm font-semibold text-paper"
-                  onClick={() => setOpen(false)}
-                >
-                  Create Secure Deal
-                </Link>
-                <button
-                  onClick={() => signOut({ callbackUrl: "/" })}
-                  className="text-left text-sm font-medium text-seal"
-                >
-                  Sign out
-                </button>
-              </>
-            ) : (
-              <>
-                <Link
-                  href="/auth/login"
-                  className="text-sm font-medium text-ink/70"
-                  onClick={() => setOpen(false)}
-                >
-                  Log in
-                </Link>
-                <Link
-                  href="/auth/register"
-                  className="rounded-full bg-vault px-4 py-2.5 text-center text-sm font-semibold text-paper"
-                  onClick={() => setOpen(false)}
-                >
-                  Get started
-                </Link>
-              </>
-            )}
-          </div>
+      {/* mobile menu panel */}
+      <div
+        className={`mx-auto max-w-6xl overflow-hidden transition-all duration-300 ease-out md:hidden ${
+          open ? "mt-2 max-h-80 opacity-100" : "max-h-0 opacity-0"
+        }`}
+      >
+        <div className="flex flex-col gap-1 rounded-2xl border border-ink/10 bg-white p-4 shadow-sm">
+          {NAV_LINKS.map((l) => (
+            <Link
+              key={l.label}
+              href={l.href}
+              onClick={() => setOpen(false)}
+              className="rounded-lg px-3 py-2.5 text-sm font-medium text-ink/70 transition-colors duration-200 hover:bg-paper-dim hover:text-brass-dark"
+            >
+              {l.label}
+            </Link>
+          ))}
+          <Link
+            href="/auth/login"
+            onClick={() => setOpen(false)}
+            className="mt-2 inline-flex items-center justify-center rounded-full bg-brass px-5 py-2.5 text-sm font-semibold text-ink transition-colors duration-500 hover:bg-[#705A2F] hover:text-gray-100"
+          >
+            Get Started
+          </Link>
         </div>
-      )}
+      </div>
     </header>
   );
 }

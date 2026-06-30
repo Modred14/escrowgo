@@ -26,14 +26,14 @@ const mono = IBM_Plex_Mono({
 export const metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
   title: {
-    default: "escrowgo — Secure deals, verified delivery",
-    template: "%s · escrowgo",
+    default: "EscrowGo — Secure deals, verified delivery",
+    template: "%s · EscrowGo",
   },
   description:
-    "escrowgo holds payment in escrow until delivery is confirmed by QR scan, protecting both buyers and sellers on every transaction.",
+    "EscrowGo holds payment in escrow until delivery is confirmed by QR scan, protecting both buyers and sellers on every transaction.",
   keywords: ["escrow", "secure payments", "delivery", "Nigeria", "Nomba", "buyer protection"],
   openGraph: {
-    title: "escrowgo — Secure deals, verified delivery",
+    title: "EscrowGo — Secure deals, verified delivery",
     description: "Funds stay locked in escrow until delivery is verified. No trust required.",
     type: "website",
   },
