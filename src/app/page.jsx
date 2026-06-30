@@ -9,11 +9,11 @@ export const metadata = {
   title: "EscrowGo — Secure deals, verified delivery",
 };
 const STATES = [
-  { name: "Lagos", src: "/lagos.jpg" },
-  { name: "Kano", src: "/kano.png" },
-  { name: "Rivers", src: "/rivers.png" },
-  { name: "Oyo", src: "/oyo.png" },
-  { name: "FCT, Abuja", src: "/abj.png" },
+  { name: "Nigeria", src: "/nig.png" },
+  { name: "Ghana", src: "/ghana.svg" },
+  { name: "Senegal", src: "/senegal.svg" },
+  { name: "Togo", src: "/togo.svg" },
+  { name: "Cameroon", src: "/cameroon.webp" },
 ];
 const STEPS = [
   {
@@ -103,18 +103,18 @@ export default function LandingPage() {
       <div className="bg-home">
         <Navbar />
 
-        <section className="relative overflow-hidden border-b border-ink/10">
+        <section className="relative overflow-hidden border-b border-black/10">
           <div className="relative mx-auto max-w-4xl px-5 pb-20 pt-16 text-center md:pb-30 md:pt-28">
             <span className="animate-fade-in-up inline-flex items-center gap-2 rounded-full border border-brass/30 bg-brass/10 px-3.5 py-1.5 text-xs font-semibold text-brass-dark">
               <span className="h-1.5 w-1.5 rounded-full bg-brass" /> Powering
               the future of e-Business
             </span>
 
-            <h1 className="animate-fade-in-up [animation-delay:80ms] mt-6 text-balance font-display text-5xl font-semibold leading-[1.05] text-ink md:text-7xl">
+            <h1 className="animate-fade-in-up [animation-delay:80ms] mt-6 text-balance font-display text-5xl font-semibold leading-[1.05] text-black md:text-7xl">
               Scan, Deliver, <span className="text-brass">Get paid</span>
             </h1>
 
-            <p className="animate-fade-in-up [animation-delay:160ms] mx-auto mt-6 max-w-2xl text-balance text-base leading-relaxed text-ink/60 md:text-lg">
+            <p className="animate-fade-in-up [animation-delay:160ms] mx-auto mt-6 max-w-2xl text-balance text-base leading-relaxed text-black md:text-lg">
               <span className="text-brass font-bold">EscrowGo</span> allows you
               to complete every transaction with confidence using secure QR
               verification, instant payment release after delivery, and detailed
@@ -124,7 +124,7 @@ export default function LandingPage() {
             <div className="animate-fade-in-up [animation-delay:240ms] mt-9 flex flex-wrap items-center justify-center gap-3">
               <Link
                 href="/auth/login"
-                className="group inline-flex items-center gap-2 rounded-full bg-brass px-7 py-3.5 text-sm font-semibold hover:text-gray-100 text-ink shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#705A2F] hover:shadow-lg"
+                className="group inline-flex items-center gap-2 rounded-full bg-brass px-7 py-3.5 text-sm font-semibold hover:text-gray-100 text-black shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#705A2F] hover:shadow-lg"
               >
                 Get Started
                 <span
@@ -136,7 +136,7 @@ export default function LandingPage() {
               </Link>
               <Link
                 href="#how-it-works"
-                className="rounded-full border border-ink/15 bg-white px-7 py-3.5 text-sm font-semibold text-brass-dark transition-all duration-300 hover:-translate-y-0.5 hover:border-brass/40 hover:shadow-md"
+                className="rounded-full border border-black/15 bg-white px-7 py-3.5 text-sm font-semibold text-brass-dark transition-all duration-300 hover:-translate-y-0.5 hover:border-brass/40 hover:shadow-md"
               >
                 How it works
               </Link>
@@ -145,19 +145,19 @@ export default function LandingPage() {
             {/* availability strip */}
             <div className="animate-fade-in-up [animation-delay:320ms] mx-auto mt-16 grid max-w-3xl gap-10 sm:grid-cols-2">
               <div>
-                <p className="text-xs font-medium text-ink/50">
-                  Available in cities near you
+                <p className="text-xs font-medium text-black">
+                  Available in countries near you
                 </p>
                 <div className="mt-3 flex items-center justify-center gap-3 ">
                   {STATES.map((s) => (
                     <span
                       key={s.name}
-                      title={s.name + " State"}
-                      className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-ink/10 bg-white shadow-sm transition-transform duration-300 hover:-translate-y-1"
+                      title={s.name}
+                      className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-black/10 bg-white shadow-sm transition-transform duration-300 hover:-translate-y-1"
                     >
                       <Image
                         src={s.src}
-                        alt={`${s.name} State`}
+                        alt={`${s.name}`}
                         width={28}
                         height={28}
                         className="h-full w-full object-cover object-center"
@@ -167,14 +167,14 @@ export default function LandingPage() {
                 </div>
               </div>
               <div>
-                <p className="text-xs font-medium text-ink/50">
+                <p className="text-xs font-medium text-black">
                   Supports all types of physical &amp; online businesses
                 </p>
                 <div className="mt-3 flex items-center justify-center gap-3 ">
                   {["📦", "👗", "💻", "🛒", "🚚"].map((e, i) => (
                     <span
                       key={i}
-                      className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-ink/10 bg-white shadow-sm transition-transform duration-300 hover:-translate-y-1"
+                      className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-black/10 bg-white shadow-sm transition-transform duration-300 hover:-translate-y-1"
                     >
                       {e}
                     </span>
@@ -188,13 +188,13 @@ export default function LandingPage() {
           {/* HOW IT WORKS */}
           {/* <section
             id="how-it-works"
-            className="border-b border-ink/10 px-5 py-20"
+            className="border-b border-black/10 px-5 py-20"
           >
             <div className="mx-auto max-w-6xl">
               <p className="text-xs font-semibold uppercase tracking-widest text-brass-dark">
                 The escrow ledger
               </p>
-              <h2 className="mt-2 max-w-lg font-display text-3xl font-semibold text-ink">
+              <h2 className="mt-2 max-w-lg font-display text-3xl font-semibold text-black">
                 Four steps, in order — nothing released out of sequence.
               </h2>
               <div className="ledger-rule mt-12 grid gap-8 md:grid-cols-4 md:gap-6">
@@ -203,13 +203,13 @@ export default function LandingPage() {
                     key={s.n}
                     className="group relative rounded-2xl pt-2 transition-transform duration-300 hover:-translate-y-1"
                   >
-                    <span className="font-display text-4xl font-semibold text-ink/10 transition-colors duration-300 group-hover:text-brass/30">
+                    <span className="font-display text-4xl font-semibold text-black/10 transition-colors duration-300 group-hover:text-brass/30">
                       {s.n}
                     </span>
-                    <h3 className="mt-3 font-display text-base font-semibold text-ink">
+                    <h3 className="mt-3 font-display text-base font-semibold text-black">
                       {s.title}
                     </h3>
-                    <p className="mt-2 text-sm leading-relaxed text-ink/55">
+                    <p className="mt-2 text-sm leading-relaxed text-black/55">
                       {s.body}
                     </p>
                   </div>
@@ -219,24 +219,24 @@ export default function LandingPage() {
           </section> */}
 
           {/* ROLES */}
-          {/* <section className="border-b border-ink/10 bg-paper-dim px-5 py-20">
+          {/* <section className="border-b border-black/10 bg-paper-dim px-5 py-20">
             <div className="mx-auto max-w-6xl">
-              <h2 className="max-w-lg font-display text-3xl font-semibold text-ink">
+              <h2 className="max-w-lg font-display text-3xl font-semibold text-black">
                 Built for everyone in the handoff.
               </h2>
               <div className="mt-10 grid gap-5 md:grid-cols-3">
                 {ROLES.map((r) => (
                   <div
                     key={r.label}
-                    className="flex flex-col rounded-2xl border border-ink/10 bg-white p-7 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+                    className="flex flex-col rounded-2xl border border-black/10 bg-white p-7 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
                   >
                     <span className="text-xs font-bold uppercase tracking-wide text-brass-dark">
                       {r.label}
                     </span>
-                    <h3 className="mt-3 font-display text-xl font-semibold text-ink">
+                    <h3 className="mt-3 font-display text-xl font-semibold text-black">
                       {r.title}
                     </h3>
-                    <p className="mt-2.5 flex-1 text-sm leading-relaxed text-ink/55">
+                    <p className="mt-2.5 flex-1 text-sm leading-relaxed text-black/55">
                       {r.body}
                     </p>
                     <Link
@@ -264,22 +264,22 @@ export default function LandingPage() {
                 <p className="text-xs font-semibold uppercase tracking-widest text-brass-dark">
                   Where's my money?
                 </p>
-                <h2 className="mt-2 font-display text-3xl font-semibold text-ink">
+                <h2 className="mt-2 font-display text-3xl font-semibold text-black">
                   It sits in escrow. Not with us, not with them.
                 </h2>
-                <p className="mt-4 text-sm leading-relaxed text-ink/60">
+                <p className="mt-4 text-sm leading-relaxed text-black/60">
                   "Escrow" means a trusted third party holds the money
                   mid-transaction so neither side has to go first. escrowgo
                   plays that role: the buyer's payment is marked <em>held</em>,
                   never paid out, until proof of delivery exists in the form of
                   a scanned QR code only the buyer can generate.
                 </p>
-                <p className="mt-3 text-sm leading-relaxed text-ink/60">
+                <p className="mt-3 text-sm leading-relaxed text-black/60">
                   If delivery never happens by the agreed date, escrowgo refunds
                   the buyer automatically — no support ticket required.
                 </p>
               </div>
-              <div className="grid gap-4 rounded-2xl border border-ink/10 bg-vault p-7 text-paper">
+              <div className="grid gap-4 rounded-2xl border border-black/10 bg-vault p-7 text-paper">
                 {[
                   [
                     "Funds secured in escrow",
@@ -313,9 +313,9 @@ export default function LandingPage() {
           </section> */}
 
           {/* DIFFERENCE / COMPARISON */}
-          <section className="border-t border-ink/10  px-5 py-20">
+          <section className="border-t border-black/10  px-5 py-20">
             <div className="mx-auto max-w-6xl">
-              <h2 className="animate-fade-in-up [animation-delay:60ms] mx-auto mt-2 max-w-xl text-balance text-center font-display text-3xl font-semibold text-ink md:text-4xl">
+              <h2 className="animate-fade-in-up [animation-delay:60ms] mx-auto mt-2 max-w-xl text-balance text-center font-display text-3xl font-semibold text-black md:text-4xl">
                 How&apos;s EscrowGo different?
               </h2>
 
@@ -325,7 +325,7 @@ export default function LandingPage() {
                   <span className="inline-flex items-center gap-1.5 rounded-full border border-red-200 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-red-600">
                     <span aria-hidden>⏱️</span> Without EscrowGo
                   </span>
-                  <h3 className="mt-5 text-balance font-display text-lg font-semibold leading-snug text-ink md:text-xl">
+                  <h3 className="mt-5 text-balance font-display text-lg font-semibold leading-snug text-black md:text-xl">
                     The lack of secure payment verification exposes buyers to
                     fraud and financial loss.
                   </h3>
@@ -336,7 +336,7 @@ export default function LandingPage() {
                     {WITHOUT_REASONS.map((reason) => (
                       <li
                         key={reason}
-                        className="flex items-start gap-3 text-sm text-ink/65"
+                        className="flex items-start gap-3 text-sm text-black/90"
                       >
                         <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-red-100">
                           <X size={12} className="text-red-500" />
@@ -352,7 +352,7 @@ export default function LandingPage() {
                   <span className="inline-flex items-center gap-1.5 rounded-full border border-green-200 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-green-600">
                     <span aria-hidden>✅</span> With EscrowGo
                   </span>
-                  <h3 className="mt-5 text-balance font-display text-lg font-semibold leading-snug text-ink md:text-xl">
+                  <h3 className="mt-5 text-balance font-display text-lg font-semibold leading-snug text-black md:text-xl">
                     EscrowGo is the solution for people trying to buy and sell
                     safely and securely.
                   </h3>
@@ -363,7 +363,7 @@ export default function LandingPage() {
                     {WITH_REASONS.map((reason) => (
                       <li
                         key={reason}
-                        className="flex items-start gap-3 text-sm text-ink/70"
+                        className="flex items-start gap-3 text-sm text-black/90"
                       >
                         <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-green-100">
                           <CheckCircle2 size={12} className="text-green-500" />
@@ -381,15 +381,15 @@ export default function LandingPage() {
                   <div
                     key={f.title}
                     style={{ animationDelay: `${240 + i * 60}ms` }}
-                    className="animate-fade-in-up group flex flex-col rounded-2xl border border-ink/10 bg-white p-6 transition-all duration-300 hover:-translate-y-1 hover:border-brass/40 hover:shadow-lg"
+                    className="animate-fade-in-up group flex flex-col rounded-2xl border border-black/10 bg-white p-6 transition-all duration-300 hover:-translate-y-1 hover:border-brass/40 hover:shadow-lg"
                   >
                     <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brass/10 text-lg transition-transform duration-300 group-hover:scale-110">
                       {f.icon}
                     </span>
-                    <h4 className="mt-4 font-display text-base font-semibold uppercase tracking-wide text-ink">
+                    <h4 className="mt-4 font-display text-base font-semibold uppercase tracking-wide text-black">
                       {f.title}
                     </h4>
-                    <p className="mt-2 flex-1 text-sm leading-relaxed text-ink/55">
+                    <p className="mt-2 flex-1 text-sm leading-relaxed text-black/95">
                       {f.body}
                     </p>
                     <Link
@@ -411,7 +411,7 @@ export default function LandingPage() {
           </section>
           {/* POWERED BY NOMBA */}
           {/* POWERED BY NOMBA */}
-          <section className="relative overflow-hidden border-t border-ink/10 px-5 py-24 text-center">
+          <section className="relative overflow-hidden border-t border-black/10 px-5 py-24 text-center">
             {/* ambient cream gradient backdrop */}
             <div
               aria-hidden
@@ -420,7 +420,7 @@ export default function LandingPage() {
             {/* faint dot-grid texture */}
             <div
               aria-hidden
-              className="absolute inset-0 opacity-[0.35] [background-image:radial-gradient(theme(colors.ink/12%)_1px,transparent_1px)] [background-size:22px_22px] [mask-image:radial-gradient(ellipse_70%_70%_at_50%_40%,black_30%,transparent_85%)]"
+              className="absolute inset-0 opacity-[0.35] [background-image:radial-gradient(theme(colors.black/12%)_1px,transparent_1px)] [background-size:22px_22px] [mask-image:radial-gradient(ellipse_70%_70%_at_50%_40%,black_30%,transparent_85%)]"
             />
             {/* watermark padlock, top-right */}
             <svg
@@ -447,7 +447,7 @@ export default function LandingPage() {
             <svg
               aria-hidden
               viewBox="0 0 200 200"
-              className="absolute -left-10 bottom-0 h-48 w-48 text-ink/[0.05] md:h-64 md:w-64"
+              className="absolute -left-10 bottom-0 h-48 w-48 text-black/[0.05] md:h-64 md:w-64"
             >
               <circle
                 cx="100"
@@ -477,7 +477,7 @@ export default function LandingPage() {
 
             <div className="relative mx-auto max-w-5xl">
               <div className="bg-white rounded-2xl backdrop-blur-sm w-fit mx-auto p-2 px-3 border border-gray-800/20">
-                <h2 className="animate-fade-in-up text-balance font-display text-2xl font-semibold text-ink md:text-3xl">
+                <h2 className="animate-fade-in-up text-balance font-display text-2xl font-semibold text-black md:text-3xl">
                   Powered by <span className="text-brass">Nomba</span>
                 </h2>
               </div>
@@ -526,14 +526,14 @@ export default function LandingPage() {
           </section>
 
           {/* CTA */}
-          {/* <section className="border-t border-ink/10 bg-ink px-5 py-20 text-center">
+          {/* <section className="border-t border-black/10 bg-black px-5 py-20 text-center">
             <SealMark size={40} className="mx-auto" />
             <h2 className="mx-auto mt-5 max-w-md font-display text-3xl font-semibold text-paper">
               Stop wiring money on trust alone.
             </h2>
             <Link
               href="/auth/register"
-              className="mt-7 inline-flex rounded-full bg-brass px-7 py-3.5 text-sm font-semibold text-ink transition-all duration-300 hover:-translate-y-0.5 hover:bg-brass-light hover:shadow-lg"
+              className="mt-7 inline-flex rounded-full bg-brass px-7 py-3.5 text-sm font-semibold text-black transition-all duration-300 hover:-translate-y-0.5 hover:bg-brass-light hover:shadow-lg"
             >
               Create your first secure deal
             </Link>
