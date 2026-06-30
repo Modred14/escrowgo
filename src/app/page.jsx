@@ -2,11 +2,19 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SealMark from "@/components/Sealmark";
+import { X, CheckCircle2 } from "lucide-react";
+import Image from "next/image";
 
 export const metadata = {
-  title: "escrowgo — Secure deals, verified delivery",
+  title: "EscrowGo — Secure deals, verified delivery",
 };
-
+const STATES = [
+  { name: "Lagos", src: "/lagos.jpg" },
+  { name: "Kano", src: "/kano.png" },
+  { name: "Rivers", src: "/rivers.png" },
+  { name: "Oyo", src: "/oyo.png" },
+  { name: "FCT, Abuja", src: "/abj.png" },
+];
 const STEPS = [
   {
     n: "01",
@@ -96,7 +104,7 @@ export default function LandingPage() {
         <Navbar />
 
         <section className="relative overflow-hidden border-b border-ink/10">
-          <div className="relative mx-auto max-w-4xl px-5 pb-20 pt-16 text-center md:pb-28 md:pt-24">
+          <div className="relative mx-auto max-w-4xl px-5 pb-20 pt-16 text-center md:pb-30 md:pt-28">
             <span className="animate-fade-in-up inline-flex items-center gap-2 rounded-full border border-brass/30 bg-brass/10 px-3.5 py-1.5 text-xs font-semibold text-brass-dark">
               <span className="h-1.5 w-1.5 rounded-full bg-brass" /> Powering
               the future of e-Business
@@ -140,13 +148,20 @@ export default function LandingPage() {
                 <p className="text-xs font-medium text-ink/50">
                   Available in cities near you
                 </p>
-                <div className="mt-3 flex items-center justify-center gap-3 sm:justify-start">
-                  {["🏝️", "🌆", "🏙️", "🏛️", "🌇"].map((e, i) => (
+                <div className="mt-3 flex items-center justify-center gap-3 ">
+                  {STATES.map((s) => (
                     <span
-                      key={i}
-                      className="flex h-9 w-9 items-center justify-center rounded-full border border-ink/10 bg-white text-sm shadow-sm transition-transform duration-300 hover:-translate-y-1"
+                      key={s.name}
+                      title={s.name + " State"}
+                      className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-ink/10 bg-white shadow-sm transition-transform duration-300 hover:-translate-y-1"
                     >
-                      {e}
+                      <Image
+                        src={s.src}
+                        alt={`${s.name} State`}
+                        width={28}
+                        height={28}
+                        className="h-full w-full object-cover object-center"
+                      />
                     </span>
                   ))}
                 </div>
@@ -155,11 +170,11 @@ export default function LandingPage() {
                 <p className="text-xs font-medium text-ink/50">
                   Supports all types of physical &amp; online businesses
                 </p>
-                <div className="mt-3 flex items-center justify-center gap-3 sm:justify-start">
+                <div className="mt-3 flex items-center justify-center gap-3 ">
                   {["📦", "👗", "💻", "🛒", "🚚"].map((e, i) => (
                     <span
                       key={i}
-                      className="flex h-9 w-9 items-center justify-center rounded-full border border-ink/10 bg-white text-sm shadow-sm transition-transform duration-300 hover:-translate-y-1"
+                      className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-ink/10 bg-white shadow-sm transition-transform duration-300 hover:-translate-y-1"
                     >
                       {e}
                     </span>
@@ -169,7 +184,7 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
-        <main className="bg-paper">
+        <main className="bg-white">
           {/* HOW IT WORKS */}
           {/* <section
             id="how-it-works"
@@ -298,67 +313,67 @@ export default function LandingPage() {
           </section> */}
 
           {/* DIFFERENCE / COMPARISON */}
-          <section className="border-t border-ink/10 bg-paper-dim px-5 py-20">
+          <section className="border-t border-ink/10  px-5 py-20">
             <div className="mx-auto max-w-6xl">
               <h2 className="animate-fade-in-up [animation-delay:60ms] mx-auto mt-2 max-w-xl text-balance text-center font-display text-3xl font-semibold text-ink md:text-4xl">
                 How&apos;s EscrowGo different?
               </h2>
 
               <div className="mt-12 grid gap-6 md:grid-cols-2">
-              
-                <div className="animate-fade-in-up [animation-delay:120ms] rounded-2xl border border-ink/10 bg-ink/[0.04] p-7 transition-all duration-300 hover:-translate-y-1 hover:shadow-md md:p-8">
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-ink/15 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-ink/60">
+                {/* WITHOUT */}
+                <div className="animate-fade-in-up [animation-delay:120ms] rounded-2xl border border-red-200 bg-red-50/60 p-7 transition-all duration-300 hover:-translate-y-1 hover:shadow-md md:p-8">
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-red-200 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-red-600">
                     <span aria-hidden>⏱️</span> Without EscrowGo
                   </span>
                   <h3 className="mt-5 text-balance font-display text-lg font-semibold leading-snug text-ink md:text-xl">
                     The lack of secure payment verification exposes buyers to
                     fraud and financial loss.
                   </h3>
-                  <p className="mt-5 text-xs font-semibold uppercase tracking-wide text-ink/40">
+                  <p className="mt-5 text-xs font-semibold uppercase tracking-wide text-red-500/70">
                     Reasons
                   </p>
                   <ul className="mt-3 space-y-4">
                     {WITHOUT_REASONS.map((reason) => (
                       <li
                         key={reason}
-                        className="flex items-start gap-2.5 text-sm text-ink/65"
+                        className="flex items-start gap-3 text-sm text-ink/65"
                       >
-                        <span className="mt-0.5 text-red-500" aria-hidden>
-                          ✕
-                        </span>
-                        {reason}
+                        <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-red-100">
+                          <X size={12} className="text-red-500" />
+                        </div>
+                        <span className="pt-0.5">{reason}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
 
                 {/* WITH */}
-                <div className="animate-fade-in-up [animation-delay:180ms] rounded-2xl border border-brass/30 bg-brass/10 p-7 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg md:p-8">
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-brass/40 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-brass-dark">
+                <div className="animate-fade-in-up [animation-delay:180ms] rounded-2xl border border-green-200 bg-green-50/60 p-7 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg md:p-8">
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-green-200 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-green-600">
                     <span aria-hidden>✅</span> With EscrowGo
                   </span>
                   <h3 className="mt-5 text-balance font-display text-lg font-semibold leading-snug text-ink md:text-xl">
                     EscrowGo is the solution for people trying to buy and sell
                     safely and securely.
                   </h3>
-                  <p className="mt-5 text-xs font-semibold uppercase tracking-wide text-brass-dark/70">
+                  <p className="mt-5 text-xs font-semibold uppercase tracking-wide text-green-600/70">
                     Reasons
                   </p>
                   <ul className="mt-3 space-y-4">
                     {WITH_REASONS.map((reason) => (
                       <li
                         key={reason}
-                        className="flex items-start gap-2.5 text-sm text-ink/70"
+                        className="flex items-start gap-3 text-sm text-ink/70"
                       >
-                        <span className="mt-0.5 text-emerald-600" aria-hidden>
-                          ✓
-                        </span>
-                        {reason}
+                        <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-green-100">
+                          <CheckCircle2 size={12} className="text-green-500" />
+                        </div>
+                        <span className="pt-0.5">{reason}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
-              </div> 
+              </div>
 
               {/* FEATURE CARDS */}
               <div className="mt-6 grid gap-5 sm:grid-cols-2 md:grid-cols-3">
