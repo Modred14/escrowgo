@@ -6,6 +6,9 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import { Spinner } from "@/components/Loader";
+import { City } from "country-state-city";
+import { useMemo } from "react";
+
 function GoogleIcon() {
   return (
     <svg viewBox="0 0 20 20" width="18" height="18">
@@ -28,25 +31,92 @@ function GoogleIcon() {
     </svg>
   );
 }
+const COUNTRY_CODES = {
+  Nigeria: "NG",
+  Ghana: "GH",
+  Cameroon: "CM",
+  Togo: "TG",
+  Senegal: "SN",
+};
+const COUNTRIES = Object.keys(COUNTRY_CODES);
+
+const COUNTRY_DIAL_CODES = {
+  Nigeria: "+234",
+  Ghana: "+233",
+  Cameroon: "+237",
+  Togo: "+228",
+  Senegal: "+221",
+};
+const DIAL_CODES = Object.values(COUNTRY_DIAL_CODES);
+function getCitiesForCountry(country) {
+  const code = COUNTRY_CODES[country];
+  if (!code) return [];
+  return City.getCitiesOfCountry(code)
+    .map((c) => c.name)
+    .sort((a, b) => a.localeCompare(b));
+}
 export default function RegisterPage() {
   const router = useRouter();
   const [form, setForm] = useState({
     name: "",
     email: "",
-    phone: "",
+    phoneCode: "+234",
+    phoneNumber: "",
+    country: "",
+    city: "",
     password: "",
+    confirmPassword: "",
+    agreedToTerms: false,
   });
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  function updateField(key, value) {
+    setForm((f) => {
+      const next = { ...f, [key]: value };
+      if (key === "country") {
+        next.city = "";
+        if (COUNTRY_DIAL_CODES[value])
+          next.phoneCode = COUNTRY_DIAL_CODES[value];
+      }
+      if (key === "phoneCode") {
+        const matchedCountry = Object.keys(COUNTRY_DIAL_CODES).find(
+          (c) => COUNTRY_DIAL_CODES[c] === value,
+        );
+        if (matchedCountry && matchedCountry !== f.country) {
+          next.country = matchedCountry;
+          next.city = "";
+        }
+      }
+      return next;
+    });
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
+
+    if (form.password !== form.confirmPassword) {
+      toast.error("Passwords do not match.");
+      return;
+    }
+    if (!form.agreedToTerms) {
+      toast.error("Please agree to the Terms and Conditions to continue.");
+      return;
+    }
+
     setLoading(true);
     try {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          name: form.name,
+          email: form.email,
+          phone: form.phoneCode + form.phoneNumber,
+          country: form.country,
+          city: form.city,
+          password: form.password,
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Registration failed.");
@@ -67,7 +137,10 @@ export default function RegisterPage() {
       setLoading(false);
     }
   }
-
+  const cities = useMemo(
+    () => (form.country ? getCitiesForCountry(form.country) : []),
+    [form.country],
+  );
   return (
     <main className=" egv-main bg-home">
       {/* Ambient vault backdrop */}
@@ -78,7 +151,7 @@ export default function RegisterPage() {
             <h1 className="egv-title">
               Create your <span className="egv-brand">EscrowGo</span> account
             </h1>
-            <p className="egv-subtitle">Buy or sell with escrow protection.</p>
+            <p className="egv-subtitle">Buy, sell and deliver with escrow protection.</p>
           </div>
 
           <form onSubmit={handleSubmit} className="egv-form">
@@ -88,7 +161,7 @@ export default function RegisterPage() {
               icon={<UserIcon />}
               required
               value={form.name}
-              onChange={(v) => setForm({ ...form, name: v })}
+              onChange={(v) => updateField("name", v)}
               placeholder="Ada Obi"
             />
             <Field
@@ -98,26 +171,75 @@ export default function RegisterPage() {
               type="email"
               required
               value={form.email}
-              onChange={(v) => setForm({ ...form, email: v })}
+              onChange={(v) => updateField("email", v)}
               placeholder="you@example.com"
             />
-            <Field
-              index={2}
-              label="Phone"
-              icon={<PhoneIcon />}
-              value={form.phone}
-              onChange={(v) => setForm({ ...form, phone: v })}
-              placeholder="080xxxxxxxx"
-            />
-            <Field
+            <div
+              className="egv-field egv-field-in"
+              style={{ animationDelay: `${2 * 70 + 80}ms` }}
+            >
+              <label className="egv-label">Phone</label>
+              <div className="egv-input-wrap egv-phone-combined">
+                <span className="egv-input-icon egv-phone-icon">
+                  <PhoneIcon />
+                </span>
+                <select
+                  value={form.phoneCode}
+                  onChange={(e) => updateField("phoneCode", e.target.value)}
+                  className="egv-phone-code-inline"
+                  aria-label="Country code"
+                >
+                  {DIAL_CODES.map((code) => (
+                    <option key={code} value={code}>
+                      {code}
+                    </option>
+                  ))}
+                </select>
+                   
+                <span className="egv-phone-divider" />
+                <input
+                  type="tel"
+                  value={form.phoneNumber}
+                  onChange={(e) => updateField("phoneNumber", e.target.value)}
+                  placeholder="80xxxxxxxx"
+                  className="egv-phone-number-inline"
+                />
+              </div>
+            </div>
+            <SelectField
               index={3}
+              label="Country"
+              icon={<GlobeIcon />}
+              required
+              value={form.country}
+              onChange={(v) => updateField("country", v)}
+              placeholder="Select a country"
+              options={COUNTRIES}
+            />
+
+            <SelectField
+              index={4}
+              label="City"
+              icon={<PinIcon />}
+              required
+              value={form.city}
+              onChange={(v) => updateField("city", v)}
+              placeholder={
+                form.country ? "Select a city" : "Select a country first"
+              }
+              options={cities}
+              disabled={!form.country}
+            />
+
+            <Field
+              index={5}
               label="Password"
               icon={<LockIcon />}
               type={showPassword ? "text" : "password"}
               required
               minLength={6}
               value={form.password}
-              onChange={(v) => setForm({ ...form, password: v })}
+              onChange={(v) => updateField("password", v)}
               placeholder="At least 6 characters"
               trailing={
                 <button
@@ -132,11 +254,58 @@ export default function RegisterPage() {
               }
             />
 
+            <Field
+              index={6}
+              label="Confirm password"
+              icon={<LockIcon />}
+              type={showConfirmPassword ? "text" : "password"}
+              required
+              minLength={6}
+              value={form.confirmPassword}
+              onChange={(v) => updateField("confirmPassword", v)}
+              placeholder="Re-enter your password"
+              trailing={
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword((s) => !s)}
+                  className="egv-eye"
+                  aria-label={
+                    showConfirmPassword ? "Hide password" : "Show password"
+                  }
+                  tabIndex={-1}
+                >
+                  {showConfirmPassword ? <EyeOffIcon /> : <EyeIcon />}
+                </button>
+              }
+            />
+            {form.confirmPassword && form.confirmPassword !== form.password && (
+              <p className="egv-error">Passwords don&apos;t match.</p>
+            )}
+
+            <label
+              className="egv-checkbox-row egv-field-in"
+              style={{ animationDelay: "530ms" }}
+            >
+              <input
+                type="checkbox"
+                required
+                checked={form.agreedToTerms}
+                onChange={(e) => updateField("agreedToTerms", e.target.checked)}
+                className="egv-checkbox"
+              />
+              <span className="egv-checkbox-label">
+                I have read and agree to the{" "}
+                <Link href="/terms" className="egv-link egv-link--brass">
+                  Terms and Conditions
+                </Link>
+              </span>
+            </label>
+
             <button
               type="submit"
               disabled={loading}
               className="egv-submit egv-field-in"
-              style={{ animationDelay: "360ms" }}
+              style={{ animationDelay: "600ms" }}
             >
               <span className="egv-submit-sheen" />
               {loading && <Spinner className="h-4 w-4" />}
@@ -145,7 +314,7 @@ export default function RegisterPage() {
 
             <div
               className="egv-divider egv-field-in"
-              style={{ animationDelay: "260ms" }}
+              style={{ animationDelay: "640ms" }}
             >
               <span className="egv-divider-line" />
               <span className="egv-divider-text">or</span>
@@ -154,9 +323,9 @@ export default function RegisterPage() {
 
             <button
               type="button"
-              onClick={() => signIn("google", { callbackUrl })}
+              onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
               className="egv-google egv-field-in"
-              style={{ animationDelay: "300ms" }}
+              style={{ animationDelay: "670ms" }}
             >
               <GoogleIcon />
               <span>Continue with Google</span>
@@ -165,7 +334,7 @@ export default function RegisterPage() {
 
           <p
             className="egv-foot egv-field-in"
-            style={{ animationDelay: "420ms" }}
+            style={{ animationDelay: "700ms" }}
           >
             Already have an account?{" "}
             <Link href="/auth/login" className="text-brass-dark font-bold ">
@@ -196,6 +365,49 @@ function Field({ index, label, icon, trailing, value, onChange, ...rest }) {
           className="egv-input"
         />
         {trailing}
+      </div>
+    </div>
+  );
+}
+
+function SelectField({
+  index,
+  label,
+  icon,
+  value,
+  onChange,
+  placeholder,
+  options,
+  disabled,
+  required,
+}) {
+  return (
+    <div
+      className="egv-field egv-field-in"
+      style={{ animationDelay: `${index * 70 + 80}ms` }}
+    >
+      <label className="egv-label">{label}</label>
+      <div className="egv-input-wrap">
+        <span className="egv-input-icon">{icon}</span>
+        <select
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          disabled={disabled}
+          required={required}
+          className="egv-input egv-select"
+        >
+          <option value="" disabled>
+            {placeholder}
+          </option>
+          {options.map((opt) => (
+            <option key={opt} value={opt}>
+              {opt}
+            </option>
+          ))}
+        </select>
+        <span className="egv-select-chevron">
+          <ChevronIcon />
+        </span>
       </div>
     </div>
   );
@@ -274,6 +486,44 @@ function LockIcon() {
     </svg>
   );
 }
+function GlobeIcon() {
+  return (
+    <svg viewBox="0 0 20 20" fill="none">
+      <circle cx="10" cy="10" r="7.2" stroke="currentColor" strokeWidth="1.4" />
+      <path
+        d="M2.8 10h14.4M10 2.8c2.3 2 3.6 4.5 3.6 7.2s-1.3 5.2-3.6 7.2c-2.3-2-3.6-4.5-3.6-7.2S7.7 4.8 10 2.8z"
+        stroke="currentColor"
+        strokeWidth="1.3"
+      />
+    </svg>
+  );
+}
+function PinIcon() {
+  return (
+    <svg viewBox="0 0 20 20" fill="none">
+      <path
+        d="M10 18s6-5.7 6-10a6 6 0 1 0-12 0c0 4.3 6 10 6 10z"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinejoin="round"
+      />
+      <circle cx="10" cy="8" r="2.1" stroke="currentColor" strokeWidth="1.3" />
+    </svg>
+  );
+}
+function ChevronIcon() {
+  return (
+    <svg viewBox="0 0 20 20" fill="none">
+      <path
+        d="M5.5 8l4.5 4.5L14.5 8"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 function EyeIcon() {
   return (
     <svg viewBox="0 0 20 20" fill="none">
@@ -310,7 +560,7 @@ function EyeOffIcon() {
 function Styles() {
   return (
     <style jsx global>{`
-           .egv-divider {
+      .egv-divider {
         display: flex;
         align-items: center;
         gap: 0.75rem;
@@ -542,6 +792,115 @@ function Styles() {
         color: #c9a227;
       }
 
+      .egv-select {
+        appearance: none;
+        -webkit-appearance: none;
+        padding-right: 2.4rem;
+        cursor: pointer;
+      }
+      .egv-select:disabled {
+        cursor: not-allowed;
+        opacity: 0.55;
+        background: rgba(27, 33, 31, 0.03);
+      }
+      .egv-phone-combined {
+        border-radius: 0.85rem;
+        border: 1px solid rgba(27, 33, 31, 0.14);
+        background: #fff;
+        transition:
+          border-color 200ms ease,
+          box-shadow 200ms ease;
+      }
+      .egv-phone-combined:focus-within {
+        border-color: #c9a227;
+        box-shadow: 0 0 0 4px rgba(201, 162, 39, 0.14);
+      }
+      .egv-phone-icon {
+        position: static;
+        margin-left: 0.85rem;
+        flex-shrink: 0;
+      }
+      .egv-phone-code-inline {
+       margin-right: 0.5rem;
+        border: none;
+        background: transparent;
+        padding: 0.7rem 0.35rem 0.7rem 0.5rem;
+        font-size: 0.9rem;
+        color: #1b211f;
+        outline: none;
+        cursor: pointer;
+        flex-shrink: 0;
+        width: auto;
+      }
+      .egv-phone-divider {
+        width: 1px;
+        height: 1.3rem;
+        background: rgba(27, 33, 31, 0.14);
+        flex-shrink: 0;
+      }
+      .egv-phone-code-chevron {
+        display: flex;
+        align-items: center;
+        color: rgba(27, 33, 31, 0.4);
+        pointer-events: none;
+        flex-shrink: 0;
+      }
+      .egv-phone-code-chevron svg {
+        width: 0.85rem;
+        height: 0.85rem;
+      }
+      .egv-phone-number-inline {
+        flex: 1;
+        min-width: 0;
+        border: none;
+        background: transparent;
+        padding: 0.7rem 0.9rem;
+        font-size: 0.9rem;
+        color: #1b211f;
+        outline: none;
+      }
+      .egv-phone-number-inline::placeholder {
+        color: rgba(27, 33, 31, 0.32);
+      }
+      .egv-select-chevron {
+        position: absolute;
+        right: 0.85rem;
+        display: flex;
+        color: rgba(27, 33, 31, 0.4);
+        pointer-events: none;
+      }
+      .egv-select-chevron svg {
+        width: 1rem;
+        height: 1rem;
+      }
+
+      .egv-error {
+        margin-top: -0.5rem;
+        font-size: 0.78rem;
+        color: #c0392b;
+      }
+
+      .egv-checkbox-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.6rem;
+        cursor: pointer;
+        user-select: none;
+      }
+      .egv-checkbox {
+        margin-top: 0.15rem;
+        width: 1.05rem;
+        height: 1.05rem;
+        flex-shrink: 0;
+        accent-color: #175450;
+        cursor: pointer;
+      }
+      .egv-checkbox-label {
+        font-size: 0.82rem;
+        line-height: 1.4;
+        color: rgba(27, 33, 31, 0.65);
+      }
+
       .egv-eye {
         position: absolute;
         right: 0.75rem;
@@ -690,6 +1049,26 @@ function Styles() {
           animation: none !important;
           transition: none !important;
         }
+      }
+      .egv-phone-row {
+        display: flex;
+        gap: 0.5rem;
+      }
+      .egv-phone-code-wrap {
+        position: relative;
+        flex-shrink: 0;
+        width: 5.5rem;
+      }
+      .egv-phone-code {
+        padding-left: 0.75rem;
+        padding-right: 1.8rem;
+        text-align: left;
+      }
+      .egv-select-chevron--tight {
+        right: 0.55rem;
+      }
+      .egv-phone-number-wrap {
+        flex: 1;
       }
     `}</style>
   );

@@ -13,14 +13,6 @@ import { useState } from "react";
 import Reveal from "@/components/reveal";
 import { ChevronDown, MessageCircleQuestion, ArrowUpRight } from "lucide-react";
 
-/**
- * FAQ — "Questions mostly asked"
- * Drop-in section for a landing page. Requires Tailwind + lucide-react.
- *
- * <FAQ /> — no props required.
- * Pass onContactClick to override the default "Contact us" behavior.
- */
-
 const FAQS = [
   {
     q: "Why use EscrowGo?",
@@ -251,7 +243,6 @@ export default function LandingPage() {
                 </h2>
 
                 <div className="mt-12 grid gap-6 md:grid-cols-2">
-                  {/* WITHOUT */}
                   <div className="animate-fade-in-up [animation-delay:120ms] rounded-2xl border border-red-200 bg-red-50/60 p-7 transition-all duration-300 hover:-translate-y-1 hover:shadow-md md:p-8">
                     <span className="inline-flex items-center gap-1.5 rounded-full border border-red-200 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-red-600">
                       <span aria-hidden>⏱️</span> Without EscrowGo
@@ -278,7 +269,6 @@ export default function LandingPage() {
                     </ul>
                   </div>
 
-                  {/* WITH */}
                   <div className="animate-fade-in-up [animation-delay:180ms] rounded-2xl border border-green-200 bg-green-50/60 p-7 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg md:p-8">
                     <span className="inline-flex items-center gap-1.5 rounded-full border border-green-200 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-green-600">
                       <span aria-hidden>✅</span> With EscrowGo
@@ -309,7 +299,6 @@ export default function LandingPage() {
                   </div>
                 </div>
 
-                {/* FEATURE CARDS */}
                 <div className="mt-6 grid gap-5 sm:grid-cols-2 md:grid-cols-3">
                   {DIFF_FEATURES.map((f, i) => {
                     const Icon = f.icon;
@@ -437,22 +426,9 @@ export default function LandingPage() {
                       Still have questions? Contact us
                       <ArrowUpRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                     </Link>
-
-                    {/* <div className="mx-auto mt-8 hidden max-w-xs items-start gap-3 rounded-2xl border border-amber-200 bg-white/70 p-4 text-left backdrop-blur-sm sm:flex lg:mx-0">
-                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-600">
-                      <MessageCircleQuestion
-                        className="h-5 w-5"
-                        strokeWidth={2}
-                      />
-                    </span>
-                    <p className="text-xs leading-relaxed text-stone-500">
-                      Can't find your answer here? Our support team typically
-                      replies within a few hours.
-                    </p>
-                  </div> */}
                   </div>
 
-                  {/* Right column — accordion */}
+                  <div className="flex flex-col gap-4">
                   <div className="flex flex-col gap-4">
                     {FAQS.map((item, i) => {
                       const isOpen = openIndex === i;
@@ -510,22 +486,17 @@ export default function LandingPage() {
             </section>
           </Reveal>
 
-          {/* POWERED BY NOMBA */}
-          {/* POWERED BY NOMBA */}
           <Reveal>
             {" "}
             <section className="relative overflow-hidden px-5 py-24 text-center">
-              {/* ambient cream gradient backdrop */}
               <div
                 aria-hidden
                 className="absolute inset-0 bg-[radial-gradient(circle_at_18%_15%,#fff7e6_0%,transparent_45%),radial-gradient(circle_at_85%_75%,#fdf2e0_0%,transparent_50%)] bg-paper"
               />
-              {/* faint dot-grid texture */}
               <div
                 aria-hidden
                 className="absolute inset-0 opacity-[0.35] [background-image:radial-gradient(theme(colors.black/12%)_1px,transparent_1px)] [background-size:22px_22px] [mask-image:radial-gradient(ellipse_70%_70%_at_50%_40%,black_30%,transparent_85%)]"
               />
-              {/* watermark padlock, top-right */}
               <svg
                 aria-hidden
                 viewBox="0 0 100 100"
@@ -546,7 +517,6 @@ export default function LandingPage() {
                   fill="none"
                 />
               </svg>
-              {/* faint world-map style arcs, bottom-left */}
               <svg
                 aria-hidden
                 viewBox="0 0 200 200"
@@ -628,19 +598,6 @@ export default function LandingPage() {
               </div>
             </section>
           </Reveal>
-          {/* CTA */}
-          {/* <section className="border-t border-black/10 bg-black px-5 py-20 text-center">
-            <SealMark size={40} className="mx-auto" />
-            <h2 className="mx-auto mt-5 max-w-md font-display text-3xl font-semibold text-paper">
-              Stop wiring money on trust alone.
-            </h2>
-            <Link
-              href="/auth/register"
-              className="mt-7 inline-flex rounded-full bg-brass px-7 py-3.5 text-sm font-semibold text-black transition-all duration-300 hover:-translate-y-0.5 hover:bg-brass-light hover:shadow-lg"
-            >
-              Create your first secure deal
-            </Link>
-          </section> */}
         </main>
         <Footer />
       </div>
