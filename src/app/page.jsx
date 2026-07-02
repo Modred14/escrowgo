@@ -10,6 +10,7 @@ import { QrCode, ClipboardList, ShieldCheck } from "lucide-react";
 import HowItWorks from "@/components/How";
 import FAQ from "@/components/Faq";
 import { useState } from "react";
+import Reveal from "@/components/reveal";
 import { ChevronDown, MessageCircleQuestion, ArrowUpRight } from "lucide-react";
 
 /**
@@ -153,208 +154,220 @@ export default function LandingPage() {
       {" "}
       <div className="bg-home">
         <Navbar />
+        <Reveal>
+          <section className="relative overflow-hidden border-b border-black/10">
+            <div className="relative mx-auto max-w-4xl px-5 pb-20 pt-16 text-center md:pb-30 md:pt-28">
+              <span className="animate-fade-in-up inline-flex items-center gap-2 rounded-full border border-brass/30 bg-brass/10 px-3.5 py-1.5 text-xs font-semibold text-brass-dark">
+                <span className="h-1.5 w-1.5 rounded-full bg-brass" /> Powering
+                the future of e-Business
+              </span>
 
-        <section className="relative overflow-hidden border-b border-black/10">
-          <div className="relative mx-auto max-w-4xl px-5 pb-20 pt-16 text-center md:pb-30 md:pt-28">
-            <span className="animate-fade-in-up inline-flex items-center gap-2 rounded-full border border-brass/30 bg-brass/10 px-3.5 py-1.5 text-xs font-semibold text-brass-dark">
-              <span className="h-1.5 w-1.5 rounded-full bg-brass" /> Powering
-              the future of e-Business
-            </span>
+              <h1 className="animate-fade-in-up [animation-delay:80ms] mt-6 text-balance font-display text-5xl font-semibold leading-[1.05] text-black md:text-7xl">
+                Scan, Deliver, <span className="text-brass">Get paid</span>
+              </h1>
 
-            <h1 className="animate-fade-in-up [animation-delay:80ms] mt-6 text-balance font-display text-5xl font-semibold leading-[1.05] text-black md:text-7xl">
-              Scan, Deliver, <span className="text-brass">Get paid</span>
-            </h1>
+              <p className="animate-fade-in-up [animation-delay:160ms] mx-auto mt-6 max-w-2xl text-balance text-base leading-relaxed text-black md:text-lg">
+                <span className="text-brass font-bold">EscrowGo</span> allows
+                you to complete every transaction with confidence using secure
+                QR verification, instant payment release after delivery, and
+                detailed business records that support growth and future
+                opportunities.
+              </p>
 
-            <p className="animate-fade-in-up [animation-delay:160ms] mx-auto mt-6 max-w-2xl text-balance text-base leading-relaxed text-black md:text-lg">
-              <span className="text-brass font-bold">EscrowGo</span> allows you
-              to complete every transaction with confidence using secure QR
-              verification, instant payment release after delivery, and detailed
-              business records that support growth and future opportunities.
-            </p>
-
-            <div className="animate-fade-in-up [animation-delay:240ms] mt-9 flex flex-wrap items-center justify-center gap-3">
-              <Link
-                href="/auth/login"
-                className="group inline-flex items-center gap-2 rounded-full bg-brass px-7 py-3.5 text-sm font-semibold hover:text-gray-100 text-black shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#705A2F] hover:shadow-lg"
-              >
-                Get Started
-                <span
-                  aria-hidden
-                  className="transition-transform duration-300 group-hover:translate-x-1"
+              <div className="animate-fade-in-up [animation-delay:240ms] mt-9 flex flex-wrap items-center justify-center gap-3">
+                <Link
+                  href="/auth/login"
+                  className="group inline-flex items-center gap-2 rounded-full bg-brass px-7 py-3.5 text-sm font-semibold hover:text-gray-100 text-black shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#705A2F] hover:shadow-lg"
                 >
-                  →
-                </span>
-              </Link>
-              <Link
-                href="#how-it-works"
-                className="rounded-full border border-black/15 bg-white px-7 py-3.5 text-sm font-semibold text-brass-dark transition-all duration-300 hover:-translate-y-0.5 hover:border-brass/40 hover:shadow-md"
-              >
-                How it works
-              </Link>
-            </div>
+                  Get Started
+                  <span
+                    aria-hidden
+                    className="transition-transform duration-300 group-hover:translate-x-1"
+                  >
+                    →
+                  </span>
+                </Link>
+                <Link
+                  href="#how-it-works"
+                  className="rounded-full border border-black/15 bg-white px-7 py-3.5 text-sm font-semibold text-brass-dark transition-all duration-300 hover:-translate-y-0.5 hover:border-brass/40 hover:shadow-md"
+                >
+                  How it works
+                </Link>
+              </div>
 
-            {/* availability strip */}
-            <div className="animate-fade-in-up [animation-delay:320ms] mx-auto mt-16 grid max-w-3xl gap-10 sm:grid-cols-2">
-              <div>
-                <p className="text-xs font-medium text-black">
-                  Available in countries near you
-                </p>
-                <div className="mt-3 flex items-center justify-center gap-3 ">
-                  {STATES.map((s) => (
-                    <span
-                      key={s.name}
-                      title={s.name}
-                      className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-black/10 bg-white shadow-sm transition-transform duration-300 hover:-translate-y-1"
-                    >
-                      <Image
-                        src={s.src}
-                        alt={`${s.name}`}
-                        width={28}
-                        height={28}
-                        className="h-full w-full object-cover object-center"
-                      />
-                    </span>
-                  ))}
+              {/* availability strip */}
+              <div className="animate-fade-in-up [animation-delay:320ms] mx-auto mt-16 grid max-w-3xl gap-10 sm:grid-cols-2">
+                <div>
+                  <p className="text-xs font-medium text-black">
+                    Available in countries near you
+                  </p>
+                  <div className="mt-3 flex items-center justify-center gap-3 ">
+                    {STATES.map((s) => (
+                      <span
+                        key={s.name}
+                        title={s.name}
+                        className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-black/10 bg-white shadow-sm transition-transform duration-300 hover:-translate-y-1"
+                      >
+                        <Image
+                          src={s.src}
+                          alt={`${s.name}`}
+                          width={28}
+                          height={28}
+                          className="h-full w-full object-cover object-center"
+                        />
+                      </span>
+                    ))}
+                  </div>
                 </div>
-              </div>
-              <div>
-                <p className="text-xs font-medium text-black">
-                  Supports all types of physical &amp; online businesses
-                </p>
-                <div className="mt-3 flex items-center justify-center gap-3 ">
-                  {["📦", "👗", "💻", "🛒", "🚚"].map((e, i) => (
-                    <span
-                      key={i}
-                      className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-black/10 bg-white shadow-sm transition-transform duration-300 hover:-translate-y-1"
-                    >
-                      {e}
-                    </span>
-                  ))}
+                <div>
+                  <p className="text-xs font-medium text-black">
+                    Supports all types of physical &amp; online businesses
+                  </p>
+                  <div className="mt-3 flex items-center justify-center gap-3 ">
+                    {["📦", "👗", "💻", "🛒", "🚚"].map((e, i) => (
+                      <span
+                        key={i}
+                        className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-black/10 bg-white shadow-sm transition-transform duration-300 hover:-translate-y-1"
+                      >
+                        {e}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </section>
+          </section>
+        </Reveal>
         <main className="bg-white">
           {/* DIFFERENCE / COMPARISON */}
-          <section className="border-t border-black/10  px-5 py-20">
-            <div className="mx-auto max-w-6xl">
-              <p className="animate-fade-in-up mx-auto w-full flex justify-center [animation-delay:40ms] text-xs font-semibold uppercase tracking-widest text-ink/40">
-                Why EscrowGo?
-              </p>
-              <h2 className="animate-fade-in-up [animation-delay:60ms] mx-auto mt-2 max-w-xl text-balance text-center font-display text-3xl font-semibold text-brass md:text-4xl">
-                What makes EscrowGo different
-              </h2>
+          <Reveal>
+            <section className="border-t border-black/10  px-5 py-20">
+              <div className="mx-auto max-w-6xl">
+                <p className="animate-fade-in-up mx-auto w-full flex justify-center [animation-delay:40ms] text-xs font-semibold uppercase tracking-widest text-ink/40">
+                  Why EscrowGo?
+                </p>
+                <h2 className="animate-fade-in-up [animation-delay:60ms] mx-auto mt-2 max-w-xl text-balance text-center font-display text-3xl font-semibold text-brass md:text-4xl">
+                  What makes EscrowGo different
+                </h2>
 
-              <div className="mt-12 grid gap-6 md:grid-cols-2">
-                {/* WITHOUT */}
-                <div className="animate-fade-in-up [animation-delay:120ms] rounded-2xl border border-red-200 bg-red-50/60 p-7 transition-all duration-300 hover:-translate-y-1 hover:shadow-md md:p-8">
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-red-200 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-red-600">
-                    <span aria-hidden>⏱️</span> Without EscrowGo
-                  </span>
-                  <h3 className="mt-5 text-balance font-display text-lg font-semibold leading-snug text-black md:text-xl">
-                    The lack of secure payment verification exposes buyers to
-                    fraud and financial loss.
-                  </h3>
-                  <p className="mt-5 text-xs font-semibold uppercase tracking-wide text-red-500/70">
-                    Reasons
-                  </p>
-                  <ul className="mt-3 space-y-4">
-                    {WITHOUT_REASONS.map((reason) => (
-                      <li
-                        key={reason}
-                        className="flex items-start gap-3 text-sm text-black/90"
-                      >
-                        <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-red-100">
-                          <X size={12} className="text-red-500" />
-                        </div>
-                        <span className="pt-0.5">{reason}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {/* WITH */}
-                <div className="animate-fade-in-up [animation-delay:180ms] rounded-2xl border border-green-200 bg-green-50/60 p-7 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg md:p-8">
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-green-200 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-green-600">
-                    <span aria-hidden>✅</span> With EscrowGo
-                  </span>
-                  <h3 className="mt-5 text-balance font-display text-lg font-semibold leading-snug text-black md:text-xl">
-                    EscrowGo is the solution for people trying to buy and sell
-                    safely and securely.
-                  </h3>
-                  <p className="mt-5 text-xs font-semibold uppercase tracking-wide text-green-600/70">
-                    Reasons
-                  </p>
-                  <ul className="mt-3 space-y-4">
-                    {WITH_REASONS.map((reason) => (
-                      <li
-                        key={reason}
-                        className="flex items-start gap-3 text-sm text-black/90"
-                      >
-                        <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-green-100">
-                          <CheckCircle2 size={12} className="text-green-500" />
-                        </div>
-                        <span className="pt-0.5">{reason}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-
-              {/* FEATURE CARDS */}
-              <div className="mt-6 grid gap-5 sm:grid-cols-2 md:grid-cols-3">
-                {DIFF_FEATURES.map((f, i) => {
-                  const Icon = f.icon;
-                  return (
-                    <div
-                      key={f.title}
-                      style={{ animationDelay: `${240 + i * 60}ms` }}
-                      className="animate-fade-in-up group flex flex-col rounded-2xl border border-black/10 bg-white p-6 transition-all duration-300 hover:-translate-y-1 hover:border-brass/40 hover:shadow-lg"
-                    >
-                      <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brass/10 text-lg transition-transform duration-300 group-hover:scale-110">
-                        <Icon className="h-5 w-5 text-brass-dark" />
-                      </span>
-                      <h4 className="mt-4 font-display text-base font-semibold uppercase tracking-wide text-black">
-                        {f.title}
-                      </h4>
-                      <p className="mt-2 flex-1 text-sm leading-relaxed text-black/95">
-                        {f.body}
-                      </p>
-                      <Link
-                        href="/marketplace"
-                        className="group/link mt-4 inline-flex w-fit items-center gap-1.5 text-sm font-semibold text-brass-dark transition-colors hover:text-brass"
-                      >
-                        Browse marketplace
-                        <span
-                          aria-hidden
-                          className="transition-transform duration-300 group-hover/link:translate-x-1"
+                <div className="mt-12 grid gap-6 md:grid-cols-2">
+                  {/* WITHOUT */}
+                  <div className="animate-fade-in-up [animation-delay:120ms] rounded-2xl border border-red-200 bg-red-50/60 p-7 transition-all duration-300 hover:-translate-y-1 hover:shadow-md md:p-8">
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-red-200 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-red-600">
+                      <span aria-hidden>⏱️</span> Without EscrowGo
+                    </span>
+                    <h3 className="mt-5 text-balance font-display text-lg font-semibold leading-snug text-black md:text-xl">
+                      The lack of secure payment verification exposes buyers to
+                      fraud and financial loss.
+                    </h3>
+                    <p className="mt-5 text-xs font-semibold uppercase tracking-wide text-red-500/70">
+                      Reasons
+                    </p>
+                    <ul className="mt-3 space-y-4">
+                      {WITHOUT_REASONS.map((reason) => (
+                        <li
+                          key={reason}
+                          className="flex items-start gap-3 text-sm text-black/90"
                         >
-                          →
+                          <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-red-100">
+                            <X size={12} className="text-red-500" />
+                          </div>
+                          <span className="pt-0.5">{reason}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* WITH */}
+                  <div className="animate-fade-in-up [animation-delay:180ms] rounded-2xl border border-green-200 bg-green-50/60 p-7 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg md:p-8">
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-green-200 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-green-600">
+                      <span aria-hidden>✅</span> With EscrowGo
+                    </span>
+                    <h3 className="mt-5 text-balance font-display text-lg font-semibold leading-snug text-black md:text-xl">
+                      EscrowGo is the solution for people trying to buy and sell
+                      safely and securely.
+                    </h3>
+                    <p className="mt-5 text-xs font-semibold uppercase tracking-wide text-green-600/70">
+                      Reasons
+                    </p>
+                    <ul className="mt-3 space-y-4">
+                      {WITH_REASONS.map((reason) => (
+                        <li
+                          key={reason}
+                          className="flex items-start gap-3 text-sm text-black/90"
+                        >
+                          <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-green-100">
+                            <CheckCircle2
+                              size={12}
+                              className="text-green-500"
+                            />
+                          </div>
+                          <span className="pt-0.5">{reason}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+
+                {/* FEATURE CARDS */}
+                <div className="mt-6 grid gap-5 sm:grid-cols-2 md:grid-cols-3">
+                  {DIFF_FEATURES.map((f, i) => {
+                    const Icon = f.icon;
+                    return (
+                      <div
+                        key={f.title}
+                        style={{ animationDelay: `${240 + i * 60}ms` }}
+                        className="animate-fade-in-up group flex flex-col rounded-2xl border border-black/10 bg-white p-6 transition-all duration-300 hover:-translate-y-1 hover:border-brass/40 hover:shadow-lg"
+                      >
+                        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brass/10 text-lg transition-transform duration-300 group-hover:scale-110">
+                          <Icon className="h-5 w-5 text-brass-dark" />
                         </span>
-                      </Link>
-                    </div>
-                  );
-                })}
+                        <h4 className="mt-4 font-display text-base font-semibold uppercase tracking-wide text-black">
+                          {f.title}
+                        </h4>
+                        <p className="mt-2 flex-1 text-sm leading-relaxed text-black/95">
+                          {f.body}
+                        </p>
+                        <Link
+                          href="/marketplace"
+                          className="group/link mt-4 inline-flex w-fit items-center gap-1.5 text-sm font-semibold text-brass-dark transition-colors hover:text-brass"
+                        >
+                          Browse marketplace
+                          <span
+                            aria-hidden
+                            className="transition-transform duration-300 group-hover/link:translate-x-1"
+                          >
+                            →
+                          </span>
+                        </Link>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          </section>
-          <section className=" px-5 py-20">
-            <div className="mx-auto max-w-6xl">
-              <p className="animate-fade-in-up mx-auto w-full flex justify-center [animation-delay:40ms] text-xs font-semibold uppercase tracking-widest text-ink/40">
-                WHO NEEDS ESCROWGO?
-              </p>
-              <h2 className="animate-fade-in-up [animation-delay:60ms] mx-auto mt-2 max-w-xl text-balance text-center font-display text-3xl font-semibold text-brass md:text-4xl">
-                One platform , Multilple uses
-              </h2>
+            </section>
+          </Reveal>
+          <Reveal>
+            <section className=" px-5 py-20">
+              <div className="mx-auto max-w-6xl">
+                <p className="animate-fade-in-up mx-auto w-full flex justify-center [animation-delay:40ms] text-xs font-semibold uppercase tracking-widest text-ink/40">
+                  WHO NEEDS ESCROWGO?
+                </p>
+                <h2 className="animate-fade-in-up [animation-delay:60ms] mx-auto mt-2 max-w-xl text-balance text-center font-display text-3xl font-semibold text-brass md:text-4xl">
+                  One platform , Multilple uses
+                </h2>
 
-              <RolesSection />
-            </div>
-          </section>
-
-          <HowItWorks />
-              <section className="relative w-full bg-[#FFFBEF] px-4 py-16 sm:px-8 sm:py-20 lg:py-24">
-            <style>{`
+                <RolesSection />
+              </div>
+            </section>
+          </Reveal>
+          <Reveal>
+            <HowItWorks />
+          </Reveal>
+          <Reveal>
+            {" "}
+            <section className="relative w-full bg-[#FFFBEF] px-4 py-16 sm:px-8 sm:py-20 lg:py-24">
+              <style>{`
         @keyframes faqRise {
           from { opacity: 0; transform: translateY(14px); }
           to   { opacity: 1; transform: translateY(0); }
@@ -375,54 +388,57 @@ export default function LandingPage() {
           min-height: 0;
         }
       `}</style>
- 
-            {/* Ambient background accents — clipped in their own layer so it doesn't break position:sticky on the content below */}
-            <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-              <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-amber-200/30 blur-3xl" />
-              <div className="absolute -bottom-24 -left-16 h-80 w-80 rounded-full bg-orange-100/40 blur-3xl" />
-            </div>
- 
-            <div className="relative mx-auto max-w-6xl">
-              <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,340px)_1fr] lg:gap-16 lg:items-start">
-                {/* Left column */}
-                <div className="text-center lg:sticky lg:top-24 lg:h-fit lg:text-left">
-                  <p className="text-xs font-semibold uppercase tracking-[0.25em] text-stone-500">
-                    FAQs
-                  </p>
-                  <h2 className="mt-3 font-serif text-3xl font-semibold tracking-tight text-stone-900 sm:text-4xl">
-                    <span className="relative inline-block">
-                      Questions mostly asked
-                      <svg
-                        aria-hidden
-                        viewBox="0 0 200 10"
-                        preserveAspectRatio="none"
-                        className="absolute -bottom-1.5 left-0 h-2.5 w-full text-amber-400"
-                      >
-                        <path
-                          d="M2 7 C 40 2, 160 2, 198 7"
-                          stroke="currentColor"
-                          strokeWidth="3"
-                          fill="none"
-                          strokeLinecap="round"
-                        />
-                      </svg>
-                    </span>
-                  </h2>
- 
-                  <p className="mx-auto mt-5 max-w-xs text-sm leading-relaxed text-stone-500 sm:text-base lg:mx-0">
-                    Everything you need to know about EscrowGo, and how it
-                    works.
-                  </p>
- 
-                  <Link
-                    href="/contact"
-                    className="group mx-auto mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-amber-600 underline decoration-amber-300 decoration-2 underline-offset-4 transition-colors hover:text-amber-700 lg:mx-0"
-                  >
-                    Still have questions? Contact us
-                    <ArrowUpRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                  </Link>
- 
-                  {/* <div className="mx-auto mt-8 hidden max-w-xs items-start gap-3 rounded-2xl border border-amber-200 bg-white/70 p-4 text-left backdrop-blur-sm sm:flex lg:mx-0">
+
+              {/* Ambient background accents — clipped in their own layer so it doesn't break position:sticky on the content below */}
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-0 overflow-hidden"
+              >
+                <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-amber-200/30 blur-3xl" />
+                <div className="absolute -bottom-24 -left-16 h-80 w-80 rounded-full bg-orange-100/40 blur-3xl" />
+              </div>
+
+              <div className="relative mx-auto max-w-6xl">
+                <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,340px)_1fr] lg:gap-16 lg:items-start">
+                  {/* Left column */}
+                  <div className="text-center lg:sticky lg:top-24 lg:h-fit lg:text-left">
+                    <p className="text-xs font-semibold uppercase tracking-[0.25em] text-stone-500">
+                      FAQs
+                    </p>
+                    <h2 className="mt-3 font-serif text-3xl font-semibold tracking-tight text-stone-900 sm:text-4xl">
+                      <span className="relative inline-block">
+                        Questions mostly asked
+                        <svg
+                          aria-hidden
+                          viewBox="0 0 200 10"
+                          preserveAspectRatio="none"
+                          className="absolute -bottom-1.5 left-0 h-2.5 w-full text-amber-400"
+                        >
+                          <path
+                            d="M2 7 C 40 2, 160 2, 198 7"
+                            stroke="currentColor"
+                            strokeWidth="3"
+                            fill="none"
+                            strokeLinecap="round"
+                          />
+                        </svg>
+                      </span>
+                    </h2>
+
+                    <p className="mx-auto mt-5 max-w-xs text-sm leading-relaxed text-stone-500 sm:text-base lg:mx-0">
+                      Everything you need to know about EscrowGo, and how it
+                      works.
+                    </p>
+
+                    <Link
+                      href="/contact"
+                      className="group mx-auto mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-amber-600 underline decoration-amber-300 decoration-2 underline-offset-4 transition-colors hover:text-amber-700 lg:mx-0"
+                    >
+                      Still have questions? Contact us
+                      <ArrowUpRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                    </Link>
+
+                    {/* <div className="mx-auto mt-8 hidden max-w-xs items-start gap-3 rounded-2xl border border-amber-200 bg-white/70 p-4 text-left backdrop-blur-sm sm:flex lg:mx-0">
                     <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-600">
                       <MessageCircleQuestion
                         className="h-5 w-5"
@@ -434,179 +450,184 @@ export default function LandingPage() {
                       replies within a few hours.
                     </p>
                   </div> */}
-                </div>
- 
-                {/* Right column — accordion */}
-                <div className="flex flex-col gap-4">
-                  {FAQS.map((item, i) => {
-                    const isOpen = openIndex === i;
-                    return (
-                      <div
-                        key={item.q}
-                        style={{ animationDelay: `${i * 60}ms` }}
-                        className={`faq-item overflow-hidden rounded-2xl border bg-white/80 backdrop-blur-sm transition-all duration-300 ${
-                          isOpen
-                            ? "border-amber-300 shadow-md shadow-amber-100"
-                            : "border-stone-200 hover:border-amber-200 hover:shadow-sm"
-                        }`}
-                      >
-                        <button
-                          onClick={() => toggle(i)}
-                          aria-expanded={isOpen}
-                          className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left sm:px-6 sm:py-5"
+                  </div>
+
+                  {/* Right column — accordion */}
+                  <div className="flex flex-col gap-4">
+                    {FAQS.map((item, i) => {
+                      const isOpen = openIndex === i;
+                      return (
+                        <div
+                          key={item.q}
+                          style={{ animationDelay: `${i * 60}ms` }}
+                          className={`faq-item overflow-hidden rounded-2xl border bg-white/80 backdrop-blur-sm transition-all duration-300 ${
+                            isOpen
+                              ? "border-amber-300 shadow-md shadow-amber-100"
+                              : "border-stone-200 hover:border-amber-200 hover:shadow-sm"
+                          }`}
                         >
-                          <span
-                            className={`text-[15px] font-semibold transition-colors duration-300 sm:text-base ${
-                              isOpen ? "text-amber-700" : "text-stone-800"
-                            }`}
+                          <button
+                            onClick={() => toggle(i)}
+                            aria-expanded={isOpen}
+                            className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left sm:px-6 sm:py-5"
                           >
-                            {item.q}
-                          </span>
-                          <span
-                            className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md transition-all duration-300 ${
-                              isOpen
-                                ? "rotate-180 bg-amber-400 text-white"
-                                : "bg-stone-100 text-amber-500"
-                            }`}
+                            <span
+                              className={`text-[15px] font-semibold transition-colors duration-300 sm:text-base ${
+                                isOpen ? "text-amber-700" : "text-stone-800"
+                              }`}
+                            >
+                              {item.q}
+                            </span>
+                            <span
+                              className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md transition-all duration-300 ${
+                                isOpen
+                                  ? "rotate-180 bg-amber-400 text-white"
+                                  : "bg-stone-100 text-amber-500"
+                              }`}
+                            >
+                              <ChevronDown
+                                className="h-4 w-4"
+                                strokeWidth={2.5}
+                              />
+                            </span>
+                          </button>
+
+                          <div
+                            className={`faq-panel ${isOpen ? "is-open" : ""}`}
                           >
-                            <ChevronDown
-                              className="h-4 w-4"
-                              strokeWidth={2.5}
-                            />
-                          </span>
-                        </button>
- 
-                        <div className={`faq-panel ${isOpen ? "is-open" : ""}`}>
-                          <div>
-                            <p className="px-5 pb-5 text-sm leading-relaxed text-stone-600 sm:px-6 sm:pb-6 sm:text-[15px]">
-                              {item.a}
-                            </p>
+                            <div>
+                              <p className="px-5 pb-5 text-sm leading-relaxed text-stone-600 sm:px-6 sm:pb-6 sm:text-[15px]">
+                                {item.a}
+                              </p>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
-            </div>
-          </section>
+            </section>
+          </Reveal>
 
           {/* POWERED BY NOMBA */}
           {/* POWERED BY NOMBA */}
-          <section className="relative overflow-hidden px-5 py-24 text-center">
-            {/* ambient cream gradient backdrop */}
-            <div
-              aria-hidden
-              className="absolute inset-0 bg-[radial-gradient(circle_at_18%_15%,#fff7e6_0%,transparent_45%),radial-gradient(circle_at_85%_75%,#fdf2e0_0%,transparent_50%)] bg-paper"
-            />
-            {/* faint dot-grid texture */}
-            <div
-              aria-hidden
-              className="absolute inset-0 opacity-[0.35] [background-image:radial-gradient(theme(colors.black/12%)_1px,transparent_1px)] [background-size:22px_22px] [mask-image:radial-gradient(ellipse_70%_70%_at_50%_40%,black_30%,transparent_85%)]"
-            />
-            {/* watermark padlock, top-right */}
-            <svg
-              aria-hidden
-              viewBox="0 0 100 100"
-              className="absolute -right-4 top-6 h-32 w-32 text-brass/[0.10] md:h-44 md:w-44"
-            >
-              <rect
-                x="22"
-                y="44"
-                width="56"
-                height="44"
-                rx="10"
-                fill="currentColor"
+          <Reveal>
+            {" "}
+            <section className="relative overflow-hidden px-5 py-24 text-center">
+              {/* ambient cream gradient backdrop */}
+              <div
+                aria-hidden
+                className="absolute inset-0 bg-[radial-gradient(circle_at_18%_15%,#fff7e6_0%,transparent_45%),radial-gradient(circle_at_85%_75%,#fdf2e0_0%,transparent_50%)] bg-paper"
               />
-              <path
-                d="M32 44V32a18 18 0 0 1 36 0v12"
-                stroke="currentColor"
-                strokeWidth="9"
-                fill="none"
+              {/* faint dot-grid texture */}
+              <div
+                aria-hidden
+                className="absolute inset-0 opacity-[0.35] [background-image:radial-gradient(theme(colors.black/12%)_1px,transparent_1px)] [background-size:22px_22px] [mask-image:radial-gradient(ellipse_70%_70%_at_50%_40%,black_30%,transparent_85%)]"
               />
-            </svg>
-            {/* faint world-map style arcs, bottom-left */}
-            <svg
-              aria-hidden
-              viewBox="0 0 200 200"
-              className="absolute -left-10 bottom-0 h-48 w-48 text-black/[0.05] md:h-64 md:w-64"
-            >
-              <circle
-                cx="100"
-                cy="100"
-                r="90"
-                stroke="currentColor"
-                strokeWidth="1"
-                fill="none"
-              />
-              <circle
-                cx="100"
-                cy="100"
-                r="60"
-                stroke="currentColor"
-                strokeWidth="1"
-                fill="none"
-              />
-              <circle
-                cx="100"
-                cy="100"
-                r="30"
-                stroke="currentColor"
-                strokeWidth="1"
-                fill="none"
-              />
-            </svg>
+              {/* watermark padlock, top-right */}
+              <svg
+                aria-hidden
+                viewBox="0 0 100 100"
+                className="absolute -right-4 top-6 h-32 w-32 text-brass/[0.10] md:h-44 md:w-44"
+              >
+                <rect
+                  x="22"
+                  y="44"
+                  width="56"
+                  height="44"
+                  rx="10"
+                  fill="currentColor"
+                />
+                <path
+                  d="M32 44V32a18 18 0 0 1 36 0v12"
+                  stroke="currentColor"
+                  strokeWidth="9"
+                  fill="none"
+                />
+              </svg>
+              {/* faint world-map style arcs, bottom-left */}
+              <svg
+                aria-hidden
+                viewBox="0 0 200 200"
+                className="absolute -left-10 bottom-0 h-48 w-48 text-black/[0.05] md:h-64 md:w-64"
+              >
+                <circle
+                  cx="100"
+                  cy="100"
+                  r="90"
+                  stroke="currentColor"
+                  strokeWidth="1"
+                  fill="none"
+                />
+                <circle
+                  cx="100"
+                  cy="100"
+                  r="60"
+                  stroke="currentColor"
+                  strokeWidth="1"
+                  fill="none"
+                />
+                <circle
+                  cx="100"
+                  cy="100"
+                  r="30"
+                  stroke="currentColor"
+                  strokeWidth="1"
+                  fill="none"
+                />
+              </svg>
 
-            <div className="relative mx-auto max-w-5xl">
-              <div className="bg-white rounded-2xl backdrop-blur-sm w-fit mx-auto p-2 px-3 border border-gray-800/20">
-                <h2 className="animate-fade-in-up text-balance font-display text-2xl font-semibold text-black md:text-3xl">
-                  Powered by <span className="text-brass">Nomba</span>
-                </h2>
+              <div className="relative mx-auto max-w-5xl">
+                <div className="bg-white rounded-2xl backdrop-blur-sm w-fit mx-auto p-2 px-3 border border-gray-800/20">
+                  <h2 className="animate-fade-in-up text-balance font-display text-2xl font-semibold text-black md:text-3xl">
+                    Powered by <span className="text-brass">Nomba</span>
+                  </h2>
+                </div>
+
+                <p className="animate-fade-in-up [animation-delay:80ms] mx-auto mt-6 max-w-5xl text-balance text-sm sm:text-base leading-relaxed font-bold ">
+                  Every payment is securely processed through Nomba&apos;s
+                  trusted payment infrastructure, while encrypted QR
+                  verification confirms every successful delivery before funds
+                  are released. Each completed transaction is automatically
+                  recorded, giving businesses a reliable digital sales history
+                  they can download, track, and use to support growth,
+                  bookkeeping, and future opportunities.
+                </p>
+
+                <div className="animate-fade-in-up [animation-delay:180ms] mt-5 flex justify-center">
+                  <Link
+                    href="https://nomba.com/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {" "}
+                    <div className="group flex h-15 w-40 items-center justify-center overflow-hidden rounded-[22px] bg-brass shadow-[0_12px_30px_-8px_theme(colors.brass/55%)] transition-transform duration-300 hover:-translate-y-1 hover:scale-105 ">
+                      <img
+                        src="https://nomba.com/nomba-social-preview.png"
+                        alt="Nomba"
+                        className="h-full w-full scale-170 object-cover object-center"
+                      />
+                      <div className="hidden h-full w-full items-center justify-center">
+                        <svg
+                          viewBox="0 0 48 48"
+                          className="h-9 w-9 md:h-11 md:w-11"
+                          fill="none"
+                        >
+                          <path
+                            d="M10 10 L38 38 M38 10 L10 38"
+                            stroke="#161311"
+                            strokeWidth="8"
+                            strokeLinecap="round"
+                          />
+                        </svg>
+                      </div>
+                    </div>{" "}
+                  </Link>
+                </div>
               </div>
-
-              <p className="animate-fade-in-up [animation-delay:80ms] mx-auto mt-6 max-w-5xl text-balance text-sm sm:text-base leading-relaxed font-bold ">
-                Every payment is securely processed through Nomba&apos;s trusted
-                payment infrastructure, while encrypted QR verification confirms
-                every successful delivery before funds are released. Each
-                completed transaction is automatically recorded, giving
-                businesses a reliable digital sales history they can download,
-                track, and use to support growth, bookkeeping, and future
-                opportunities.
-              </p>
-
-              <div className="animate-fade-in-up [animation-delay:180ms] mt-5 flex justify-center">
-                <Link
-                  href="https://nomba.com/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {" "}
-                  <div className="group flex h-15 w-40 items-center justify-center overflow-hidden rounded-[22px] bg-brass shadow-[0_12px_30px_-8px_theme(colors.brass/55%)] transition-transform duration-300 hover:-translate-y-1 hover:scale-105 ">
-                    <img
-                      src="https://nomba.com/nomba-social-preview.png"
-                      alt="Nomba"
-                      className="h-full w-full scale-170 object-cover object-center"
-                    />
-                    <div className="hidden h-full w-full items-center justify-center">
-                      <svg
-                        viewBox="0 0 48 48"
-                        className="h-9 w-9 md:h-11 md:w-11"
-                        fill="none"
-                      >
-                        <path
-                          d="M10 10 L38 38 M38 10 L10 38"
-                          stroke="#161311"
-                          strokeWidth="8"
-                          strokeLinecap="round"
-                        />
-                      </svg>
-                    </div>
-                  </div>{" "}
-                </Link>
-              </div>
-            </div>
-          </section>
-
+            </section>
+          </Reveal>
           {/* CTA */}
           {/* <section className="border-t border-black/10 bg-black px-5 py-20 text-center">
             <SealMark size={40} className="mx-auto" />

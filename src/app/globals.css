@@ -22,6 +22,12 @@ body {
     transform: translateY(0);
   }
 }
+button{
+  cursor: pointer;
+}
+button:disabled {
+  cursor: not-allowed;
+}
 .bg-home {
   background-image: url("/home-bg.png");
   background-size: cover;
