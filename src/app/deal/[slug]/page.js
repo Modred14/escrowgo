@@ -145,11 +145,9 @@ export default function DealPage() {
 
           <div className="grid gap-10 lg:grid-cols-[1fr_360px]">
             <div>
-              {/* Images */}
               <div className="overflow-hidden rounded-2xl border border-ink/10 bg-white">
                 <div className="aspect-[4/3] bg-paper-dim">
                   {deal.product.images?.[activeImage] && (
-                    // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={deal.product.images[activeImage]}
                       alt={deal.product.name}
@@ -165,7 +163,6 @@ export default function DealPage() {
                         onClick={() => setActiveImage(i)}
                         className={`h-16 w-16 overflow-hidden rounded-lg border-2 ${i === activeImage ? "border-brass" : "border-transparent"}`}
                       >
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={img}
                           alt=""
