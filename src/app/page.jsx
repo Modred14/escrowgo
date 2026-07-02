@@ -231,7 +231,6 @@ export default function LandingPage() {
           </section>
         </Reveal>
         <main className="bg-white">
-          {/* DIFFERENCE / COMPARISON */}
           <Reveal>
             <section className="border-t border-black/10  px-5 py-20">
               <div className="mx-auto max-w-6xl">
@@ -378,7 +377,6 @@ export default function LandingPage() {
         }
       `}</style>
 
-              {/* Ambient background accents — clipped in their own layer so it doesn't break position:sticky on the content below */}
               <div
                 aria-hidden
                 className="pointer-events-none absolute inset-0 overflow-hidden"
@@ -389,7 +387,6 @@ export default function LandingPage() {
 
               <div className="relative mx-auto max-w-6xl">
                 <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,340px)_1fr] lg:gap-16 lg:items-start">
-                  {/* Left column */}
                   <div className="text-center lg:sticky lg:top-24 lg:h-fit lg:text-left">
                     <p className="text-xs font-semibold uppercase tracking-[0.25em] text-stone-500">
                       FAQs
@@ -428,7 +425,6 @@ export default function LandingPage() {
                     </Link>
                   </div>
 
-                  <div className="flex flex-col gap-4">
                   <div className="flex flex-col gap-4">
                     {FAQS.map((item, i) => {
                       const isOpen = openIndex === i;

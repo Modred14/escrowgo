@@ -44,7 +44,11 @@ export default function DealPage() {
   useEffect(() => {
     if (deal?.qrCode?.code && !deal.qrCode.isUsed) {
       import("qrcode").then((QR) => {
-        QR.toDataURL(deal.qrCode.code, { margin: 2, width: 260, color: { dark: "#0E1A17", light: "#F3F5F2" } }).then(setQrDataUrl);
+        QR.toDataURL(deal.qrCode.code, {
+          margin: 2,
+          width: 260,
+          color: { dark: "#0E1A17", light: "#F3F5F2" },
+        }).then(setQrDataUrl);
       });
     }
   }, [deal?.qrCode?.code, deal?.qrCode?.isUsed]);
@@ -66,8 +70,12 @@ export default function DealPage() {
         <main className="flex min-h-[60vh] items-center justify-center px-5 text-center">
           <div>
             <p className="text-5xl">🔍</p>
-            <h1 className="mt-3 font-display text-xl font-semibold text-ink">Deal not found</h1>
-            <p className="mt-1 text-sm text-ink/55">This link may be invalid or the deal was removed.</p>
+            <h1 className="mt-3 font-display text-xl font-semibold text-ink">
+              Deal not found
+            </h1>
+            <p className="mt-1 text-sm text-ink/55">
+              This link may be invalid or the deal was removed.
+            </p>
           </div>
         </main>
         <Footer />
@@ -110,7 +118,11 @@ export default function DealPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Action failed.");
-      toast.success(action === "PICKED_UP" ? "Marked as picked up." : "Marked as delivered.");
+      toast.success(
+        action === "PICKED_UP"
+          ? "Marked as picked up."
+          : "Marked as delivered.",
+      );
       load();
     } catch (err) {
       toast.error(err.message);
@@ -126,7 +138,9 @@ export default function DealPage() {
         <div className="mx-auto max-w-5xl">
           <div className="mb-6 flex items-center justify-between">
             <StatusBadge status={deal.status} />
-            <span className="text-xs text-ink/40">Created {formatDate(deal.createdAt)}</span>
+            <span className="text-xs text-ink/40">
+              Created {formatDate(deal.createdAt)}
+            </span>
           </div>
 
           <div className="grid gap-10 lg:grid-cols-[1fr_360px]">
@@ -136,7 +150,11 @@ export default function DealPage() {
                 <div className="aspect-[4/3] bg-paper-dim">
                   {deal.product.images?.[activeImage] && (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={deal.product.images[activeImage]} alt={deal.product.name} className="h-full w-full object-cover" />
+                    <img
+                      src={deal.product.images[activeImage]}
+                      alt={deal.product.name}
+                      className="h-full w-full object-cover"
+                    />
                   )}
                 </div>
                 {deal.product.images?.length > 1 && (
@@ -148,70 +166,104 @@ export default function DealPage() {
                         className={`h-16 w-16 overflow-hidden rounded-lg border-2 ${i === activeImage ? "border-brass" : "border-transparent"}`}
                       >
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={img} alt="" className="h-full w-full object-cover" />
+                        <img
+                          src={img}
+                          alt=""
+                          className="h-full w-full object-cover"
+                        />
                       </button>
                     ))}
                   </div>
                 )}
               </div>
 
-              <h1 className="mt-6 font-display text-2xl font-semibold text-ink">{deal.product.name}</h1>
-              <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-ink/60">{deal.product.description}</p>
+              <h1 className="mt-6 font-display text-2xl font-semibold text-ink">
+                {deal.product.name}
+              </h1>
+              <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-ink/60">
+                {deal.product.description}
+              </p>
 
               <div className="mt-8 grid grid-cols-2 gap-4 rounded-2xl border border-ink/10 bg-white p-5 text-sm sm:grid-cols-4">
                 <div>
                   <p className="text-ink/40">Seller</p>
-                  <p className="mt-0.5 font-semibold text-ink">{deal.seller.name}</p>
+                  <p className="mt-0.5 font-semibold text-ink">
+                    {deal.seller.name}
+                  </p>
                 </div>
                 <div>
                   <p className="text-ink/40">From</p>
-                  <p className="mt-0.5 font-semibold text-ink">{deal.sellerLocation}</p>
+                  <p className="mt-0.5 font-semibold text-ink">
+                    {deal.sellerLocation}
+                  </p>
                 </div>
                 <div>
                   <p className="text-ink/40">To</p>
-                  <p className="mt-0.5 font-semibold text-ink">{deal.buyerLocation}</p>
+                  <p className="mt-0.5 font-semibold text-ink">
+                    {deal.buyerLocation}
+                  </p>
                 </div>
                 <div>
                   <p className="text-ink/40">Delivery</p>
-                  <p className="mt-0.5 font-semibold text-ink">{deal.deliveryOption === "ESCROWGO" ? "escrowgo Delivery" : "Self Delivery"}</p>
+                  <p className="mt-0.5 font-semibold text-ink">
+                    {deal.deliveryOption === "ESCROWGO"
+                      ? "escrowgo Delivery"
+                      : "Self Delivery"}
+                  </p>
                 </div>
               </div>
 
               {deal.expectedDeliveryDate && (
                 <div className="mt-4 rounded-2xl border border-brass/20 bg-brass/5 p-4 text-sm text-ink/70">
-                  Expected delivery by <span className="font-semibold text-ink">{formatDate(deal.expectedDeliveryDate)}</span>
-                  {deal.deliveryOption === "ESCROWGO" && " — includes a 7-day buffer."}
+                  Expected delivery by{" "}
+                  <span className="font-semibold text-ink">
+                    {formatDate(deal.expectedDeliveryDate)}
+                  </span>
+                  {deal.deliveryOption === "ESCROWGO" &&
+                    " — includes a 7-day buffer."}
                 </div>
               )}
 
               <div className="mt-10">
-                <h2 className="font-display text-lg font-semibold text-ink">Progress</h2>
+                <h2 className="font-display text-lg font-semibold text-ink">
+                  Progress
+                </h2>
                 <div className="mt-4">
                   <Timeline deal={deal} />
                 </div>
               </div>
 
               <div className="mt-10 rounded-2xl border border-ink/10 bg-white p-5">
-                <h3 className="font-display text-base font-semibold text-ink">How escrow protects you</h3>
+                <h3 className="font-display text-base font-semibold text-ink">
+                  How escrow protects you
+                </h3>
                 <p className="mt-2 text-sm leading-relaxed text-ink/60">
-                  Your payment is held by escrowgo, not handed to the seller right away. It's only released after
-                  delivery is confirmed by scanning a one-time QR code — and if delivery never happens by the
-                  expected date, escrowgo refunds you automatically.
+                  Your payment is held by escrowgo, not handed to the seller
+                  right away. It's only released after delivery is confirmed by
+                  scanning a one-time QR code — and if delivery never happens by
+                  the expected date, escrowgo refunds you automatically.
                 </p>
               </div>
             </div>
 
-            {/* Sidebar: pay / actions */}
             <aside className="lg:sticky lg:top-24 lg:self-start">
               <div className="rounded-2xl border border-ink/10 bg-white p-6 shadow-card">
-                <p className="text-xs font-medium uppercase tracking-wide text-ink/40">Item price</p>
-                <p className="mt-1 font-mono text-2xl font-semibold text-ink">{formatNaira(deal.product.price)}</p>
+                <p className="text-xs font-medium uppercase tracking-wide text-ink/40">
+                  Item price
+                </p>
+                <p className="mt-1 font-mono text-2xl font-semibold text-ink">
+                  {formatNaira(deal.product.price)}
+                </p>
                 {deal.deliveryOption === "ESCROWGO" && deal.deliveryFee > 0 && (
-                  <p className="mt-1 text-xs text-ink/50">+ {formatNaira(deal.deliveryFee)} delivery fee</p>
+                  <p className="mt-1 text-xs text-ink/50">
+                    + {formatNaira(deal.deliveryFee)} delivery fee
+                  </p>
                 )}
                 <div className="mt-3 flex items-center justify-between border-t border-ink/10 pt-3 text-sm">
                   <span className="font-semibold text-ink">Total</span>
-                  <span className="font-mono font-semibold text-vault">{formatNaira(totalAmount)}</span>
+                  <span className="font-mono font-semibold text-vault">
+                    {formatNaira(totalAmount)}
+                  </span>
                 </div>
 
                 {deal.status === "PENDING_PAYMENT" && !isSeller && (
@@ -237,47 +289,69 @@ export default function DealPage() {
                   </p>
                 )}
 
-                {/* Seller self-delivery controls */}
-                {isSeller && deal.deliveryOption === "SELF" && deal.delivery && (
-                  <div className="mt-5 space-y-2 border-t border-ink/10 pt-5">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-ink/40">Self-delivery controls</p>
-                    {deal.delivery.status === "UNASSIGNED" && deal.status === "FUNDS_HELD" && (
-                      <button
-                        onClick={() => handleSelfDeliveryAction("PICKED_UP")}
-                        disabled={actionLoading}
-                        className="w-full rounded-xl border border-vault py-2.5 text-sm font-semibold text-vault hover:bg-vault/5 disabled:opacity-60"
-                      >
-                        Mark as picked up
-                      </button>
-                    )}
-                    {deal.delivery.status === "PICKED_UP" && (
-                      <button
-                        onClick={() => handleSelfDeliveryAction("DELIVERED")}
-                        disabled={actionLoading}
-                        className="w-full rounded-xl bg-brass py-2.5 text-sm font-semibold text-ink hover:bg-brass-light disabled:opacity-60"
-                      >
-                        Mark as delivered
-                      </button>
-                    )}
-                    {deal.delivery.status === "DELIVERED" && (
-                      <p className="text-center text-xs text-ink/50">
-                        Delivered. Ask the buyer to show their QR code, then scan it on the{" "}
-                        <a href="/scanner" className="font-semibold text-vault hover:underline">Scanner</a> page.
+                {isSeller &&
+                  deal.deliveryOption === "SELF" &&
+                  deal.delivery && (
+                    <div className="mt-5 space-y-2 border-t border-ink/10 pt-5">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-ink/40">
+                        Self-delivery controls
                       </p>
-                    )}
-                  </div>
-                )}
+                      {deal.delivery.status === "UNASSIGNED" &&
+                        deal.status === "FUNDS_HELD" && (
+                          <button
+                            onClick={() =>
+                              handleSelfDeliveryAction("PICKED_UP")
+                            }
+                            disabled={actionLoading}
+                            className="w-full rounded-xl border border-vault py-2.5 text-sm font-semibold text-vault hover:bg-vault/5 disabled:opacity-60"
+                          >
+                            Mark as picked up
+                          </button>
+                        )}
+                      {deal.delivery.status === "PICKED_UP" && (
+                        <button
+                          onClick={() => handleSelfDeliveryAction("DELIVERED")}
+                          disabled={actionLoading}
+                          className="w-full rounded-xl bg-brass py-2.5 text-sm font-semibold text-ink hover:bg-brass-light disabled:opacity-60"
+                        >
+                          Mark as delivered
+                        </button>
+                      )}
+                      {deal.delivery.status === "DELIVERED" && (
+                        <p className="text-center text-xs text-ink/50">
+                          Delivered. Ask the buyer to show their QR code, then
+                          scan it on the{" "}
+                          <a
+                            href="/scanner"
+                            className="font-semibold text-vault hover:underline"
+                          >
+                            Scanner
+                          </a>{" "}
+                          page.
+                        </p>
+                      )}
+                    </div>
+                  )}
 
-                {/* Buyer QR display */}
                 {isBuyer && deal.qrCode?.code && !deal.qrCode.isUsed && (
                   <div className="mt-5 border-t border-ink/10 pt-5 text-center">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-ink/40">Your release code</p>
-                    <p className="mt-1 text-xs text-ink/50">Show this to the seller or courier to release payment.</p>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-ink/40">
+                      Your release code
+                    </p>
+                    <p className="mt-1 text-xs text-ink/50">
+                      Show this to the seller or courier to release payment.
+                    </p>
                     {qrDataUrl && (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={qrDataUrl} alt="Release QR code" className="mx-auto mt-3 h-44 w-44 rounded-xl border border-ink/10" />
+                      <img
+                        src={qrDataUrl}
+                        alt="Release QR code"
+                        className="mx-auto mt-3 h-44 w-44 rounded-xl border border-ink/10"
+                      />
                     )}
-                    <p className="mt-2 break-all font-mono text-[10px] text-ink/30">{deal.qrCode.code}</p>
+                    <p className="mt-2 break-all font-mono text-[10px] text-ink/30">
+                      {deal.qrCode.code}
+                    </p>
                   </div>
                 )}
 

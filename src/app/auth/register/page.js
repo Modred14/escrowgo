@@ -143,15 +143,15 @@ export default function RegisterPage() {
   );
   return (
     <main className=" egv-main bg-home">
-      {/* Ambient vault backdrop */}
-
       <div className="egv-shell">
         <div className="egv-card">
           <div className="egv-header">
             <h1 className="egv-title">
               Create your <span className="egv-brand">EscrowGo</span> account
             </h1>
-            <p className="egv-subtitle">Buy, sell and deliver with escrow protection.</p>
+            <p className="egv-subtitle">
+              Buy, sell and deliver with escrow protection.
+            </p>
           </div>
 
           <form onSubmit={handleSubmit} className="egv-form">
@@ -195,7 +195,7 @@ export default function RegisterPage() {
                     </option>
                   ))}
                 </select>
-                   
+
                 <span className="egv-phone-divider" />
                 <input
                   type="tel"
@@ -821,7 +821,7 @@ function Styles() {
         flex-shrink: 0;
       }
       .egv-phone-code-inline {
-       margin-right: 0.5rem;
+        margin-right: 0.5rem;
         border: none;
         background: transparent;
         padding: 0.7rem 0.35rem 0.7rem 0.5rem;

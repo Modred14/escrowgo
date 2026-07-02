@@ -7,7 +7,10 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ImageUploader from "@/components/ImageUploader";
 import { Spinner } from "@/components/Loader";
-import { checkDeliveryCoverage, COVERED_LOCATIONS } from "@/lib/delivery-coverage";
+import {
+  checkDeliveryCoverage,
+  COVERED_LOCATIONS,
+} from "@/lib/delivery-coverage";
 import { formatNaira } from "@/lib/utils";
 
 const initialForm = {
@@ -28,13 +31,23 @@ export default function CreateDealPage() {
   const [result, setResult] = useState(null);
 
   const coverage = useMemo(() => {
-    if (form.deliveryOption !== "ESCROWGO" || !form.sellerLocation || !form.buyerLocation) return null;
+    if (
+      form.deliveryOption !== "ESCROWGO" ||
+      !form.sellerLocation ||
+      !form.buyerLocation
+    )
+      return null;
     return checkDeliveryCoverage({
       sellerLocation: form.sellerLocation,
       buyerLocation: form.buyerLocation,
       estimatedDeliveryDays: Number(form.estimatedDeliveryDays) || 0,
     });
-  }, [form.deliveryOption, form.sellerLocation, form.buyerLocation, form.estimatedDeliveryDays]);
+  }, [
+    form.deliveryOption,
+    form.sellerLocation,
+    form.buyerLocation,
+    form.estimatedDeliveryDays,
+  ]);
 
   function update(field, value) {
     setForm((f) => ({ ...f, [field]: value }));
@@ -53,7 +66,10 @@ export default function CreateDealPage() {
       if (!res.ok) throw new Error(data.error || "Could not create the deal.");
 
       if (data.forcedSelfDelivery) {
-        toast("escrowgo Delivery isn't available for that route — switched to Self Delivery.", { icon: "📦" });
+        toast(
+          "escrowgo Delivery isn't available for that route — switched to Self Delivery.",
+          { icon: "📦" },
+        );
       }
       setResult(data);
       toast.success("Secure deal created.");
@@ -70,11 +86,19 @@ export default function CreateDealPage() {
         <Navbar />
         <main className="flex min-h-[70vh] items-center justify-center bg-paper px-5 py-16">
           <div className="w-full max-w-md rounded-2xl border border-mint/30 bg-white p-8 text-center shadow-card">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-mint/15 text-2xl">✅</div>
-            <h1 className="mt-4 font-display text-xl font-semibold text-ink">Deal created</h1>
-            <p className="mt-2 text-sm text-ink/60">Share this link with your buyer to get paid securely.</p>
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-mint/15 text-2xl">
+              ✅
+            </div>
+            <h1 className="mt-4 font-display text-xl font-semibold text-ink">
+              Deal created
+            </h1>
+            <p className="mt-2 text-sm text-ink/60">
+              Share this link with your buyer to get paid securely.
+            </p>
             <div className="mt-5 flex items-center gap-2 rounded-xl border border-ink/10 bg-paper px-3.5 py-2.5">
-              <code className="flex-1 truncate text-left text-xs text-ink/70">{result.paymentLink}</code>
+              <code className="flex-1 truncate text-left text-xs text-ink/70">
+                {result.paymentLink}
+              </code>
               <button
                 onClick={() => {
                   navigator.clipboard.writeText(result.paymentLink);
@@ -112,12 +136,21 @@ export default function CreateDealPage() {
       <main className="bg-paper px-5 py-10">
         <div className="mx-auto grid max-w-4xl gap-8 lg:grid-cols-[1fr_280px]">
           <div>
-            <h1 className="font-display text-2xl font-semibold text-ink">Create Secure Deal</h1>
-            <p className="mt-1 text-sm text-ink/55">Fill in the details once — escrowgo handles trust from here.</p>
+            <h1 className="font-display text-2xl font-semibold text-ink">
+              Create Secure Deal
+            </h1>
+            <p className="mt-1 text-sm text-ink/55">
+              Fill in the details once — escrowgo handles trust from here.
+            </p>
 
-            <form onSubmit={handleSubmit} className="mt-7 space-y-6 rounded-2xl border border-ink/10 bg-white p-6 shadow-card">
+            <form
+              onSubmit={handleSubmit}
+              className="mt-7 space-y-6 rounded-2xl border border-ink/10 bg-white p-6 shadow-card"
+            >
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-ink/70">Product name</label>
+                <label className="mb-1.5 block text-sm font-medium text-ink/70">
+                  Product name
+                </label>
                 <input
                   required
                   value={form.name}
@@ -128,7 +161,9 @@ export default function CreateDealPage() {
               </div>
 
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-ink/70">Description</label>
+                <label className="mb-1.5 block text-sm font-medium text-ink/70">
+                  Description
+                </label>
                 <textarea
                   required
                   rows={3}
@@ -141,7 +176,9 @@ export default function CreateDealPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-ink/70">Price (NGN)</label>
+                  <label className="mb-1.5 block text-sm font-medium text-ink/70">
+                    Price (NGN)
+                  </label>
                   <input
                     required
                     type="number"
@@ -153,27 +190,38 @@ export default function CreateDealPage() {
                   />
                 </div>
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-ink/70">Estimated delivery (days)</label>
+                  <label className="mb-1.5 block text-sm font-medium text-ink/70">
+                    Estimated delivery (days)
+                  </label>
                   <input
                     required
                     type="number"
                     min="1"
                     max="30"
                     value={form.estimatedDeliveryDays}
-                    onChange={(e) => update("estimatedDeliveryDays", e.target.value)}
+                    onChange={(e) =>
+                      update("estimatedDeliveryDays", e.target.value)
+                    }
                     className="w-full rounded-xl border border-ink/15 px-3.5 py-2.5 text-sm outline-none focus:border-brass"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-ink/70">Product photos</label>
-                <ImageUploader images={form.images} onChange={(imgs) => update("images", imgs)} />
+                <label className="mb-1.5 block text-sm font-medium text-ink/70">
+                  Product photos
+                </label>
+                <ImageUploader
+                  images={form.images}
+                  onChange={(imgs) => update("images", imgs)}
+                />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-ink/70">Your location (seller)</label>
+                  <label className="mb-1.5 block text-sm font-medium text-ink/70">
+                    Your location (seller)
+                  </label>
                   <input
                     required
                     list="locations"
@@ -184,7 +232,9 @@ export default function CreateDealPage() {
                   />
                 </div>
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-ink/70">Buyer's location</label>
+                  <label className="mb-1.5 block text-sm font-medium text-ink/70">
+                    Buyer's location
+                  </label>
                   <input
                     required
                     list="locations"
@@ -195,26 +245,42 @@ export default function CreateDealPage() {
                   />
                 </div>
                 <datalist id="locations">
-                  {COVERED_LOCATIONS.map((c) => <option key={c} value={c} />)}
+                  {COVERED_LOCATIONS.map((c) => (
+                    <option key={c} value={c} />
+                  ))}
                 </datalist>
               </div>
 
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-ink/70">Delivery option</label>
+                <label className="mb-1.5 block text-sm font-medium text-ink/70">
+                  Delivery option
+                </label>
                 <div className="grid grid-cols-2 gap-3">
                   {[
-                    { value: "ESCROWGO", label: "escrowgo Delivery", desc: "We coordinate pickup & drop-off" },
-                    { value: "SELF", label: "Self Delivery", desc: "You handle delivery yourself" },
+                    {
+                      value: "ESCROWGO",
+                      label: "escrowgo Delivery",
+                      desc: "We coordinate pickup & drop-off",
+                    },
+                    {
+                      value: "SELF",
+                      label: "Self Delivery",
+                      desc: "You handle delivery yourself",
+                    },
                   ].map((opt) => (
                     <button
                       type="button"
                       key={opt.value}
                       onClick={() => update("deliveryOption", opt.value)}
                       className={`rounded-xl border-2 p-3.5 text-left transition ${
-                        form.deliveryOption === opt.value ? "border-vault bg-vault/5" : "border-ink/10"
+                        form.deliveryOption === opt.value
+                          ? "border-vault bg-vault/5"
+                          : "border-ink/10"
                       }`}
                     >
-                      <p className="text-sm font-semibold text-ink">{opt.label}</p>
+                      <p className="text-sm font-semibold text-ink">
+                        {opt.label}
+                      </p>
                       <p className="mt-0.5 text-xs text-ink/50">{opt.desc}</p>
                     </button>
                   ))}
@@ -232,37 +298,64 @@ export default function CreateDealPage() {
             </form>
           </div>
 
-          {/* Live coverage preview sidebar */}
           <aside className="lg:sticky lg:top-24 lg:self-start">
             <div className="rounded-2xl border border-ink/10 bg-white p-5">
-              <p className="text-xs font-semibold uppercase tracking-wide text-ink/40">Delivery preview</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-ink/40">
+                Delivery preview
+              </p>
 
               {form.deliveryOption === "SELF" ? (
                 <p className="mt-3 text-sm text-ink/60">
-                  You'll coordinate delivery yourself and mark progress from the deal page.
+                  You'll coordinate delivery yourself and mark progress from the
+                  deal page.
                 </p>
               ) : !form.sellerLocation || !form.buyerLocation ? (
-                <p className="mt-3 text-sm text-ink/40">Enter both locations to check escrowgo Delivery coverage.</p>
+                <p className="mt-3 text-sm text-ink/40">
+                  Enter both locations to check escrowgo Delivery coverage.
+                </p>
               ) : coverage?.available ? (
                 <div className="mt-3 space-y-2 text-sm">
-                  <p className="font-semibold text-mint-dark">✓ Covered route</p>
-                  <p className="text-ink/60">Delivery fee: <span className="font-mono font-semibold text-ink">{formatNaira(coverage.fee)}</span></p>
-                  <p className="text-ink/60">Buffer added: <span className="font-semibold text-ink">{coverage.bufferDays} days</span></p>
-                  <p className="text-ink/60">Total estimate: <span className="font-semibold text-ink">{coverage.totalEstimatedDays} days</span></p>
+                  <p className="font-semibold text-mint-dark">
+                    ✓ Covered route
+                  </p>
+                  <p className="text-ink/60">
+                    Delivery fee:{" "}
+                    <span className="font-mono font-semibold text-ink">
+                      {formatNaira(coverage.fee)}
+                    </span>
+                  </p>
+                  <p className="text-ink/60">
+                    Buffer added:{" "}
+                    <span className="font-semibold text-ink">
+                      {coverage.bufferDays} days
+                    </span>
+                  </p>
+                  <p className="text-ink/60">
+                    Total estimate:{" "}
+                    <span className="font-semibold text-ink">
+                      {coverage.totalEstimatedDays} days
+                    </span>
+                  </p>
                 </div>
               ) : (
                 <div className="mt-3 space-y-2 text-sm">
                   <p className="font-semibold text-seal">✕ Not covered</p>
                   <p className="text-ink/60">{coverage?.reason}</p>
-                  <p className="text-ink/50">escrowgo Delivery will be disabled — this deal will fall back to Self Delivery automatically.</p>
+                  <p className="text-ink/50">
+                    escrowgo Delivery will be disabled — this deal will fall
+                    back to Self Delivery automatically.
+                  </p>
                 </div>
               )}
             </div>
 
             <div className="mt-4 rounded-2xl border border-brass/20 bg-brass/5 p-5">
-              <p className="text-xs font-semibold uppercase tracking-wide text-brass-dark">How escrow works</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-brass-dark">
+                How escrow works
+              </p>
               <p className="mt-2 text-xs leading-relaxed text-ink/55">
-                The buyer's payment is locked until they confirm delivery with a QR scan. You only get paid once that's verified.
+                The buyer's payment is locked until they confirm delivery with a
+                QR scan. You only get paid once that's verified.
               </p>
             </div>
           </aside>

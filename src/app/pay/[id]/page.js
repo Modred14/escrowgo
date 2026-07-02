@@ -31,7 +31,6 @@ export default function PayPage() {
     load();
   }, [id]);
 
-  // Poll while a real (non-mock) Nomba payment is awaiting the webhook.
   useEffect(() => {
     if (!payment || payment.mockMode) return;
     if (payment.payment.status !== "PENDING") return;
@@ -78,7 +77,9 @@ export default function PayPage() {
       <div className="w-full max-w-sm rounded-2xl border border-paper/10 bg-vault-deep p-7 text-paper shadow-seal">
         <div className="flex items-center gap-2.5">
           <SealMark size={30} />
-          <span className="font-display text-base font-semibold">escrowgo checkout</span>
+          <span className="font-display text-base font-semibold">
+            escrowgo checkout
+          </span>
         </div>
         {mockMode && (
           <span className="mt-3 inline-flex rounded-full bg-brass/15 px-2.5 py-1 text-[11px] font-semibold text-brass-light">
@@ -97,7 +98,9 @@ export default function PayPage() {
           </div>
           <div className="flex justify-between text-paper/60">
             <span>Reference</span>
-            <span className="font-mono text-xs text-paper/70">{p.providerRef}</span>
+            <span className="font-mono text-xs text-paper/70">
+              {p.providerRef}
+            </span>
           </div>
           <div className="flex justify-between pt-2 text-base font-semibold">
             <span>Total</span>
@@ -107,8 +110,12 @@ export default function PayPage() {
 
         {isSuccess ? (
           <div className="mt-6 text-center">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-mint/20 text-2xl">✅</div>
-            <p className="mt-3 text-sm font-semibold">Payment secured in escrow</p>
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-mint/20 text-2xl">
+              ✅
+            </div>
+            <p className="mt-3 text-sm font-semibold">
+              Payment secured in escrow
+            </p>
             <button
               onClick={() => router.push(`/deal/${deal.slug}`)}
               className="mt-5 w-full rounded-xl bg-brass py-2.5 text-sm font-semibold text-ink hover:bg-brass-light"
@@ -118,7 +125,9 @@ export default function PayPage() {
           </div>
         ) : isFailed ? (
           <div className="mt-6 text-center">
-            <p className="text-sm font-semibold text-seal-light">Payment failed</p>
+            <p className="text-sm font-semibold text-seal-light">
+              Payment failed
+            </p>
             <button
               onClick={() => router.push(`/deal/${deal.slug}`)}
               className="mt-5 w-full rounded-xl border border-paper/20 py-2.5 text-sm font-semibold hover:border-brass"
@@ -138,7 +147,9 @@ export default function PayPage() {
         ) : (
           <div className="mt-6 flex flex-col items-center gap-3 text-center">
             <Spinner className="h-6 w-6 text-brass" />
-            <p className="text-sm text-paper/60">Waiting for Nomba to confirm your payment…</p>
+            <p className="text-sm text-paper/60">
+              Waiting for Nomba to confirm your payment…
+            </p>
           </div>
         )}
       </div>

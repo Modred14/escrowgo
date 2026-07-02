@@ -65,9 +65,6 @@ function LoginForm() {
 
   return (
     <main className="egv-main bg-home">
-      {/* Ambient vault backdrop */}
-      
-
       <div className="egv-shell">
         <div className="egv-card">
           <div className="egv-header">
