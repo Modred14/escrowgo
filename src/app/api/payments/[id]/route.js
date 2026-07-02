@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { isMockMode } from "@/lib/nomba";
 
-export async function GET(_req, { params }) {
+export async function GET(_req, props) {
+  const params = await props.params;
   const payment = await prisma.payment.findUnique({
     where: { id: params.id },
     include: { deal: { include: { product: true, seller: true } } },

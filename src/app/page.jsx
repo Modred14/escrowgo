@@ -1,13 +1,60 @@
+"use client";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SealMark from "@/components/Sealmark";
 import { X, CheckCircle2 } from "lucide-react";
 import Image from "next/image";
+import RolesSection from "@/components/Roles";
+import { QrCode, ClipboardList, ShieldCheck } from "lucide-react";
+import HowItWorks from "@/components/How";
+import FAQ from "@/components/Faq";
+import { useState } from "react";
+import { ChevronDown, MessageCircleQuestion, ArrowUpRight } from "lucide-react";
 
-export const metadata = {
-  title: "EscrowGo — Secure deals, verified delivery",
-};
+/**
+ * FAQ — "Questions mostly asked"
+ * Drop-in section for a landing page. Requires Tailwind + lucide-react.
+ *
+ * <FAQ /> — no props required.
+ * Pass onContactClick to override the default "Contact us" behavior.
+ */
+
+const FAQS = [
+  {
+    q: "Why use EscrowGo?",
+    a: "Buying and selling secondhand online usually means trusting a stranger with your money or your product first. EscrowGo removes that risk — the buyer's payment is locked safely until the item is delivered and confirmed, so neither side has to go first on faith.",
+  },
+  {
+    q: "Where is my money held during the transaction?",
+    a: "Once a buyer pays, funds move into a secure escrow account managed by EscrowGo — not the seller's pocket. The money only releases to the seller after the buyer receives the item and it's verified with the delivery QR code.",
+  },
+  {
+    q: "What happens if someone tries to scam me?",
+    a: "Because payment is held in escrow until delivery is confirmed, a seller can't take your money and disappear, and a buyer can't claim non-delivery on an item that scanned successfully. If a dispute does come up, our team can review the order timeline, QR scan, and delivery details to resolve it fairly.",
+  },
+  {
+    q: "What if, as a seller, I don't have a courier?",
+    a: 'No problem — when you list a product, you can choose EscrowGo\'s courier network for pickup and delivery, or select "self delivery" and hand off the item yourself. Either way, the QR verification step works the same.',
+  },
+  {
+    q: "How do I receive my payment?",
+    a: 'As soon as the buyer\'s QR code is scanned and the delivery is marked complete, payment releases automatically to your linked payout account — no invoicing, no waiting on the buyer to "confirm receipt" manually.',
+  },
+  {
+    q: "What happens if my product isn't delivered by the specified date?",
+    a: "If a delivery misses its window, the order is automatically flagged and you'll get a notification. You can message the courier directly through the app, and if it still doesn't resolve, our support team steps in — your payment stays protected in escrow the whole time.",
+  },
+  {
+    q: "How do I become a delivery rider?",
+    a: "Head to the Riders tab and apply with a valid ID and proof of a working vehicle or bike. Once approved, you'll start seeing nearby delivery requests you can accept, and get paid per completed, QR-verified drop-off.",
+  },
+  {
+    q: "What makes EscrowGo different from other escrow services?",
+    a: "EscrowGo is built specifically for peer-to-peer product sales, not big-ticket contracts. It bundles escrow, delivery coordination, and QR-verified handoffs into one link a seller can generate in seconds — plus every completed sale is automatically logged into a business record you can track and download.",
+  },
+];
+
 const STATES = [
   { name: "Nigeria", src: "/nig.png" },
   { name: "Ghana", src: "/ghana.svg" },
@@ -80,23 +127,27 @@ const WITH_REASONS = [
 
 const DIFF_FEATURES = [
   {
-    icon: "🔳",
+    icon: QrCode,
     title: "QR-code",
     body: "Every order includes a unique encrypted QR code that's scanned before payment is released, reducing fraud and disputes.",
   },
   {
-    icon: "🕘",
+    icon: ClipboardList,
     title: "Records",
     body: "Every completed transaction is automatically saved, creating a reliable sales history businesses can track, download, and use for bookkeeping, growth, and future opportunities.",
   },
   {
-    icon: "💳",
+    icon: ShieldCheck,
     title: "Secure payment",
     body: "Every payment is securely processed through Nomba, ensuring fast, reliable, and protected transactions from start to finish.",
   },
 ];
 
 export default function LandingPage() {
+  const [openIndex, setOpenIndex] = useState(-1);
+
+  const toggle = (i) => setOpenIndex((prev) => (prev === i ? -1 : i));
+
   return (
     <>
       {" "}
@@ -185,138 +236,14 @@ export default function LandingPage() {
           </div>
         </section>
         <main className="bg-white">
-          {/* HOW IT WORKS */}
-          {/* <section
-            id="how-it-works"
-            className="border-b border-black/10 px-5 py-20"
-          >
-            <div className="mx-auto max-w-6xl">
-              <p className="text-xs font-semibold uppercase tracking-widest text-brass-dark">
-                The escrow ledger
-              </p>
-              <h2 className="mt-2 max-w-lg font-display text-3xl font-semibold text-black">
-                Four steps, in order — nothing released out of sequence.
-              </h2>
-              <div className="ledger-rule mt-12 grid gap-8 md:grid-cols-4 md:gap-6">
-                {STEPS.map((s) => (
-                  <div
-                    key={s.n}
-                    className="group relative rounded-2xl pt-2 transition-transform duration-300 hover:-translate-y-1"
-                  >
-                    <span className="font-display text-4xl font-semibold text-black/10 transition-colors duration-300 group-hover:text-brass/30">
-                      {s.n}
-                    </span>
-                    <h3 className="mt-3 font-display text-base font-semibold text-black">
-                      {s.title}
-                    </h3>
-                    <p className="mt-2 text-sm leading-relaxed text-black/55">
-                      {s.body}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section> */}
-
-          {/* ROLES */}
-          {/* <section className="border-b border-black/10 bg-paper-dim px-5 py-20">
-            <div className="mx-auto max-w-6xl">
-              <h2 className="max-w-lg font-display text-3xl font-semibold text-black">
-                Built for everyone in the handoff.
-              </h2>
-              <div className="mt-10 grid gap-5 md:grid-cols-3">
-                {ROLES.map((r) => (
-                  <div
-                    key={r.label}
-                    className="flex flex-col rounded-2xl border border-black/10 bg-white p-7 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
-                  >
-                    <span className="text-xs font-bold uppercase tracking-wide text-brass-dark">
-                      {r.label}
-                    </span>
-                    <h3 className="mt-3 font-display text-xl font-semibold text-black">
-                      {r.title}
-                    </h3>
-                    <p className="mt-2.5 flex-1 text-sm leading-relaxed text-black/55">
-                      {r.body}
-                    </p>
-                    <Link
-                      href={r.href}
-                      className="group mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-vault transition-colors hover:text-brass-dark"
-                    >
-                      {r.cta}{" "}
-                      <span
-                        aria-hidden
-                        className="transition-transform duration-300 group-hover:translate-x-1"
-                      >
-                        →
-                      </span>
-                    </Link>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section> */}
-
-          {/* ESCROW EXPLAINER */}
-          {/* <section className="px-5 py-20">
-            <div className="mx-auto grid max-w-6xl gap-10 md:grid-cols-2 md:items-start">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-widest text-brass-dark">
-                  Where's my money?
-                </p>
-                <h2 className="mt-2 font-display text-3xl font-semibold text-black">
-                  It sits in escrow. Not with us, not with them.
-                </h2>
-                <p className="mt-4 text-sm leading-relaxed text-black/60">
-                  "Escrow" means a trusted third party holds the money
-                  mid-transaction so neither side has to go first. escrowgo
-                  plays that role: the buyer's payment is marked <em>held</em>,
-                  never paid out, until proof of delivery exists in the form of
-                  a scanned QR code only the buyer can generate.
-                </p>
-                <p className="mt-3 text-sm leading-relaxed text-black/60">
-                  If delivery never happens by the agreed date, escrowgo refunds
-                  the buyer automatically — no support ticket required.
-                </p>
-              </div>
-              <div className="grid gap-4 rounded-2xl border border-black/10 bg-vault p-7 text-paper">
-                {[
-                  [
-                    "Funds secured in escrow",
-                    "Buyer paid. Money is locked, not yet sent to seller.",
-                  ],
-                  ["Out for delivery", "Item is in transit to the buyer."],
-                  [
-                    "Delivered — awaiting confirmation",
-                    "Buyer holds a QR code to confirm receipt.",
-                  ],
-                  [
-                    "Payment released",
-                    "QR scanned and verified. Seller is paid.",
-                  ],
-                ].map(([title, body]) => (
-                  <div
-                    key={title}
-                    className="flex gap-3 border-b border-paper/10 pb-4 transition-colors duration-300 last:border-0 last:pb-0 hover:bg-white/5"
-                  >
-                    <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-brass" />
-                    <div>
-                      <p className="text-sm font-semibold text-paper">
-                        {title}
-                      </p>
-                      <p className="mt-0.5 text-xs text-paper/55">{body}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section> */}
-
           {/* DIFFERENCE / COMPARISON */}
           <section className="border-t border-black/10  px-5 py-20">
             <div className="mx-auto max-w-6xl">
-              <h2 className="animate-fade-in-up [animation-delay:60ms] mx-auto mt-2 max-w-xl text-balance text-center font-display text-3xl font-semibold text-black md:text-4xl">
-                How&apos;s EscrowGo different?
+              <p className="animate-fade-in-up mx-auto w-full flex justify-center [animation-delay:40ms] text-xs font-semibold uppercase tracking-widest text-ink/40">
+                Why EscrowGo?
+              </p>
+              <h2 className="animate-fade-in-up [animation-delay:60ms] mx-auto mt-2 max-w-xl text-balance text-center font-display text-3xl font-semibold text-brass md:text-4xl">
+                What makes EscrowGo different
               </h2>
 
               <div className="mt-12 grid gap-6 md:grid-cols-2">
@@ -377,41 +304,196 @@ export default function LandingPage() {
 
               {/* FEATURE CARDS */}
               <div className="mt-6 grid gap-5 sm:grid-cols-2 md:grid-cols-3">
-                {DIFF_FEATURES.map((f, i) => (
-                  <div
-                    key={f.title}
-                    style={{ animationDelay: `${240 + i * 60}ms` }}
-                    className="animate-fade-in-up group flex flex-col rounded-2xl border border-black/10 bg-white p-6 transition-all duration-300 hover:-translate-y-1 hover:border-brass/40 hover:shadow-lg"
-                  >
-                    <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brass/10 text-lg transition-transform duration-300 group-hover:scale-110">
-                      {f.icon}
-                    </span>
-                    <h4 className="mt-4 font-display text-base font-semibold uppercase tracking-wide text-black">
-                      {f.title}
-                    </h4>
-                    <p className="mt-2 flex-1 text-sm leading-relaxed text-black/95">
-                      {f.body}
-                    </p>
-                    <Link
-                      href="/marketplace"
-                      className="group/link mt-4 inline-flex w-fit items-center gap-1.5 text-sm font-semibold text-brass-dark transition-colors hover:text-brass"
+                {DIFF_FEATURES.map((f, i) => {
+                  const Icon = f.icon;
+                  return (
+                    <div
+                      key={f.title}
+                      style={{ animationDelay: `${240 + i * 60}ms` }}
+                      className="animate-fade-in-up group flex flex-col rounded-2xl border border-black/10 bg-white p-6 transition-all duration-300 hover:-translate-y-1 hover:border-brass/40 hover:shadow-lg"
                     >
-                      Browse marketplace
-                      <span
-                        aria-hidden
-                        className="transition-transform duration-300 group-hover/link:translate-x-1"
-                      >
-                        →
+                      <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brass/10 text-lg transition-transform duration-300 group-hover:scale-110">
+                        <Icon className="h-5 w-5 text-brass-dark" />
                       </span>
-                    </Link>
-                  </div>
-                ))}
+                      <h4 className="mt-4 font-display text-base font-semibold uppercase tracking-wide text-black">
+                        {f.title}
+                      </h4>
+                      <p className="mt-2 flex-1 text-sm leading-relaxed text-black/95">
+                        {f.body}
+                      </p>
+                      <Link
+                        href="/marketplace"
+                        className="group/link mt-4 inline-flex w-fit items-center gap-1.5 text-sm font-semibold text-brass-dark transition-colors hover:text-brass"
+                      >
+                        Browse marketplace
+                        <span
+                          aria-hidden
+                          className="transition-transform duration-300 group-hover/link:translate-x-1"
+                        >
+                          →
+                        </span>
+                      </Link>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </section>
+          <section className=" px-5 py-20">
+            <div className="mx-auto max-w-6xl">
+              <p className="animate-fade-in-up mx-auto w-full flex justify-center [animation-delay:40ms] text-xs font-semibold uppercase tracking-widest text-ink/40">
+                WHO NEEDS ESCROWGO?
+              </p>
+              <h2 className="animate-fade-in-up [animation-delay:60ms] mx-auto mt-2 max-w-xl text-balance text-center font-display text-3xl font-semibold text-brass md:text-4xl">
+                One platform , Multilple uses
+              </h2>
+
+              <RolesSection />
+            </div>
+          </section>
+
+          <HowItWorks />
+              <section className="relative w-full bg-[#FFFBEF] px-4 py-16 sm:px-8 sm:py-20 lg:py-24">
+            <style>{`
+        @keyframes faqRise {
+          from { opacity: 0; transform: translateY(14px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        .faq-item {
+          animation: faqRise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+        .faq-panel {
+          display: grid;
+          grid-template-rows: 0fr;
+          transition: grid-template-rows 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .faq-panel.is-open {
+          grid-template-rows: 1fr;
+        }
+        .faq-panel > div {
+          overflow: hidden;
+          min-height: 0;
+        }
+      `}</style>
+ 
+            {/* Ambient background accents — clipped in their own layer so it doesn't break position:sticky on the content below */}
+            <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+              <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-amber-200/30 blur-3xl" />
+              <div className="absolute -bottom-24 -left-16 h-80 w-80 rounded-full bg-orange-100/40 blur-3xl" />
+            </div>
+ 
+            <div className="relative mx-auto max-w-6xl">
+              <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,340px)_1fr] lg:gap-16 lg:items-start">
+                {/* Left column */}
+                <div className="text-center lg:sticky lg:top-24 lg:h-fit lg:text-left">
+                  <p className="text-xs font-semibold uppercase tracking-[0.25em] text-stone-500">
+                    FAQs
+                  </p>
+                  <h2 className="mt-3 font-serif text-3xl font-semibold tracking-tight text-stone-900 sm:text-4xl">
+                    <span className="relative inline-block">
+                      Questions mostly asked
+                      <svg
+                        aria-hidden
+                        viewBox="0 0 200 10"
+                        preserveAspectRatio="none"
+                        className="absolute -bottom-1.5 left-0 h-2.5 w-full text-amber-400"
+                      >
+                        <path
+                          d="M2 7 C 40 2, 160 2, 198 7"
+                          stroke="currentColor"
+                          strokeWidth="3"
+                          fill="none"
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                    </span>
+                  </h2>
+ 
+                  <p className="mx-auto mt-5 max-w-xs text-sm leading-relaxed text-stone-500 sm:text-base lg:mx-0">
+                    Everything you need to know about EscrowGo, and how it
+                    works.
+                  </p>
+ 
+                  <Link
+                    href="/contact"
+                    className="group mx-auto mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-amber-600 underline decoration-amber-300 decoration-2 underline-offset-4 transition-colors hover:text-amber-700 lg:mx-0"
+                  >
+                    Still have questions? Contact us
+                    <ArrowUpRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                  </Link>
+ 
+                  {/* <div className="mx-auto mt-8 hidden max-w-xs items-start gap-3 rounded-2xl border border-amber-200 bg-white/70 p-4 text-left backdrop-blur-sm sm:flex lg:mx-0">
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-600">
+                      <MessageCircleQuestion
+                        className="h-5 w-5"
+                        strokeWidth={2}
+                      />
+                    </span>
+                    <p className="text-xs leading-relaxed text-stone-500">
+                      Can't find your answer here? Our support team typically
+                      replies within a few hours.
+                    </p>
+                  </div> */}
+                </div>
+ 
+                {/* Right column — accordion */}
+                <div className="flex flex-col gap-4">
+                  {FAQS.map((item, i) => {
+                    const isOpen = openIndex === i;
+                    return (
+                      <div
+                        key={item.q}
+                        style={{ animationDelay: `${i * 60}ms` }}
+                        className={`faq-item overflow-hidden rounded-2xl border bg-white/80 backdrop-blur-sm transition-all duration-300 ${
+                          isOpen
+                            ? "border-amber-300 shadow-md shadow-amber-100"
+                            : "border-stone-200 hover:border-amber-200 hover:shadow-sm"
+                        }`}
+                      >
+                        <button
+                          onClick={() => toggle(i)}
+                          aria-expanded={isOpen}
+                          className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left sm:px-6 sm:py-5"
+                        >
+                          <span
+                            className={`text-[15px] font-semibold transition-colors duration-300 sm:text-base ${
+                              isOpen ? "text-amber-700" : "text-stone-800"
+                            }`}
+                          >
+                            {item.q}
+                          </span>
+                          <span
+                            className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md transition-all duration-300 ${
+                              isOpen
+                                ? "rotate-180 bg-amber-400 text-white"
+                                : "bg-stone-100 text-amber-500"
+                            }`}
+                          >
+                            <ChevronDown
+                              className="h-4 w-4"
+                              strokeWidth={2.5}
+                            />
+                          </span>
+                        </button>
+ 
+                        <div className={`faq-panel ${isOpen ? "is-open" : ""}`}>
+                          <div>
+                            <p className="px-5 pb-5 text-sm leading-relaxed text-stone-600 sm:px-6 sm:pb-6 sm:text-[15px]">
+                              {item.a}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </section>
+
           {/* POWERED BY NOMBA */}
           {/* POWERED BY NOMBA */}
-          <section className="relative overflow-hidden border-t border-black/10 px-5 py-24 text-center">
+          <section className="relative overflow-hidden px-5 py-24 text-center">
             {/* ambient cream gradient backdrop */}
             <div
               aria-hidden

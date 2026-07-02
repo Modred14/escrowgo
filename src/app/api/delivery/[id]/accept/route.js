@@ -4,7 +4,8 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { notify } from "@/lib/notifications";
 
-export async function POST(_req, { params }) {
+export async function POST(_req, props) {
+  const params = await props.params;
   const session = await getServerSession(authOptions);
   if (!session?.user || session.user.role !== "DELIVERY_AGENT") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
