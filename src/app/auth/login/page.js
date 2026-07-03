@@ -531,6 +531,12 @@ function Styles() {
       .egv-submit:active {
         transform: translateY(0) scale(0.98);
       }
+          .egv-submit:disabled {
+        background: #8f6b07;
+        color: #faf6ee;
+        transform: translateY(-1px);
+        box-shadow: 0 10px 15px -10px rgba(14, 59, 57, 0.6);
+      }
       .egv-submit:disabled {
         opacity: 0.6;
         cursor: not-allowed;

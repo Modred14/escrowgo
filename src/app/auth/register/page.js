@@ -71,6 +71,70 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [errors, setErrors] = useState({});
+
+  const passwordRequirements = [
+    { label: "At least 8 characters", test: (value) => value.length >= 8 },
+    { label: "Uppercase letter", test: (value) => /[A-Z]/.test(value) },
+    { label: "Lowercase letter", test: (value) => /[a-z]/.test(value) },
+    { label: "Number", test: (value) => /[0-9]/.test(value) },
+    {
+      label: "Special character",
+      test: (value) => /[!@#$%^&*(),.?":{}|<>]/.test(value),
+    },
+  ];
+
+  const passwordStrength = useMemo(
+    () =>
+      passwordRequirements.filter((rule) => rule.test(form.password)).length,
+    [form.password],
+  );
+
+  function validatePassword(value) {
+    if (!value) return "Password is required.";
+    if (value.length < 8) return "Password must be at least 8 characters.";
+    if (!/[A-Z]/.test(value)) return "Use at least one uppercase letter.";
+    if (!/[a-z]/.test(value)) return "Use at least one lowercase letter.";
+    if (!/[0-9]/.test(value)) return "Use at least one number.";
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(value))
+      return "Use at least one special character.";
+    return "";
+  }
+
+  function getValidationErrors(values) {
+    const nextErrors = {};
+    if (!values.name.trim()) nextErrors.name = "Full name is required.";
+    if (!values.email.trim()) {
+      nextErrors.email = "Email is required.";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) {
+      nextErrors.email = "Enter a valid email address.";
+    }
+    if (!values.phoneNumber.trim()) {
+      nextErrors.phoneNumber = "Phone number is required.";
+    } else if (!/^\d{6,15}$/.test(values.phoneNumber.trim())) {
+      nextErrors.phoneNumber = "Enter a valid phone number.";
+    }
+    if (!values.country) nextErrors.country = "Country is required.";
+    if (!values.city) nextErrors.city = "City is required.";
+
+    const pwError = validatePassword(values.password);
+    if (pwError) nextErrors.password = pwError;
+    if (!values.confirmPassword) {
+      nextErrors.confirmPassword = "Confirm your password.";
+    } else if (values.password !== values.confirmPassword) {
+      nextErrors.confirmPassword = "Passwords must match.";
+    }
+    if (!values.agreedToTerms) {
+      nextErrors.agreedToTerms = "You must agree to the Terms and Conditions.";
+    }
+    return nextErrors;
+  }
+
+  const isFormValid = useMemo(
+    () => Object.keys(getValidationErrors(form)).length === 0,
+    [form],
+  );
+
   function updateField(key, value) {
     setForm((f) => {
       const next = { ...f, [key]: value };
@@ -90,17 +154,32 @@ export default function RegisterPage() {
       }
       return next;
     });
+    setErrors((prev) => {
+      const next = { ...prev, [key]: undefined };
+      if (key === "password") next.confirmPassword = undefined;
+      if (key === "confirmPassword") next.password = undefined;
+      return next;
+    });
+  }
+
+  function handleFieldBlur(key, value) {
+    const nextErrors = getValidationErrors({ ...form, [key]: value });
+    setErrors((prev) => ({
+      ...prev,
+      [key]: nextErrors[key],
+      ...(key === "password"
+        ? { confirmPassword: nextErrors.confirmPassword }
+        : {}),
+      ...(key === "confirmPassword" ? { password: nextErrors.password } : {}),
+    }));
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
 
-    if (form.password !== form.confirmPassword) {
-      toast.error("Passwords do not match.");
-      return;
-    }
-    if (!form.agreedToTerms) {
-      toast.error("Please agree to the Terms and Conditions to continue.");
+    const validationErrors = getValidationErrors(form);
+    if (Object.keys(validationErrors).length) {
+      setErrors(validationErrors);
       return;
     }
 
@@ -128,7 +207,7 @@ export default function RegisterPage() {
       });
       if (signinRes?.error) throw new Error(signinRes.error);
 
-      toast.success("Account created. Welcome to escrowgo!");
+      toast.success("Account created. Welcome to EscrowGo!");
       router.push("/dashboard");
       router.refresh();
     } catch (err) {
@@ -162,7 +241,9 @@ export default function RegisterPage() {
               required
               value={form.name}
               onChange={(v) => updateField("name", v)}
+              onBlur={(e) => handleFieldBlur("name", e.target.value)}
               placeholder="Ada Obi"
+              error={errors.name}
             />
             <Field
               index={1}
@@ -172,7 +253,9 @@ export default function RegisterPage() {
               required
               value={form.email}
               onChange={(v) => updateField("email", v)}
+              onBlur={(e) => handleFieldBlur("email", e.target.value)}
               placeholder="you@example.com"
+              error={errors.email}
             />
             <div
               className="egv-field egv-field-in"
@@ -201,10 +284,14 @@ export default function RegisterPage() {
                   type="tel"
                   value={form.phoneNumber}
                   onChange={(e) => updateField("phoneNumber", e.target.value)}
+                  onBlur={(e) => handleFieldBlur("phoneNumber", e.target.value)}
                   placeholder="80xxxxxxxx"
                   className="egv-phone-number-inline"
                 />
               </div>
+              {errors.phoneNumber && (
+                <p className="egv-error">{errors.phoneNumber}</p>
+              )}
             </div>
             <SelectField
               index={3}
@@ -213,8 +300,10 @@ export default function RegisterPage() {
               required
               value={form.country}
               onChange={(v) => updateField("country", v)}
+              onBlur={() => handleFieldBlur("country", form.country)}
               placeholder="Select a country"
               options={COUNTRIES}
+              error={errors.country}
             />
 
             <SelectField
@@ -224,11 +313,13 @@ export default function RegisterPage() {
               required
               value={form.city}
               onChange={(v) => updateField("city", v)}
+              onBlur={() => handleFieldBlur("city", form.city)}
               placeholder={
                 form.country ? "Select a city" : "Select a country first"
               }
               options={cities}
               disabled={!form.country}
+              error={errors.city}
             />
 
             <Field
@@ -237,10 +328,11 @@ export default function RegisterPage() {
               icon={<LockIcon />}
               type={showPassword ? "text" : "password"}
               required
-              minLength={6}
               value={form.password}
               onChange={(v) => updateField("password", v)}
-              placeholder="At least 6 characters"
+              placeholder="At least 8 characters"
+              error={errors.password}
+           
               trailing={
                 <button
                   type="button"
@@ -260,10 +352,31 @@ export default function RegisterPage() {
               icon={<LockIcon />}
               type={showConfirmPassword ? "text" : "password"}
               required
-              minLength={6}
               value={form.confirmPassword}
               onChange={(v) => updateField("confirmPassword", v)}
               placeholder="Re-enter your password"
+              error={errors.confirmPassword}
+                 hint={
+                <div className="egv-password-help">
+                  <p className="egv-password-strength">
+                    Password strength: {passwordStrength}/5
+                  </p>
+                  <ul className="egv-password-rules">
+                    {passwordRequirements.map((rule) => (
+                      <li
+                        key={rule.label}
+                        className={
+                          rule.test(form.password)
+                            ? "egv-password-rule--passed"
+                            : "egv-password-rule"
+                        }
+                      >
+                        {rule.label}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              }
               trailing={
                 <button
                   type="button"
@@ -278,9 +391,7 @@ export default function RegisterPage() {
                 </button>
               }
             />
-            {form.confirmPassword && form.confirmPassword !== form.password && (
-              <p className="egv-error">Passwords don&apos;t match.</p>
-            )}
+           
 
             <label
               className="egv-checkbox-row egv-field-in"
@@ -300,6 +411,9 @@ export default function RegisterPage() {
                 </Link>
               </span>
             </label>
+            {errors.agreedToTerms && (
+              <p className="egv-error">{errors.agreedToTerms}</p>
+            )}
 
             <button
               type="submit"
@@ -349,7 +463,17 @@ export default function RegisterPage() {
   );
 }
 
-function Field({ index, label, icon, trailing, value, onChange, ...rest }) {
+function Field({
+  index,
+  label,
+  icon,
+  trailing,
+  value,
+  onChange,
+  error,
+  hint,
+  ...rest
+}) {
   return (
     <div
       className="egv-field egv-field-in"
@@ -362,10 +486,13 @@ function Field({ index, label, icon, trailing, value, onChange, ...rest }) {
           {...rest}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="egv-input"
+          className=" egv-input"
+          aria-invalid={!!error}
         />
         {trailing}
       </div>
+      {hint &&  <div className="egv-field-hint mt-3">{hint}</div>}
+      {error && <p className="egv-error">{error}</p>}
     </div>
   );
 }
@@ -376,10 +503,12 @@ function SelectField({
   icon,
   value,
   onChange,
+  onBlur,
   placeholder,
   options,
   disabled,
   required,
+  error,
 }) {
   return (
     <div
@@ -392,9 +521,11 @@ function SelectField({
         <select
           value={value}
           onChange={(e) => onChange(e.target.value)}
+          onBlur={onBlur}
           disabled={disabled}
           required={required}
           className="egv-input egv-select"
+          aria-invalid={!!error}
         >
           <option value="" disabled>
             {placeholder}
@@ -409,6 +540,7 @@ function SelectField({
           <ChevronIcon />
         </span>
       </div>
+      {error && <p className="egv-error">{error}</p>}
     </div>
   );
 }
@@ -792,6 +924,78 @@ function Styles() {
         color: #c9a227;
       }
 
+      .egv-password-help {
+        display: grid;
+        gap: 0.75rem;
+        padding: 0.95rem 1rem;
+        border-radius: 1rem;
+        border: 1px solid rgba(201, 162, 39, 0.18);
+        background: rgba(249, 244, 225, 0.9);
+      }
+      .egv-password-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+      }
+      .egv-password-strength {
+        font-size: 0.82rem;
+        color: #1b211f;
+        font-weight: 600;
+        margin: 0;
+      }
+      .egv-password-meter {
+        display: flex;
+        gap: 0.35rem;
+        min-width: 8rem;
+      }
+      .egv-password-meter-bar {
+        flex: 1;
+        height: 0.4rem;
+        border-radius: 999px;
+        background: rgba(27, 33, 31, 0.12);
+        transition: background 200ms ease;
+      }
+      .egv-password-meter-bar--active {
+        background: #c9a227;
+      }
+      .egv-password-rules {
+        display: grid;
+        gap: 0.4rem;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+      .egv-password-rule {
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+        font-size: 0.78rem;
+        color: rgba(27, 33, 31, 0.6);
+      }
+      .egv-password-rule--passed {
+        color: #175450;
+        font-size: 0.78rem;
+        text-decoration: line-through;
+      }
+      .egv-password-rule-icon {
+        width: 1.1rem;
+        height: 1.1rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 999px;
+        border: 1px solid rgba(27, 33, 31, 0.14);
+        color: rgba(27, 33, 31, 0.55);
+        font-size: 0.72rem;
+        flex-shrink: 0;
+      }
+      .egv-password-rule--passed .egv-password-rule-icon {
+        background: rgba(23, 84, 80, 0.12);
+        border-color: rgba(23, 84, 80, 0.25);
+        color: #175450;
+      }
+
       .egv-select {
         appearance: none;
         -webkit-appearance: none;
@@ -875,7 +1079,7 @@ function Styles() {
       }
 
       .egv-error {
-        margin-top: -0.5rem;
+        margin-top: 0;
         font-size: 0.78rem;
         color: #c0392b;
       }
@@ -938,6 +1142,12 @@ function Styles() {
         box-shadow: 0 10px 5px -10px rgba(14, 59, 57, 0.55);
       }
       .egv-submit:hover {
+        background: #8f6b07;
+        color: #faf6ee;
+        transform: translateY(-1px);
+        box-shadow: 0 10px 15px -10px rgba(14, 59, 57, 0.6);
+      }
+       .egv-submit:disabled {
         background: #8f6b07;
         color: #faf6ee;
         transform: translateY(-1px);
