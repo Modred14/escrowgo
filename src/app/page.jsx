@@ -9,7 +9,7 @@ import RolesSection from "@/components/Roles";
 import { QrCode, ClipboardList, ShieldCheck } from "lucide-react";
 import HowItWorks from "@/components/How";
 import FAQ from "@/components/Faq";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Reveal from "@/components/reveal";
 import { ChevronDown, MessageCircleQuestion, ArrowUpRight } from "lucide-react";
 import { useSession } from "next-auth/react";
@@ -143,11 +143,14 @@ export default function LandingPage() {
   const [user, setUser] = useState(null);
 
   const toggle = (i) => setOpenIndex((prev) => (prev === i ? -1 : i));
-  useState(() => {
+
+  useEffect(() => {
     if (status === "authenticated") {
-      setUser(session.user);
+      setUser(session?.user ?? null);
+    } else {
+      setUser(null);
     }
-  }, [status]);
+  }, [session, status]);
   return (
     <>
       {" "}
@@ -174,29 +177,37 @@ export default function LandingPage() {
               </p>
 
               <div className="animate-fade-in-up [animation-delay:240ms] mt-9 flex flex-wrap items-center justify-center gap-3">
-              {user ? (<><Link
-                  href="/dashboard"
-                  className="group inline-flex items-center gap-2 rounded-full bg-brass px-7 py-3.5 text-sm font-semibold hover:text-gray-100 text-black shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#705A2F] hover:shadow-lg"
-                >
-                  Dashboard
-                  <span
-                    aria-hidden
-                    className="transition-transform duration-300 group-hover:translate-x-1"
-                  >
-                    →
-                  </span>
-                </Link></>):(<><Link
-                  href="/auth/login"
-                  className="group inline-flex items-center gap-2 rounded-full bg-brass px-7 py-3.5 text-sm font-semibold hover:text-gray-100 text-black shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#705A2F] hover:shadow-lg"
-                >
-                  Get Started
-                  <span
-                    aria-hidden
-                    className="transition-transform duration-300 group-hover:translate-x-1"
-                  >
-                    →
-                  </span>
-                </Link></>)}  
+                {user ? (
+                  <>
+                    <Link
+                      href="/dashboard"
+                      className="group inline-flex items-center gap-2 rounded-full bg-brass px-7 py-3.5 text-sm font-semibold hover:text-gray-100 text-black shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#705A2F] hover:shadow-lg"
+                    >
+                      Dashboard
+                      <span
+                        aria-hidden
+                        className="transition-transform duration-300 group-hover:translate-x-1"
+                      >
+                        →
+                      </span>
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      href="/auth/login"
+                      className="group inline-flex items-center gap-2 rounded-full bg-brass px-7 py-3.5 text-sm font-semibold hover:text-gray-100 text-black shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#705A2F] hover:shadow-lg"
+                    >
+                      Get Started
+                      <span
+                        aria-hidden
+                        className="transition-transform duration-300 group-hover:translate-x-1"
+                      >
+                        →
+                      </span>
+                    </Link>
+                  </>
+                )}
                 <Link
                   href="#how-it-works"
                   className="rounded-full border border-black/15 bg-white px-7 py-3.5 text-sm font-semibold text-brass-dark transition-all duration-300 hover:-translate-y-0.5 hover:border-brass/40 hover:shadow-md"
