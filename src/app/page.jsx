@@ -13,6 +13,8 @@ import { useState, useEffect } from "react";
 import Reveal from "@/components/reveal";
 import { ChevronDown, MessageCircleQuestion, ArrowUpRight } from "lucide-react";
 import { useSession } from "next-auth/react";
+import Revealright from "@/components/revealfright";
+import RevealLeft from "@/components/revealfrleft";
 
 const FAQS = [
   {
@@ -261,7 +263,7 @@ export default function LandingPage() {
         </Reveal>
         <main className="bg-white">
           <Reveal>
-            <section className="border-t border-black/10  px-5 py-20">
+            <section className="border-t border-black/10 overflow-x-hidden px-5 py-20">
               <div className="mx-auto max-w-6xl">
                 <p className="animate-fade-in-up mx-auto w-full flex justify-center [animation-delay:40ms] text-xs font-semibold uppercase tracking-widest text-ink/40">
                   Why EscrowGo?
@@ -271,96 +273,85 @@ export default function LandingPage() {
                 </h2>
 
                 <div className="mt-12 grid gap-6 md:grid-cols-2">
-                  <div className="animate-fade-in-up [animation-delay:120ms] rounded-2xl border border-red-200 bg-red-50/60 p-7 transition-all duration-300 hover:-translate-y-1 hover:shadow-md md:p-8">
-                    <span className="inline-flex items-center gap-1.5 rounded-full border border-red-200 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-red-600">
-                      <span aria-hidden>⏱️</span> Without EscrowGo
-                    </span>
-                    <h3 className="mt-5 text-balance font-display text-lg font-semibold leading-snug text-black md:text-xl">
-                      The lack of secure payment verification exposes buyers to
-                      fraud and financial loss.
-                    </h3>
-                    <p className="mt-5 text-xs font-semibold uppercase tracking-wide text-red-500/70">
-                      Reasons
-                    </p>
-                    <ul className="mt-3 space-y-4">
-                      {WITHOUT_REASONS.map((reason) => (
-                        <li
-                          key={reason}
-                          className="flex items-start gap-3 text-sm text-black/90"
-                        >
-                          <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-red-100">
-                            <X size={12} className="text-red-500" />
-                          </div>
-                          <span className="pt-0.5">{reason}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <div className="animate-fade-in-up [animation-delay:180ms] rounded-2xl border border-green-200 bg-green-50/60 p-7 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg md:p-8">
-                    <span className="inline-flex items-center gap-1.5 rounded-full border border-green-200 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-green-600">
-                      <span aria-hidden>✅</span> With EscrowGo
-                    </span>
-                    <h3 className="mt-5 text-balance font-display text-lg font-semibold leading-snug text-black md:text-xl">
-                      EscrowGo is the solution for people trying to buy and sell
-                      safely and securely.
-                    </h3>
-                    <p className="mt-5 text-xs font-semibold uppercase tracking-wide text-green-600/70">
-                      Reasons
-                    </p>
-                    <ul className="mt-3 space-y-4">
-                      {WITH_REASONS.map((reason) => (
-                        <li
-                          key={reason}
-                          className="flex items-start gap-3 text-sm text-black/90"
-                        >
-                          <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-green-100">
-                            <CheckCircle2
-                              size={12}
-                              className="text-green-500"
-                            />
-                          </div>
-                          <span className="pt-0.5">{reason}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-
-                <div className="mt-6 grid gap-5 sm:grid-cols-2 md:grid-cols-3">
-                  {DIFF_FEATURES.map((f, i) => {
-                    const Icon = f.icon;
-                    return (
-                      <div
-                        key={f.title}
-                        style={{ animationDelay: `${240 + i * 60}ms` }}
-                        className="animate-fade-in-up group flex flex-col rounded-2xl border border-black/10 bg-white p-6 transition-all duration-300 hover:-translate-y-1 hover:border-brass/40 hover:shadow-lg"
-                      >
-                        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brass/10 text-lg transition-transform duration-300 group-hover:scale-110">
-                          <Icon className="h-5 w-5 text-brass-dark" />
-                        </span>
-                        <h4 className="mt-4 font-display text-base font-semibold uppercase tracking-wide text-black">
-                          {f.title}
-                        </h4>
-                        <p className="mt-2 flex-1 text-sm leading-relaxed text-black/95">
-                          {f.body}
-                        </p>
-                        <Link
-                          href="/marketplace"
-                          className="group/link mt-4 inline-flex w-fit items-center gap-1.5 text-sm font-semibold text-brass-dark transition-colors hover:text-brass"
-                        >
-                          Browse marketplace
-                          <span
-                            aria-hidden
-                            className="transition-transform duration-300 group-hover/link:translate-x-1"
+                  <Revealright>
+                    <div className="animate-fade-in-up [animation-delay:120ms] rounded-2xl border border-red-200 bg-red-50/60 p-7 transition-all duration-300 hover:-translate-y-1 hover:shadow-md md:p-8">
+                      <span className="inline-flex items-center gap-1.5 rounded-full border border-red-200 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-red-600">
+                        <span aria-hidden>⏱️</span> Without EscrowGo
+                      </span>
+                      <h3 className="mt-5 text-balance font-display text-lg font-semibold leading-snug text-black md:text-xl">
+                        The lack of secure payment verification exposes buyers
+                        to fraud and financial loss.
+                      </h3>
+                      <p className="mt-5 text-xs font-semibold uppercase tracking-wide text-red-500/70">
+                        Reasons
+                      </p>
+                      <ul className="mt-3 space-y-4">
+                        {WITHOUT_REASONS.map((reason) => (
+                          <li
+                            key={reason}
+                            className="flex items-start gap-3 text-sm text-black/90"
                           >
-                            →
-                          </span>
-                        </Link>
-                      </div>
-                    );
-                  })}
+                            <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-red-100">
+                              <X size={12} className="text-red-500" />
+                            </div>
+                            <span className="pt-0.5">{reason}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </Revealright>
+                  <RevealLeft>
+                    <div className="animate-fade-in-up [animation-delay:180ms] rounded-2xl border border-green-200 bg-green-50/60 p-7 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg md:p-8">
+                      <span className="inline-flex items-center gap-1.5 rounded-full border border-green-200 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-green-600">
+                        <span aria-hidden>✅</span> With EscrowGo
+                      </span>
+                      <h3 className="mt-5 text-balance font-display text-lg font-semibold leading-snug text-black md:text-xl">
+                        EscrowGo is the solution for people trying to buy and
+                        sell safely and securely.
+                      </h3>
+                      <p className="mt-5 text-xs font-semibold uppercase tracking-wide text-green-600/70">
+                        Reasons
+                      </p>
+                      <ul className="mt-3 space-y-4">
+                        {WITH_REASONS.map((reason) => (
+                          <li
+                            key={reason}
+                            className="flex items-start gap-3 text-sm text-black/90"
+                          >
+                            <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-green-100">
+                              <CheckCircle2
+                                size={12}
+                                className="text-green-500"
+                              />
+                            </div>
+                            <span className="pt-0.5">{reason}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </RevealLeft>
                 </div>
+<div className="mt-6 grid gap-5 sm:grid-cols-2 md:grid-cols-3">
+  {DIFF_FEATURES.map((f, i) => {
+    const Icon = f.icon;
+    const Reveal = i % 2 === 0 ? RevealLeft : Revealright;
+    return (
+      <Reveal key={f.title} delay={240 + i * 60}>
+        <div className="group flex flex-col rounded-2xl border h-full border-black/10 bg-white p-6 transition-all duration-300 hover:-translate-y-1 hover:border-brass/40 hover:shadow-lg">
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brass/10 text-lg transition-transform duration-300 group-hover:scale-110">
+            <Icon className="h-5 w-5 text-brass-dark" />
+          </span>
+          <h4 className="mt-4 font-display text-base font-semibold uppercase tracking-wide text-black">
+            {f.title}
+          </h4>
+          <p className="mt-2 flex-1 text-sm leading-relaxed text-black/95">
+            {f.body}
+          </p>
+        </div>
+      </Reveal>
+    );
+  })}
+</div>
               </div>
             </section>
           </Reveal>
