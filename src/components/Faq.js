@@ -32,7 +32,7 @@ const FAQS = [
   },
   {
     q: "What happens if my product isn't delivered by the specified date?",
-    a: "If a delivery misses its window, the order is automatically flagged and you'll get a notification. You can message the courier directly through the app, and if it still doesn't resolve, our support team steps in — your payment stays protected in escrow the whole time.",
+    a: "If a delivery misses its window, the order is automatically flagged and you'll get a notification and our support team steps in — your payment stays protected in escrow the whole time.",
   },
   {
     q: "How do I become a delivery rider?",

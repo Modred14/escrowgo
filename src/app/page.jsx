@@ -12,6 +12,7 @@ import FAQ from "@/components/Faq";
 import { useState } from "react";
 import Reveal from "@/components/reveal";
 import { ChevronDown, MessageCircleQuestion, ArrowUpRight } from "lucide-react";
+import { useSession } from "next-auth/react";
 
 const FAQS = [
   {
@@ -36,7 +37,7 @@ const FAQS = [
   },
   {
     q: "What happens if my product isn't delivered by the specified date?",
-    a: "If a delivery misses its window, the order is automatically flagged and you'll get a notification. You can message the courier directly through the app, and if it still doesn't resolve, our support team steps in — your payment stays protected in escrow the whole time.",
+    a: "If a delivery misses its window, the order is automatically flagged and you'll get a notification and our support team steps in — your payment stays protected in escrow the whole time.",
   },
   {
     q: "How do I become a delivery rider?",
@@ -138,9 +139,15 @@ const DIFF_FEATURES = [
 
 export default function LandingPage() {
   const [openIndex, setOpenIndex] = useState(-1);
+  const { data: session, status } = useSession();
+  const [user, setUser] = useState(null);
 
   const toggle = (i) => setOpenIndex((prev) => (prev === i ? -1 : i));
-
+  useState(() => {
+    if (status === "authenticated") {
+      setUser(session.user);
+    }
+  }, [status]);
   return (
     <>
       {" "}
@@ -167,7 +174,18 @@ export default function LandingPage() {
               </p>
 
               <div className="animate-fade-in-up [animation-delay:240ms] mt-9 flex flex-wrap items-center justify-center gap-3">
-                <Link
+              {user ? (<><Link
+                  href="/dashboard"
+                  className="group inline-flex items-center gap-2 rounded-full bg-brass px-7 py-3.5 text-sm font-semibold hover:text-gray-100 text-black shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#705A2F] hover:shadow-lg"
+                >
+                  Dashboard
+                  <span
+                    aria-hidden
+                    className="transition-transform duration-300 group-hover:translate-x-1"
+                  >
+                    →
+                  </span>
+                </Link></>):(<><Link
                   href="/auth/login"
                   className="group inline-flex items-center gap-2 rounded-full bg-brass px-7 py-3.5 text-sm font-semibold hover:text-gray-100 text-black shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#705A2F] hover:shadow-lg"
                 >
@@ -178,7 +196,7 @@ export default function LandingPage() {
                   >
                     →
                   </span>
-                </Link>
+                </Link></>)}  
                 <Link
                   href="#how-it-works"
                   className="rounded-full border border-black/15 bg-white px-7 py-3.5 text-sm font-semibold text-brass-dark transition-all duration-300 hover:-translate-y-0.5 hover:border-brass/40 hover:shadow-md"
@@ -350,7 +368,9 @@ export default function LandingPage() {
             </section>
           </Reveal>
           <Reveal>
-            <HowItWorks />
+            <section id="how-it-works">
+              <HowItWorks />
+            </section>
           </Reveal>
           <Reveal>
             {" "}

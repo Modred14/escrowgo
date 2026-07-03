@@ -159,7 +159,7 @@ export default function Footer() {
               ))}
             </div>
           </div>
-          <diV className="flex flex-row flex-wrap w-full justify-between">
+          <div className="flex flex-row flex-wrap w-full justify-between">
             {/* Link groups */}
             {LINK_GROUPS.map((group, gi) => (
               <div
@@ -184,7 +184,7 @@ export default function Footer() {
                 </ul>
               </div>
             ))}
-          </diV>
+          </div>
         </div>
 
         {/* Divider */}

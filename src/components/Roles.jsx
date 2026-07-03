@@ -157,7 +157,7 @@ const CONTENT = {
       "Generate and share your secure checkout link.",
       "Prepare the order for delivery.",
       "Courier delivers and scans the buyer's QR code.",
-      "Payment is automatically released to your bank account.",
+      "Payment is automatically released to your Escrowgo account.",
     ],
     Phone: SellerPhone,
   },
