@@ -17,17 +17,23 @@ import {
 import { useSession, signOut } from "next-auth/react";
 import { C } from "./hooks";
 
-/* ---------- avatar ---------- */
-
 function Avatar({ src, name, size = 100 }) {
   const initial = name ? name.trim().charAt(0).toUpperCase() : "?";
   return (
     <div
       className="relative overflow-hidden rounded-full ring-4"
-      style={{ width: size, height: size, ["--tw-ring-color"]: "rgba(198,156,63,0.35)" }}
+      style={{
+        width: size,
+        height: size,
+        ["--tw-ring-color"]: "rgba(198,156,63,0.35)",
+      }}
     >
       {src ? (
-        <img src={src} alt={name || "Profile photo"} className="h-full w-full object-cover" />
+        <img
+          src={src}
+          alt={name || "Profile photo"}
+          className="h-full w-full object-cover"
+        />
       ) : (
         <div
           className="flex h-full w-full items-center justify-center font-serif font-semibold"
@@ -44,9 +50,16 @@ function Avatar({ src, name, size = 100 }) {
   );
 }
 
-/* ---------- editable field ---------- */
-
-function EditableField({ icon: Icon, label, value, placeholder, editable = true, locked, onSave, type = "text" }) {
+function EditableField({
+  icon: Icon,
+  label,
+  value,
+  placeholder,
+  editable = true,
+  locked,
+  onSave,
+  type = "text",
+}) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(value || "");
   const inputRef = useRef(null);
@@ -82,7 +95,12 @@ function EditableField({ icon: Icon, label, value, placeholder, editable = true,
 
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5">
-          <p className="text-[10.5px] font-semibold uppercase tracking-[0.1em]" style={{ color: C.textMuted }}>{label}</p>
+          <p
+            className="text-[10.5px] font-semibold uppercase tracking-[0.1em]"
+            style={{ color: C.textMuted }}
+          >
+            {label}
+          </p>
           {locked && <BadgeCheck size={12} style={{ color: C.green }} />}
         </div>
 
@@ -100,14 +118,24 @@ function EditableField({ icon: Icon, label, value, placeholder, editable = true,
             style={{ color: C.ink, borderColor: C.gold }}
           />
         ) : (
-          <p className="mt-0.5 truncate text-[14.5px] font-semibold" style={{ color: C.ink }}>
-            {value || <span className="font-normal italic" style={{ color: C.textMuted }}>{placeholder}</span>}
+          <p
+            className="mt-0.5 truncate text-[14.5px] font-semibold"
+            style={{ color: C.ink }}
+          >
+            {value || (
+              <span
+                className="font-normal italic"
+                style={{ color: C.textMuted }}
+              >
+                {placeholder}
+              </span>
+            )}
           </p>
         )}
       </div>
 
-      {editable && (
-        editing ? (
+      {editable &&
+        (editing ? (
           <div className="flex shrink-0 items-center gap-1.5">
             <button
               onClick={commit}
@@ -128,17 +156,18 @@ function EditableField({ icon: Icon, label, value, placeholder, editable = true,
           <button
             onClick={startEdit}
             className="inline-flex shrink-0 items-center gap-1 rounded-lg border px-2.5 py-1 text-[11px] font-semibold opacity-0 transition-all duration-200 group-hover:opacity-100 sm:opacity-100"
-            style={{ borderColor: "rgba(198,156,63,0.5)", color: C.goldDeep, backgroundColor: "#FFFFFF" }}
+            style={{
+              borderColor: "rgba(198,156,63,0.5)",
+              color: C.goldDeep,
+              backgroundColor: "#FFFFFF",
+            }}
           >
             <Pencil size={11} /> Edit
           </button>
-        )
-      )}
+        ))}
     </div>
   );
 }
-
-/* ---------- log out card ---------- */
 
 function LogoutCard() {
   const [confirming, setConfirming] = useState(false);
@@ -155,15 +184,23 @@ function LogoutCard() {
 
   return (
     <div>
-      <p className="mb-2.5 text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: C.textMuted }}>
+      <p
+        className="mb-2.5 text-[11px] font-semibold uppercase tracking-[0.12em]"
+        style={{ color: C.textMuted }}
+      >
         Log out
       </p>
       <div
         className="flex flex-col gap-4 rounded-xl border p-5 transition-all duration-300 sm:flex-row sm:items-center sm:justify-between"
-        style={{ borderColor: "rgba(214,69,69,0.3)", backgroundColor: C.redSoft }}
+        style={{
+          borderColor: "rgba(214,69,69,0.3)",
+          backgroundColor: C.redSoft,
+        }}
       >
         <div>
-          <p className="text-[14px] font-semibold" style={{ color: C.ink }}>Sign out of this device</p>
+          <p className="text-[14px] font-semibold" style={{ color: C.ink }}>
+            Sign out of this device
+          </p>
           <p className="mt-0.5 text-[12.5px]" style={{ color: C.textMuted }}>
             You'll be signed out of this device. You can sign in again anytime.
           </p>
@@ -172,10 +209,17 @@ function LogoutCard() {
           onClick={handleLogout}
           disabled={loggingOut}
           className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-[13px] font-semibold text-white transition-all duration-300 hover:brightness-95 active:scale-[0.98] disabled:opacity-60"
-          style={{ backgroundColor: C.red, boxShadow: "0 10px 22px -10px rgba(214,69,69,0.6)" }}
+          style={{
+            backgroundColor: C.red,
+            boxShadow: "0 10px 22px -10px rgba(214,69,69,0.6)",
+          }}
         >
           <LogOut size={14} />
-          {loggingOut ? "Signing out…" : confirming ? "Confirm log out" : "Log out"}
+          {loggingOut
+            ? "Signing out…"
+            : confirming
+              ? "Confirm log out"
+              : "Log out"}
         </button>
       </div>
       {confirming && !loggingOut && (
@@ -190,8 +234,6 @@ function LogoutCard() {
     </div>
   );
 }
-
-/* ---------- page ---------- */
 
 export default function ProfileSettingsContent() {
   const { data: session, status } = useSession();
@@ -227,8 +269,14 @@ export default function ProfileSettingsContent() {
 
   return (
     <div>
-      <div className="opacity-0 animate-riseIn" style={{ animationDelay: "60ms" }}>
-        <h1 className="font-serif text-[30px] font-semibold tracking-tight" style={{ color: C.ink }}>
+      <div
+        className="opacity-0 animate-riseIn"
+        style={{ animationDelay: "60ms" }}
+      >
+        <h1
+          className="font-serif text-[30px] font-semibold tracking-tight"
+          style={{ color: C.ink }}
+        >
           Profile & Settings
         </h1>
         <p className="mt-1.5 text-[14px]" style={{ color: C.textMuted }}>
@@ -240,7 +288,8 @@ export default function ProfileSettingsContent() {
         className="mt-7 rounded-2xl border p-6 opacity-0 animate-riseIn transition-all duration-300 sm:p-8"
         style={{
           borderColor: "rgba(198,156,63,0.45)",
-          boxShadow: "0 20px 45px -30px rgba(198,156,63,0.5), 0 1px 2px rgba(22,19,13,0.04)",
+          boxShadow:
+            "0 20px 45px -30px rgba(198,156,63,0.5), 0 1px 2px rgba(22,19,13,0.04)",
           animationDelay: "140ms",
         }}
       >
@@ -259,11 +308,21 @@ export default function ProfileSettingsContent() {
               <button
                 onClick={() => fileInputRef.current?.click()}
                 className="absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center rounded-full transition-all duration-300 hover:brightness-105 active:scale-95"
-                style={{ backgroundColor: C.gold, color: C.ink, boxShadow: "0 6px 14px -6px rgba(198,156,63,0.7)" }}
+                style={{
+                  backgroundColor: C.gold,
+                  color: C.ink,
+                  boxShadow: "0 6px 14px -6px rgba(198,156,63,0.7)",
+                }}
               >
                 <Camera size={14} />
               </button>
-              <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelect} className="hidden" />
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileSelect}
+                className="hidden"
+              />
             </div>
 
             <div className="flex flex-wrap gap-3">
@@ -291,7 +350,10 @@ export default function ProfileSettingsContent() {
         )}
 
         <div className="mt-7 border-t pt-6" style={{ borderColor: C.line }}>
-          <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: C.textMuted }}>
+          <p
+            className="mb-3 text-[11px] font-semibold uppercase tracking-[0.12em]"
+            style={{ color: C.textMuted }}
+          >
             Profile information
           </p>
 
@@ -303,8 +365,20 @@ export default function ProfileSettingsContent() {
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <EditableField icon={User} label="Full name" value={fullName} placeholder="Add your name" onSave={setFullName} />
-              <EditableField icon={MapPin} label="Location" value={location} placeholder="Add your location" onSave={setLocation} />
+              <EditableField
+                icon={User}
+                label="Full name"
+                value={fullName}
+                placeholder="Add your name"
+                onSave={setFullName}
+              />
+              <EditableField
+                icon={MapPin}
+                label="Location"
+                value={location}
+                placeholder="Add your location"
+                onSave={setLocation}
+              />
               <EditableField
                 icon={Mail}
                 label="E-mail"
@@ -313,7 +387,14 @@ export default function ProfileSettingsContent() {
                 editable={false}
                 locked={!!sessionEmail}
               />
-              <EditableField icon={Phone} label="Phone number" value={phone} placeholder="Add your phone number" onSave={setPhone} type="tel" />
+              <EditableField
+                icon={Phone}
+                label="Phone number"
+                value={phone}
+                placeholder="Add your phone number"
+                onSave={setPhone}
+                type="tel"
+              />
             </div>
           )}
         </div>

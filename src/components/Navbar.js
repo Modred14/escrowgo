@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import SealMark from "@/components/Sealmark";
+import { useSession } from "next-auth/react";
+import { C } from "@/app/dashboard/hooks";
 
 const NAV_LINKS = [
   { label: "How it works", href: "#how-it-works" },
@@ -13,13 +15,25 @@ const NAV_LINKS = [
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
+  const { data: session, status } = useSession();
+  const [user, setUser] = useState(null);
 
+  useEffect(() => {
+    setUser(session?.user);
+  }, [session]);
+  const initial = user?.name ? user.name.trim().charAt(0).toUpperCase() : "?";
   return (
     <header className="sticky top-0 z-50 px-5 pt-4 bg-transparent">
       <nav className="mx-auto flex max-w-6xl items-center justify-between rounded-full border border-ink/10 bg-white px-4 py-2.5 shadow-sm transition-shadow duration-300 hover:shadow-md">
         <Link href="/" className="flex items-center gap-2">
           <span className="">
-            <Image src="/logo.png" alt="EscrowGo logo" className="object-contain" width={25} height={24} />
+            <Image
+              src="/logo.png"
+              alt="EscrowGo logo"
+              className="object-contain"
+              width={25}
+              height={24}
+            />
           </span>
           <span className="font-display text-base font-semibold text-ink">
             EscrowGo<span className="text-brass">.</span>
@@ -40,12 +54,18 @@ export default function Navbar() {
         </div>
 
         <div className="hidden md:block">
-          <Link
-            href="/auth/login"
-            className="inline-flex items-center rounded-full bg-brass px-5 py-2.5 text-sm font-semibold text-ink transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#705A2F] hover:text-gray-100 hover:shadow-md"
-          >
-            Get Started
-          </Link>
+          {user ? (
+            <>
+          
+            </>
+          ) : (
+            <Link
+              href="/auth/login"
+              className="inline-flex items-center rounded-full bg-brass px-5 py-2.5 text-sm font-semibold text-ink transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#705A2F] hover:text-gray-100 hover:shadow-md"
+            >
+              Get Started
+            </Link>
+          )}
         </div>
 
         {/* mobile hamburger / close icon */}
