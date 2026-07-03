@@ -67,7 +67,7 @@ export default function Sidebar({ activePage, onNavigate, page, setPage }) {
   return (
     <>
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex h-screen w-[290px] shrink-0 flex-col overflow-hidden px-5 py-7 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-[290px] shrink-0 flex-col overflow-hidden px-5 py-7 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 ${
           mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         }`}
         style={{ backgroundColor: C.ink }}
