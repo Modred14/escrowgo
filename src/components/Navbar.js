@@ -55,9 +55,21 @@ export default function Navbar() {
 
         <div className="hidden md:block">
           {user ? (
-            <>
-          
-            </>
+            <Link href="/dashboard">
+              <p className="flex items-center gap-3">
+                <div
+                  className="flex h-10 w-10 items-center justify-center rounded-full font-serif text-[14px] font-semibold ring-2 ring-offset-2"
+                  style={{
+                    background: `linear-gradient(135deg, ${C.goldSoft}, ${C.gold})`,
+                    color: C.ink,
+                    ["--tw-ring-color"]: "rgba(198,156,63,0.4)",
+                    ["--tw-ring-offset-color"]: C.cream,
+                  }}
+                >
+                  {initial || "··"}
+                </div>
+              </p>
+            </Link>
           ) : (
             <Link
               href="/auth/login"
@@ -113,13 +125,23 @@ export default function Navbar() {
               {l.label}
             </Link>
           ))}
-          <Link
-            href="/auth/login"
-            onClick={() => setOpen(false)}
-            className="mt-2 inline-flex items-center justify-center rounded-full bg-brass px-5 py-2.5 text-sm font-semibold text-ink transition-colors duration-500 hover:bg-[#705A2F] hover:text-gray-100"
-          >
-            Get Started
-          </Link>
+          {user ? (
+            <Link
+              href="/dashboard"
+              onClick={() => setOpen(false)}
+              className="mt-2 inline-flex items-center justify-center rounded-full bg-brass px-5 py-2.5 text-sm font-semibold text-ink transition-colors duration-500 hover:bg-[#705A2F] hover:text-gray-100"
+            >
+              Dashboard
+            </Link>
+          ) : (
+            <Link
+              href="/auth/login"
+              onClick={() => setOpen(false)}
+              className="mt-2 inline-flex items-center justify-center rounded-full bg-brass px-5 py-2.5 text-sm font-semibold text-ink transition-colors duration-500 hover:bg-[#705A2F] hover:text-gray-100"
+            >
+              Get Started
+            </Link>
+          )}
         </div>
       </div>
     </header>

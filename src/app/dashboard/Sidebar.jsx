@@ -131,13 +131,13 @@ export default function Sidebar({ activePage, onNavigate, page, setPage }) {
             Available
           </p>
           <p
-            className="mt-1.5 font-serif text-[26px] font-semibold tracking-tight"
+            className="mt-1.5 font-serif text-[25px] font-semibold tracking-tight"
             style={{ color: C.cream }}
           >
             {balanceVisible ? formatNaira(balanceCount) : "₦ • • • • • • •"}
           </p>
           <button
-            className="mt-5 w-full rounded-xl py-2.5 text-[13px] font-semibold transition-all duration-300 hover:brightness-110 hover:shadow-lg active:scale-[0.98]"
+            className="mt-3 w-full rounded-xl py-1.5 text-[12px] font-semibold transition-all duration-300 hover:brightness-110 hover:shadow-lg active:scale-[0.98]"
             style={{
               background: `linear-gradient(135deg, ${C.goldSoft}, ${C.gold})`,
               color: C.ink,
@@ -148,7 +148,7 @@ export default function Sidebar({ activePage, onNavigate, page, setPage }) {
           </button>
         </div>
 
-        <nav className="mt-8 flex flex-1 flex-col gap-1">
+        <nav className="mt-5 flex flex-1 flex-col gap-1">
           <p
             className="px-4 pb-2 text-[10.5px] font-semibold uppercase tracking-[0.14em] opacity-0 animate-riseIn"
             style={{ color: "rgba(251,247,239,0.35)", animationDelay: "220ms" }}
