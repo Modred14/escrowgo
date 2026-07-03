@@ -95,7 +95,7 @@ export default function Sidebar({ activePage, onNavigate, page, setPage }) {
         </div>
 
         <div
-          className="shimmer-sweep relative mt-7 overflow-hidden rounded-2xl p-5 opacity-0 animate-riseIn"
+          className="shimmer-sweep relative mt-3 overflow-hidden rounded-2xl p-5 opacity-0 animate-riseIn"
           style={{
             animationDelay: "150ms",
             background: `linear-gradient(155deg, ${C.inkSoft} 0%, ${C.ink} 65%)`,
