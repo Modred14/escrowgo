@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   LayoutDashboard,
   Wallet,
@@ -55,26 +55,46 @@ function NavItem({ icon: Icon, label, active, delay, onClick }) {
   );
 }
 
-export default function Sidebar({ activePage, onNavigate, page, setPage }) {
-  const { data: session, status} = useSession();
+export default function Sidebar({ activePage, onNavigate, page, setPage, open, setOpen }) {
+  const { data: session, status } = useSession();
   const [balanceVisible, setBalanceVisible] = useState(true);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Falls back to local state only if the parent doesn't control open/setOpen,
+  // but AppLayout's hamburger button drives `open`/`setOpen` — this MUST stay in sync with it.
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isOpen = open ?? internalOpen;
+  const setIsOpen = setOpen ?? setInternalOpen;
+
   const balance = 2000000; // shared wallet balance
   const balanceCount = useCountUp(balance, { start: true, duration: 1600 });
   const currentPage = activePage ?? page;
   const handleNavigate = onNavigate ?? setPage;
 
+  // Lock page scroll behind the drawer while it's open on mobile/tablet.
+  useEffect(() => {
+    if (!isOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [isOpen]);
+
   return (
     <>
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-[290px] shrink-0 flex-col overflow-hidden px-5 py-7 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 ${
-          mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+        role="dialog"
+        aria-modal={isOpen}
+        aria-hidden={!isOpen && undefined}
+        className={`fixed inset-y-0 left-0 z-50 flex h-[100dvh] w-[82vw] max-w-[290px] shrink-0 flex-col overflow-y-auto overflow-x-hidden px-4 py-6 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] sm:px-5 sm:py-7 lg:sticky lg:top-0 lg:h-screen lg:w-[290px] lg:max-w-none lg:translate-x-0 ${
+          isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
         style={{ backgroundColor: C.ink }}
       >
         <button
-          onClick={() => setMobileMenuOpen(false)}
+          onClick={() => setIsOpen(false)}
           className="absolute right-4 top-6 flex h-8 w-8 items-center justify-center rounded-lg text-white/50 transition-all duration-300 hover:bg-white/10 hover:text-white lg:hidden"
+          aria-label="Close menu"
         >
           <X size={18} />
         </button>
@@ -83,7 +103,7 @@ export default function Sidebar({ activePage, onNavigate, page, setPage }) {
           className="flex items-center gap-2.5 px-2 opacity-0 animate-riseIn"
           style={{ animationDelay: "50ms" }}
         >
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg font-serif text-base font-bold">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg font-serif text-base font-bold">
             <Image src="/logo.png" alt="EscrowGo" width={24} height={24} />
           </div>
           <span
@@ -95,7 +115,7 @@ export default function Sidebar({ activePage, onNavigate, page, setPage }) {
         </div>
 
         <div
-          className="shimmer-sweep relative mt-3 overflow-hidden rounded-2xl p-5 opacity-0 animate-riseIn"
+          className="shimmer-sweep relative mt-3 shrink-0 overflow-hidden rounded-2xl p-4 opacity-0 animate-riseIn sm:p-5"
           style={{
             animationDelay: "150ms",
             background: `linear-gradient(155deg, ${C.inkSoft} 0%, ${C.ink} 65%)`,
@@ -105,7 +125,7 @@ export default function Sidebar({ activePage, onNavigate, page, setPage }) {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div
-                className="pulse-seal flex h-6 w-6 items-center justify-center rounded-full"
+                className="pulse-seal flex h-6 w-6 shrink-0 items-center justify-center rounded-full"
                 style={{ backgroundColor: "rgba(198,156,63,0.15)" }}
               >
                 <ShieldCheck size={12} style={{ color: C.gold }} />
@@ -119,7 +139,8 @@ export default function Sidebar({ activePage, onNavigate, page, setPage }) {
             </div>
             <button
               onClick={() => setBalanceVisible((v) => !v)}
-              className="text-white/40 transition-colors hover:text-white/80"
+              className="shrink-0 text-white/40 transition-colors hover:text-white/80"
+              aria-label={balanceVisible ? "Hide balance" : "Show balance"}
             >
               {balanceVisible ? <Eye size={15} /> : <EyeOff size={15} />}
             </button>
@@ -131,7 +152,7 @@ export default function Sidebar({ activePage, onNavigate, page, setPage }) {
             Available
           </p>
           <p
-            className="mt-1.5 font-serif text-[25px] font-semibold tracking-tight"
+            className="mt-1.5 truncate font-serif text-[22px] font-semibold tracking-tight sm:text-[25px]"
             style={{ color: C.cream }}
           >
             {balanceVisible ? formatNaira(balanceCount) : "₦ • • • • • • •"}
@@ -164,14 +185,14 @@ export default function Sidebar({ activePage, onNavigate, page, setPage }) {
               delay={260 + i * 50}
               onClick={() => {
                 handleNavigate(item.key);
-                setMobileMenuOpen(false);
+                setIsOpen(false);
               }}
             />
           ))}
         </nav>
 
         <div
-          className="group relative overflow-hidden rounded-2xl p-4 opacity-0 animate-riseIn transition-all duration-300 hover:border-[rgba(198,156,63,0.55)]"
+          className="group relative mt-4 shrink-0 overflow-hidden rounded-2xl p-4 opacity-0 animate-riseIn transition-all duration-300 hover:border-[rgba(198,156,63,0.55)]"
           style={{
             border: "1px solid rgba(198,156,63,0.3)",
             backgroundColor: "rgba(198,156,63,0.06)",
@@ -180,7 +201,7 @@ export default function Sidebar({ activePage, onNavigate, page, setPage }) {
         >
           <div className="flex items-center gap-2">
             <div
-              className="flex h-7 w-7 items-center justify-center rounded-lg"
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg"
               style={{ backgroundColor: "rgba(198,156,63,0.18)" }}
             >
               <Truck size={13} style={{ color: C.gold }} />
@@ -209,20 +230,25 @@ export default function Sidebar({ activePage, onNavigate, page, setPage }) {
         </div>
       </aside>
 
-      {mobileMenuOpen && (
+      {isOpen && (
         <div
-          onClick={() => setMobileMenuOpen(false)}
+          onClick={() => setIsOpen(false)}
           className="animate-fadeIn fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
+          aria-hidden="true"
         />
       )}
 
-      {/* expose trigger for the header to use */}
-      <button
-        onClick={() => setMobileMenuOpen(true)}
-        data-sidebar-trigger
-        className="hidden"
-        aria-hidden
-      />
+      {/* Standalone trigger — only used if this component isn't given open/setOpen by a parent. */}
+      {open === undefined && (
+        <button
+          onClick={() => setIsOpen(true)}
+          className="fixed right-5 top-5 z-30 flex h-10 w-10 items-center justify-center rounded-xl border bg-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 lg:hidden"
+          style={{ borderColor: C.line }}
+          aria-label="Open menu"
+        >
+          <Menu size={18} style={{ color: C.inkFaint }} />
+        </button>
+      )}
     </>
   );
 }
