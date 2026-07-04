@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   ShoppingBag,
   CheckCircle2,
@@ -14,6 +14,73 @@ import { useCountUp, formatNaira, C } from "./hooks";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { QrCode, ScanLine, X } from "lucide-react";
+
+import jsQR from "jsqr";
+
+function useQrScanner(active, onScan) {
+  const videoRef = useRef(null);
+  const streamRef = useRef(null);
+  const rafRef = useRef(null);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (!active) return;
+    let cancelled = false;
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+
+    function tick() {
+      const video = videoRef.current;
+      if (!video || video.readyState !== video.HAVE_ENOUGH_DATA) {
+        rafRef.current = requestAnimationFrame(tick);
+        return;
+      }
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const code = jsQR(imageData.data, imageData.width, imageData.height);
+      if (code) {
+        onScan(code.data);
+        return;
+      }
+      rafRef.current = requestAnimationFrame(tick);
+    }
+
+    async function start() {
+        setError(null);
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: "environment" },
+        });
+        if (cancelled) {
+          stream.getTracks().forEach((t) => t.stop());
+          return;
+        }
+        streamRef.current = stream;
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          await videoRef.current.play();
+          tick();
+        }
+      } catch (err) {
+        setError(err.message || "Camera access failed");
+      }
+    }
+
+    start();
+
+    return () => {
+      cancelled = true;
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((t) => t.stop());
+      }
+    };
+  }, [active, onScan]);
+
+  return { videoRef, error };
+}
 
 function useDashboardData() {
   const [data, setData] = useState({
@@ -118,6 +185,13 @@ export default function DashboardContent({ onNavigate }) {
   const [mounted, setMounted] = useState(false);
   const [qrModalOpen, setQrModalOpen] = useState(false);
 
+ const handleScan = useCallback((scannedValue) => {
+  console.log("Scanned:", scannedValue);
+  setQrModalOpen(false);
+  // call delivery-confirm API
+}, []);
+
+const { videoRef, error: qrError } = useQrScanner(qrModalOpen, handleScan);
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 150);
     return () => clearTimeout(t);
@@ -214,6 +288,12 @@ export default function DashboardContent({ onNavigate }) {
               className="relative mx-auto flex h-64 w-64 items-center justify-center overflow-hidden rounded-2xl"
               style={{ backgroundColor: "#0B1220" }}
             >
+               <video
+    ref={videoRef}
+    className="absolute inset-0 h-full w-full object-cover"
+    muted
+    playsInline
+  />
               <div
                 className="absolute inset-0 opacity-40"
                 style={{
@@ -222,6 +302,7 @@ export default function DashboardContent({ onNavigate }) {
                   backgroundSize: "16px 16px",
                 }}
               />
+
 
               <div className="absolute inset-6">
                 <span
@@ -254,6 +335,11 @@ export default function DashboardContent({ onNavigate }) {
                 className="h-10 w-10 opacity-20"
                 style={{ color: C.gold }}
               />
+               {qrError && (
+    <p className="absolute bottom-2 px-4 text-center text-[11px] text-red-400">
+      {qrError}
+    </p>
+  )}
             </div>
 
             <p

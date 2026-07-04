@@ -19,6 +19,7 @@
     "country-state-city": "^3.2.1",
     "date-fns": "^3.6.0",
     "html5-qrcode": "^2.3.8",
+    "jsqr": "^1.4.0",
     "lucide-react": "^1.23.0",
     "next": "16.2.10",
     "next-auth": "^4.24.7",
