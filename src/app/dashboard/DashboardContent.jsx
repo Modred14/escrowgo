@@ -187,7 +187,7 @@ export default function DashboardContent({ onNavigate }) {
 
  const handleScan = useCallback((scannedValue) => {
   console.log("Scanned:", scannedValue);
-  setQrModalOpen(false);
+
   // call delivery-confirm API
 }, []);
 
@@ -294,14 +294,7 @@ const { videoRef, error: qrError } = useQrScanner(qrModalOpen, handleScan);
     muted
     playsInline
   />
-              <div
-                className="absolute inset-0 opacity-40"
-                style={{
-                  backgroundImage:
-                    "linear-gradient(#1a2436 1px, transparent 1px), linear-gradient(90deg, #1a2436 1px, transparent 1px)",
-                  backgroundSize: "16px 16px",
-                }}
-              />
+           
 
 
               <div className="absolute inset-6">
