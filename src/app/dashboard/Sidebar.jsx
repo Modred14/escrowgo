@@ -55,11 +55,18 @@ function NavItem({ icon: Icon, label, active, delay, onClick }) {
   );
 }
 
-export default function Sidebar({ activePage, onNavigate, page, setPage, open, setOpen }) {
+export default function Sidebar({
+  activePage,
+  onNavigate,
+  page,
+  setPage,
+  open,
+  setOpen,
+}) {
   const { data: session, status } = useSession();
   const [balanceVisible, setBalanceVisible] = useState(true);
 
-const [internalOpen, setInternalOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
   const isControlled = open !== undefined && setOpen !== undefined;
   const isOpen = isControlled ? open : internalOpen;
   const setIsOpen = isControlled ? setOpen : setInternalOpen;
@@ -69,7 +76,6 @@ const [internalOpen, setInternalOpen] = useState(false);
   const currentPage = activePage ?? page;
   const handleNavigate = onNavigate ?? setPage;
 
-  // Lock page scroll behind the drawer while it's open on mobile/tablet.
   useEffect(() => {
     if (!isOpen) return;
     const prev = document.body.style.overflow;
@@ -90,7 +96,7 @@ const [internalOpen, setInternalOpen] = useState(false);
         }`}
         style={{ backgroundColor: C.ink }}
       >
-       <button
+        <button
           type="button"
           onClick={(e) => {
             e.stopPropagation();
@@ -241,8 +247,7 @@ const [internalOpen, setInternalOpen] = useState(false);
         />
       )}
 
-    
-    {!isControlled && (
+      {!isControlled && (
         <button
           onClick={() => setIsOpen(true)}
           className="fixed right-5 top-5 z-30 flex h-10 w-10 items-center justify-center rounded-xl border bg-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 lg:hidden"

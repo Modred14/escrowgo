@@ -97,7 +97,7 @@ export default function AppLayout() {
       />
 
       <main className="flex-1 px-6 py-7 sm:px-10 lg:px-12">
-        <div className="mb-2 flex justify-end lg:hidden">
+        <div className=" flex justify-end lg:hidden">
           <button
             onClick={() => setMobileMenuOpen(true)}
             className="flex h-10 w-10 items-center justify-center rounded-xl border bg-white transition-all duration-300 hover:-translate-y-0.5"

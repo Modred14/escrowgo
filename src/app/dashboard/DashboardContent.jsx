@@ -173,17 +173,8 @@ export default function DashboardContent({ onNavigate }) {
         </div>
 
         <div className="flex items-center gap-3">
-          <button
-            className="relative flex h-10 w-10 items-center justify-center rounded-xl border bg-white transition-all duration-300 hover:-translate-y-0.5"
-            style={{ borderColor: C.line }}
-          >
-            <Bell size={16} style={{ color: C.inkFaint }} />
-            <span
-              className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full"
-              style={{ backgroundColor: C.gold }}
-            />
-          </button>
-          <div
+       
+          {/* <div
             className="flex h-11 w-11 items-center justify-center rounded-full text-[14px] font-semibold ring-2 ring-offset-2"
             style={{
               background: `linear-gradient(135deg, ${C.goldSoft}, ${C.gold})`,
@@ -193,7 +184,7 @@ export default function DashboardContent({ onNavigate }) {
             }}
           >
             {initials || "··"}
-          </div>
+          </div> */}
         </div>
       </div>
 

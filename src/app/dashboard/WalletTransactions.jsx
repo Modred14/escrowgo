@@ -170,7 +170,7 @@ export default function WalletTransactions() {
 
       {/* Hero balance card */}
       <div
-        className="shimmer-sweep relative mt-7 overflow-hidden rounded-2xl p-7 opacity-0 animate-riseIn"
+        className="shimmer-sweep relative mt-7 overflow-hidden rounded-2xl p-5 opacity-0 animate-riseIn sm:p-7"
         style={{
           animationDelay: "140ms",
           background: `linear-gradient(120deg, #FCEFC7 0%, #F3DA9C 45%, #E8C873 100%)`,
@@ -200,20 +200,20 @@ export default function WalletTransactions() {
               Available balance
             </p>
             <p
-              className="mt-1 font-serif text-[38px] font-semibold tracking-tight"
+              className="mt-1 font-serif text-[30px] font-semibold tracking-tight sm:text-[38px]"
               style={{ color: C.ink }}
             >
               {formatNaira(balanceCount)}
             </p>
-            <div className="mt-5 flex flex-wrap gap-3">
+            <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <button
-                className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-[13px] font-semibold transition-all duration-300 hover:brightness-95 active:scale-[0.98]"
+                className="inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-[13px] font-semibold transition-all duration-300 hover:brightness-95 active:scale-[0.98] sm:w-auto"
                 style={{ backgroundColor: C.ink, color: C.goldSoft }}
               >
                 <ArrowUpFromLine size={14} /> Withdraw money
               </button>
               <button
-                className="inline-flex items-center gap-2 rounded-xl border px-5 py-2.5 text-[13px] font-semibold transition-all duration-300 hover:bg-white/40 active:scale-[0.98]"
+                className="inline-flex items-center justify-center gap-2 rounded-xl border px-5 py-2.5 text-[13px] font-semibold transition-all duration-300 hover:bg-white/40 active:scale-[0.98] sm:w-auto"
                 style={{ borderColor: "rgba(22,19,13,0.2)", color: C.ink }}
               >
                 <ArrowDownToLine size={14} /> Fund wallet
@@ -305,7 +305,7 @@ export default function WalletTransactions() {
             Sales history
           </p>
           <div className="flex items-center gap-3">
-            <div className="relative">
+            <div className="relative flex-1 sm:flex-none">
               <Search
                 size={14}
                 className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2"
@@ -315,12 +315,33 @@ export default function WalletTransactions() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search buyer or product"
-                className="w-[200px] rounded-lg border py-2 pl-8 pr-3 text-[12.5px] outline-none transition-all duration-300 focus:w-[240px]"
+                className="w-full rounded-lg border py-2 pl-8 pr-3 text-[12.5px] outline-none transition-all duration-300 sm:w-[200px] sm:focus:w-[240px]"
                 style={{ borderColor: C.line, color: C.ink }}
               />
             </div>
             <button
-              className="inline-flex items-center gap-1 text-[12.5px] font-semibold transition-all duration-300 hover:gap-1.5"
+              className="inline-flex shrink-0 items-center gap-1 text-[12.5px] font-semibold transition-all duration-300 hover:gap-1.5"
+              style={{ color: C.goldDeep }}
+            >
+              View all <ArrowRight size={12} />
+            </button>
+          </div><div className="flex items-center gap-3">
+            <div className="relative flex-1 sm:flex-none">
+              <Search
+                size={14}
+                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2"
+                style={{ color: C.textMuted }}
+              />
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search buyer or product"
+                className="w-full rounded-lg border py-2 pl-8 pr-3 text-[12.5px] outline-none transition-all duration-300 sm:w-[200px] sm:focus:w-[240px]"
+                style={{ borderColor: C.line, color: C.ink }}
+              />
+            </div>
+            <button
+              className="inline-flex shrink-0 items-center gap-1 text-[12.5px] font-semibold transition-all duration-300 hover:gap-1.5"
               style={{ color: C.goldDeep }}
             >
               View all <ArrowRight size={12} />
