@@ -1,6 +1,7 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import { Menu } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Sidebar from "./Sidebar";
 import DashboardContent from "./DashboardContent";
 import WalletTransactions from "./WalletTransactions";
@@ -8,10 +9,25 @@ import { C } from "./hooks";
 import SecurityContent from "./SecurityContent";
 import ProfileSettingsContent from "./ProfileSettingsContent";
 
-export default function AppLayout() {
-  const [page, setPage] = useState("dashboard");
+const VALID_TABS = ["dashboard", "wallet", "security", "settings"];
+
+function AppLayoutInner() {
+ const router = useRouter();
+  const searchParams = useSearchParams();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  const tabParam = searchParams.get("tab");
+  const page = VALID_TABS.includes(tabParam) ? tabParam : "dashboard";
+
+   React.useEffect(() => {
+    if (!VALID_TABS.includes(tabParam)) {
+      router.replace(`?tab=dashboard`);
+    }
+  }, [tabParam]);
+
+  const setPage = (next) => {
+    router.push(`?tab=${next}`);
+  };
   return (
     <div
       className="flex min-h-screen w-full"
@@ -107,8 +123,7 @@ export default function AppLayout() {
           </button>
         </div>
 
-        {/* Only this swaps — sidebar above never remounts */}
-        <div key={page} className="animate-fadeIn">
+     <div key={page} className="animate-fadeIn">
           {page === "dashboard" && <DashboardContent onNavigate={setPage} />}
           {page === "wallet" && <WalletTransactions />}
           {page === "security" && <SecurityContent />}
@@ -116,5 +131,12 @@ export default function AppLayout() {
         </div>
       </main>
     </div>
+  );
+}
+export default function AppLayout() {
+  return (
+    <Suspense fallback={null}>
+      <AppLayoutInner />
+    </Suspense>
   );
 }
