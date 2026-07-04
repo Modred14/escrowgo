@@ -149,7 +149,7 @@ export default function WalletTransactions() {
   );
 
   return (
-    <div>
+    <div className="max-w-full overflow-x-hidden">
       {/* Header */}
       <div
         className="flex items-start justify-between opacity-0 animate-riseIn"
@@ -290,12 +290,12 @@ export default function WalletTransactions() {
       </div>
 
       {/* Sales history */}
-      <div
+     <div
         className="mt-6 overflow-hidden rounded-2xl border bg-white opacity-0 animate-riseIn"
         style={{ borderColor: C.line, animationDelay: "360ms" }}
       >
         <div
-          className="flex flex-col gap-3 border-b p-5 sm:flex-row sm:items-center sm:justify-between"
+          className="flex min-w-0 flex-col gap-3 border-b p-5 sm:flex-row sm:items-center sm:justify-between"
           style={{ borderColor: C.line }}
         >
           <p
@@ -325,31 +325,42 @@ export default function WalletTransactions() {
             >
               View all <ArrowRight size={12} />
             </button>
-          </div><div className="flex items-center gap-3">
-            <div className="relative flex-1 sm:flex-none">
-              <Search
-                size={14}
-                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2"
-                style={{ color: C.textMuted }}
-              />
-              <input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search buyer or product"
-                className="w-full rounded-lg border py-2 pl-8 pr-3 text-[12.5px] outline-none transition-all duration-300 sm:w-[200px] sm:focus:w-[240px]"
-                style={{ borderColor: C.line, color: C.ink }}
-              />
-            </div>
-            <button
-              className="inline-flex shrink-0 items-center gap-1 text-[12.5px] font-semibold transition-all duration-300 hover:gap-1.5"
-              style={{ color: C.goldDeep }}
-            >
-              View all <ArrowRight size={12} />
-            </button>
           </div>
         </div>
 
-        <div className="overflow-x-auto">
+        {/* Mobile: stacked cards, no horizontal scroll */}
+        <div className="flex flex-col divide-y sm:hidden" style={{ borderColor: C.line }}>
+          {filteredSales.map((row, i) => (
+            <div
+              key={row.id}
+              className="flex items-center justify-between gap-3 p-4 opacity-0 animate-riseIn transition-colors duration-200"
+              style={{ borderColor: C.line, animationDelay: `${420 + i * 60}ms` }}
+            >
+              <div className="min-w-0">
+                <p className="truncate text-[13.5px] font-medium" style={{ color: C.ink }}>
+                  {row.product}
+                </p>
+                <p className="mt-0.5 truncate text-[12px]" style={{ color: C.textMuted }}>
+                  {row.buyer}
+                </p>
+              </div>
+              <div className="flex shrink-0 flex-col items-end gap-1.5">
+                <span className="text-[13px] font-semibold" style={{ color: C.ink }}>
+                  {formatNaira(row.amount)}
+                </span>
+                <StatusBadge status={row.status} />
+              </div>
+            </div>
+          ))}
+          {filteredSales.length === 0 && (
+            <div className="px-5 py-8 text-center text-[13px]" style={{ color: C.textMuted }}>
+              No transactions match "{query}".
+            </div>
+          )}
+        </div>
+
+        {/* Tablet & up: full table */}
+        <div className="hidden overflow-x-auto sm:block">
           <table className="w-full min-w-[640px] border-collapse">
             <thead>
               <tr>
