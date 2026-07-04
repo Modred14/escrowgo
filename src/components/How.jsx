@@ -16,8 +16,8 @@ import {
   User,
   Store,
 } from "lucide-react";
-
-
+import RevealLeft from "./revealfrleft";
+import RevealRight from "./revealfright";
 
 const ROLES = [
   {
@@ -136,7 +136,7 @@ const ACCENTS = {
     gradient: "from-amber-400 to-orange-400",
   },
   emerald: {
-       text: "text-amber-600",
+    text: "text-amber-600",
     textStrong: "text-amber-700",
     bg: "bg-amber-500",
     bgSoft: "bg-amber-50",
@@ -147,7 +147,7 @@ const ACCENTS = {
     gradient: "from-amber-400 to-orange-400",
   },
   indigo: {
-      text: "text-amber-600",
+    text: "text-amber-600",
     textStrong: "text-amber-700",
     bg: "bg-amber-500",
     bgSoft: "bg-amber-50",
@@ -205,7 +205,7 @@ export default function HowItWorks() {
               Delivery
             </span>
           </h2>
-          
+
           <p className="mx-auto mt-3 max-w-md text-sm text-stone-500 sm:text-base">
             One secure flow, three points of view. See how a trade moves from
             first message to money in the bank.
@@ -230,7 +230,9 @@ export default function HowItWorks() {
                   key={r.key}
                   onClick={() => setActiveIndex(i)}
                   className={`relative z-10 flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-colors duration-300 sm:px-6 ${
-                    isActive ? "text-white" : "text-stone-500 hover:text-stone-700"
+                    isActive
+                      ? "text-white"
+                      : "text-stone-500 hover:text-stone-700"
                   }`}
                 >
                   <Icon className="h-4 w-4" strokeWidth={2.25} />
@@ -249,45 +251,48 @@ export default function HowItWorks() {
           {role.steps.map((step, i) => {
             const StepIcon = step.icon;
             const isLast = i === role.steps.length - 1;
+            const Reveal = i % 2 === 0 ? RevealLeft : RevealRight;
             return (
-              <div
+              <Reveal
                 key={`${role.key}-${i}`}
-                style={{ animationDelay: `${i * 80}ms` }}
-                className={`hiw-card group relative rounded-2xl border ${a.border} bg-white/80 p-6 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:${a.glow} sm:p-7 ${
-                  isLast ? "sm:col-span-2" : ""
-                }`}
+                delay={i * 80}
+                className={isLast ? "sm:col-span-2" : ""}
               >
-                <div className="flex items-start justify-between">
-                  <span
-                    className={`flex h-9 w-9 items-center justify-center rounded-lg text-sm font-bold ${a.chip}`}
-                  >
-                    {i + 1}
-                  </span>
-                  <span
-                    className={`flex h-10 w-10 items-center justify-center rounded-full ${a.bgSoft} ${a.text} ${
-                      step.highlight ? "hiw-pulse" : ""
-                    } transition-transform duration-300 group-hover:scale-110`}
-                  >
-                    <StepIcon className="h-5 w-5" strokeWidth={2} />
-                  </span>
-                </div>
-
-                <h3
-                  className={`mt-4 text-xs font-bold uppercase tracking-wider ${a.textStrong}`}
+                <div
+                  className={`hiw-card group relative rounded-2xl border ${a.border} bg-white/80 p-6 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:${a.glow} sm:p-7`}
                 >
-                  {step.title}
-                </h3>
-                <p className="mt-2 text-[15px] leading-relaxed text-stone-600">
-                  {step.text}
-                </p>
+                  <div className="flex items-start justify-between">
+                    <span
+                      className={`flex h-9 w-9 items-center justify-center rounded-lg text-sm font-bold ${a.chip}`}
+                    >
+                      {i + 1}
+                    </span>
+                    <span
+                      className={`flex h-10 w-10 items-center justify-center rounded-full ${a.bgSoft} ${a.text} ${
+                        step.highlight ? "hiw-pulse" : ""
+                      } transition-transform duration-300 group-hover:scale-110`}
+                    >
+                      <StepIcon className="h-5 w-5" strokeWidth={2} />
+                    </span>
+                  </div>
 
-                {!isLast && (
-                  <div
-                    aria-hidden
-                    className={`absolute -bottom-3 left-1/2 hidden h-3 w-px -translate-x-1/2 ${a.bg}/30 sm:block`}
-                  />
-                )}
-              </div>
+                  <h3
+                    className={`mt-4 text-xs font-bold uppercase tracking-wider ${a.textStrong}`}
+                  >
+                    {step.title}
+                  </h3>
+                  <p className="mt-2 text-[15px] leading-relaxed text-stone-600">
+                    {step.text}
+                  </p>
+
+                  {!isLast && (
+                    <div
+                      aria-hidden
+                      className={`absolute -bottom-3 left-1/2 hidden h-3 w-px -translate-x-1/2 ${a.bg}/30 sm:block`}
+                    />
+                  )}
+                </div>
+              </Reveal>
             );
           })}
         </div>

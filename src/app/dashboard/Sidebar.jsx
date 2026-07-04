@@ -59,11 +59,10 @@ export default function Sidebar({ activePage, onNavigate, page, setPage, open, s
   const { data: session, status } = useSession();
   const [balanceVisible, setBalanceVisible] = useState(true);
 
-  // Falls back to local state only if the parent doesn't control open/setOpen,
-  // but AppLayout's hamburger button drives `open`/`setOpen` — this MUST stay in sync with it.
-  const [internalOpen, setInternalOpen] = useState(false);
-  const isOpen = open ?? internalOpen;
-  const setIsOpen = setOpen ?? setInternalOpen;
+const [internalOpen, setInternalOpen] = useState(false);
+  const isControlled = open !== undefined && setOpen !== undefined;
+  const isOpen = isControlled ? open : internalOpen;
+  const setIsOpen = isControlled ? setOpen : setInternalOpen;
 
   const balance = 2000000; // shared wallet balance
   const balanceCount = useCountUp(balance, { start: true, duration: 1600 });
@@ -91,9 +90,13 @@ export default function Sidebar({ activePage, onNavigate, page, setPage, open, s
         }`}
         style={{ backgroundColor: C.ink }}
       >
-        <button
-          onClick={() => setIsOpen(false)}
-          className="absolute right-4 top-6 flex h-8 w-8 items-center justify-center rounded-lg text-white/50 transition-all duration-300 hover:bg-white/10 hover:text-white lg:hidden"
+       <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsOpen(false);
+          }}
+          className="absolute right-4 top-6 z-[60] flex h-8 w-8 items-center justify-center rounded-lg text-white/50 transition-all duration-300 hover:bg-white/10 hover:text-white active:scale-95 lg:hidden"
           aria-label="Close menu"
         >
           <X size={18} />
@@ -238,8 +241,8 @@ export default function Sidebar({ activePage, onNavigate, page, setPage, open, s
         />
       )}
 
-      {/* Standalone trigger — only used if this component isn't given open/setOpen by a parent. */}
-      {open === undefined && (
+    
+    {!isControlled && (
         <button
           onClick={() => setIsOpen(true)}
           className="fixed right-5 top-5 z-30 flex h-10 w-10 items-center justify-center rounded-xl border bg-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 lg:hidden"

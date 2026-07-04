@@ -108,7 +108,7 @@ function StatCard({
         {label}
       </p>
       <p
-        className="mt-1 font-serif text-[26px] font-semibold tracking-tight"
+        className="mt-1  text-[26px] font-semibold tracking-tight"
         style={{ color: C.ink }}
       >
         {prefix}
@@ -160,7 +160,7 @@ export default function DashboardContent({ onNavigate }) {
           ) : (
             <>
               <h1
-                className="font-serif text-[30px] font-semibold tracking-tight"
+                className=" text-[30px] font-semibold tracking-tight"
                 style={{ color: C.ink }}
               >
                 Welcome back{firstName ? `, ${firstName}` : ""}
@@ -184,7 +184,7 @@ export default function DashboardContent({ onNavigate }) {
             />
           </button>
           <div
-            className="flex h-11 w-11 items-center justify-center rounded-full font-serif text-[14px] font-semibold ring-2 ring-offset-2"
+            className="flex h-11 w-11 items-center justify-center rounded-full text-[14px] font-semibold ring-2 ring-offset-2"
             style={{
               background: `linear-gradient(135deg, ${C.goldSoft}, ${C.gold})`,
               color: C.ink,
@@ -320,7 +320,7 @@ export default function DashboardContent({ onNavigate }) {
             </RadialBarChart>
             <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
               <span
-                className="font-serif text-[24px] font-semibold"
+                className=" text-[24px] font-semibold"
                 style={{ color: C.ink }}
               >
                 {completionPct}%

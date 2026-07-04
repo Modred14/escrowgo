@@ -17,7 +17,6 @@ export default function AppLayout() {
       className="flex min-h-screen w-full"
       style={{
         backgroundColor: C.cream,
-        fontFamily: "'Inter', ui-sans-serif, system-ui",
       }}
     >
       <link
@@ -33,8 +32,8 @@ export default function AppLayout() {
         .shimmer-sweep::after { content: ''; position: absolute; top: 0; left: 0; width: 40%; height: 100%; background: linear-gradient(120deg, transparent, rgba(255,255,255,0.16), transparent); animation: shimmerSweep 3.2s ease-in-out infinite; }
         @keyframes pulseRing { 0%, 100% { box-shadow: 0 0 0 0 rgba(198,156,63,0.35); } 50% { box-shadow: 0 0 0 8px rgba(198,156,63,0); } }
         .pulse-seal { animation: pulseRing 2.6s ease-in-out infinite; }
-        .font-serif { font-family: 'Fraunces', ui-serif, Georgia, serif; }
-        .skeleton { background: linear-gradient(90deg, rgba(22,19,13,0.06) 25%, rgba(22,19,13,0.1) 37%, rgba(22,19,13,0.06) 63%); background-size: 400% 100%; animation: skeletonShine 1.4s ease infinite; }
+     .font-serif { font-family: var(--font-bricolage), Arial, Helvetica, sans-serif; }
+       .skeleton { background: linear-gradient(90deg, rgba(22,19,13,0.06) 25%, rgba(22,19,13,0.1) 37%, rgba(22,19,13,0.06) 63%); background-size: 400% 100%; animation: skeletonShine 1.4s ease infinite; }
         @keyframes skeletonShine { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
       `}</style>
       <link
@@ -78,8 +77,7 @@ export default function AppLayout() {
         }
         .cta-plus { animation: ctaPulse 3.4s ease-in-out infinite; }
 
-        .font-serif { font-family: 'Fraunces', ui-serif, Georgia, serif; }
-
+.font-serif { font-family: var(--font-bricolage), Arial, Helvetica, sans-serif; }
         .skeleton {
           background: linear-gradient(90deg, rgba(22,19,13,0.06) 25%, rgba(22,19,13,0.1) 37%, rgba(22,19,13,0.06) 63%);
           background-size: 400% 100%;
