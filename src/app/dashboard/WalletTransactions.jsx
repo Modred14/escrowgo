@@ -329,7 +329,7 @@ export default function WalletTransactions() {
         </div>
 
         {/* Mobile: stacked cards, no horizontal scroll */}
-        <div className="flex flex-col divide-y sm:hidden" style={{ borderColor: C.line }}>
+        <div className="flex flex-col divide-y md:hidden" style={{ borderColor: C.line }}>
           {filteredSales.map((row, i) => (
             <div
               key={row.id}
@@ -360,7 +360,7 @@ export default function WalletTransactions() {
         </div>
 
         {/* Tablet & up: full table */}
-        <div className="hidden overflow-x-auto sm:block">
+        <div className="hidden overflow-x-auto md:block">
           <table className="w-full min-w-[640px] border-collapse">
             <thead>
               <tr>

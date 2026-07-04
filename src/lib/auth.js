@@ -24,13 +24,17 @@ export const authOptions = {
 
         const user = await prisma.user.findUnique({
           where: { email: credentials.email.toLowerCase().trim() },
+          include: { deliveryAgent: true },
         });
 
         if (!user) {
           throw new Error("No account found with that email.");
         }
 
-        const isValid = await bcrypt.compare(credentials.password, user.password);
+        const isValid = await bcrypt.compare(
+          credentials.password,
+          user.password,
+        );
         if (!isValid) {
           throw new Error("Incorrect password.");
         }
@@ -40,6 +44,11 @@ export const authOptions = {
           name: user.name,
           email: user.email,
           role: user.role,
+          phone: user.phone,
+          country: user.country,
+          city: user.city,
+          location: user.deliveryAgent?.location ?? null,
+          vehicleType: user.deliveryAgent?.vehicleType ?? null,
         };
       },
     }),
@@ -49,6 +58,11 @@ export const authOptions = {
       if (user) {
         token.id = user.id;
         token.role = user.role;
+        token.location = user.location;
+        token.phone = user.phone;
+        token.country = user.country;
+        token.city = user.city;
+        token.vehicleType = user.vehicleType;
       }
       return token;
     },
@@ -56,6 +70,11 @@ export const authOptions = {
       if (session?.user) {
         session.user.id = token.id;
         session.user.role = token.role;
+        session.user.location = token.location;
+        session.user.phone = token.phone;
+        session.user.country = token.country;
+        session.user.city = token.city;
+        session.user.vehicleType = token.vehicleType;
       }
       return session;
     },

@@ -13,7 +13,7 @@
     "db:studio": "prisma studio"
   },
   "dependencies": {
-    "@prisma/client": "^5.20.0",
+    "@prisma/adapter-pg": "^7.8.0",
     "bcryptjs": "^2.4.3",
     "clsx": "^2.1.1",
     "country-state-city": "^3.2.1",
@@ -22,6 +22,7 @@
     "lucide-react": "^1.23.0",
     "next": "16.2.10",
     "next-auth": "^4.24.7",
+    "pg": "^8.22.0",
     "qrcode": "^1.5.4",
     "react": "19.2.7",
     "react-dom": "19.2.7",
@@ -33,11 +34,15 @@
   },
   "devDependencies": {
     "@netlify/plugin-nextjs": "^5.7.2",
+    "@prisma/client": "^7.8.0",
     "@tailwindcss/postcss": "^4.3.1",
+    "dotenv": "^17.4.2",
     "eslint": "^9.39.4",
     "eslint-config-next": "^16.2.10",
+    "i": "^0.3.7",
+    "npm": "^11.18.0",
     "postcss": "^8.5.16",
-    "prisma": "^5.20.0"
+    "prisma": "^7.8.0"
   },
   "engines": {
     "node": ">=18.18.0"

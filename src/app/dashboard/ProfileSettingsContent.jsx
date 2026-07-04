@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   ImagePlus,
   X,
@@ -16,7 +16,24 @@ import {
 } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
 import { C } from "./hooks";
+import { City } from "country-state-city";
 
+const COUNTRY_CODES = {
+  Nigeria: "NG",
+  Ghana: "GH",
+  Cameroon: "CM",
+  Togo: "TG",
+  Senegal: "SN",
+};
+const COUNTRIES = Object.keys(COUNTRY_CODES);
+
+function getCitiesForCountry(country) {
+  const code = COUNTRY_CODES[country];
+  if (!code) return [];
+  return City.getCitiesOfCountry(code)
+    .map((c) => c.name)
+    .sort((a, b) => a.localeCompare(b));
+}
 function Avatar({ src, name, size = 100 }) {
   const initial = name ? name.trim().charAt(0).toUpperCase() : "?";
   return (
@@ -58,6 +75,7 @@ function EditableField({
   editable = true,
   locked,
   onSave,
+  onEditClick,
   type = "text",
 }) {
   const [editing, setEditing] = useState(false);
@@ -66,6 +84,10 @@ function EditableField({
 
   const startEdit = () => {
     if (!editable) return;
+    if (onEditClick) {
+      onEditClick();
+      return;
+    }
     setDraft(value || "");
     setEditing(true);
     setTimeout(() => inputRef.current?.focus(), 30);
@@ -168,7 +190,123 @@ function EditableField({
     </div>
   );
 }
+function LocationEditModal({
+  open,
+  onClose,
+  initialCountry,
+  initialCity,
+  onSave,
+}) {
+  const [country, setCountry] = useState(initialCountry || "");
+  const [city, setCity] = useState(initialCity || "");
 
+  useEffect(() => {
+    if (open) {
+      setCountry(initialCountry || "");
+      setCity(initialCity || "");
+    }
+  }, [open, initialCountry, initialCity]);
+
+  const cities = country ? getCitiesForCountry(country) : [];
+
+  if (!open) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ backgroundColor: "rgba(22,19,13,0.45)" }}
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-sm rounded-2xl border bg-white p-6"
+        style={{ borderColor: "rgba(198,156,63,0.45)" }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h3
+          className="font-serif text-[18px] font-semibold"
+          style={{ color: C.ink }}
+        >
+          Update your location
+        </h3>
+
+        <div className="mt-4 flex flex-col gap-4">
+          <div>
+            <label
+              className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.1em]"
+              style={{ color: C.textMuted }}
+            >
+              Country
+            </label>
+            <select
+              value={country}
+              onChange={(e) => {
+                setCountry(e.target.value);
+                setCity("");
+              }}
+              className="w-full rounded-xl border px-3 py-2.5 text-[14px]"
+              style={{ borderColor: C.line, color: C.ink }}
+            >
+              <option value="" disabled>
+                Select a country
+              </option>
+              {COUNTRIES.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label
+              className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.1em]"
+              style={{ color: C.textMuted }}
+            >
+              City
+            </label>
+            <select
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              disabled={!country}
+              className="w-full rounded-xl border px-3 py-2.5 text-[14px] disabled:opacity-50"
+              style={{ borderColor: C.line, color: C.ink }}
+            >
+              <option value="" disabled>
+                {country ? "Select a city" : "Select a country first"}
+              </option>
+              {cities.map((ct) => (
+                <option key={ct} value={ct}>
+                  {ct}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div className="mt-6 flex justify-end gap-2">
+          <button
+            onClick={onClose}
+            className="rounded-xl border px-4 py-2 text-[13px] font-semibold"
+            style={{ borderColor: C.line, color: C.textMuted }}
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => {
+              onSave({ country, city });
+              onClose();
+            }}
+            disabled={!country || !city}
+            className="rounded-xl px-4 py-2 text-[13px] font-semibold disabled:opacity-50"
+            style={{ backgroundColor: C.gold, color: C.ink }}
+          >
+            Save
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 function LogoutCard() {
   const [confirming, setConfirming] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
@@ -242,12 +380,25 @@ export default function ProfileSettingsContent() {
   const sessionName = session?.user?.name || "";
   const sessionEmail = session?.user?.email || "";
   const sessionImage = session?.user?.image || null;
+  const sessionPhone = session?.user?.phone || "";
+  const sessionLocation =
+    session?.user?.city + ", " + session?.user?.country || "";
 
   const [photoOverride, setPhotoOverride] = useState(null);
   const [fullName, setFullName] = useState(sessionName);
-  const [location, setLocation] = useState("");
-  const [phone, setPhone] = useState("");
+  // const [location, setLocation] = useState(sessionLocation);
+  const [phone, setPhone] = useState(sessionPhone);
+  const sessionCity = session?.user?.city || "";
+  const sessionCountry = session?.user?.country || "";
 
+  const [locationCountry, setLocationCountry] = useState(sessionCountry);
+  const [locationCity, setLocationCity] = useState(sessionCity);
+  const [locationModalOpen, setLocationModalOpen] = useState(false);
+
+  const location =
+    locationCity || locationCountry
+      ? [locationCity, locationCountry].filter(Boolean).join(", ")
+      : "";
   const nameInitialized = useRef(false);
   if (!nameInitialized.current && sessionName) {
     nameInitialized.current = true;
@@ -266,9 +417,22 @@ export default function ProfileSettingsContent() {
   }, []);
 
   const isLoading = status === "loading";
+  useEffect(() => {
+    console.log(session?.user);
+  }, [isLoading]);
 
   return (
     <div>
+      <LocationEditModal
+        open={locationModalOpen}
+        onClose={() => setLocationModalOpen(false)}
+        initialCountry={locationCountry}
+        initialCity={locationCity}
+        onSave={({ country, city }) => {
+          setLocationCountry(country);
+          setLocationCity(city);
+        }}
+      />
       <div
         className="opacity-0 animate-riseIn"
         style={{ animationDelay: "60ms" }}
@@ -377,7 +541,7 @@ export default function ProfileSettingsContent() {
                 label="Location"
                 value={location}
                 placeholder="Add your location"
-                onSave={setLocation}
+                onEditClick={() => setLocationModalOpen(true)}
               />
               <EditableField
                 icon={Mail}
@@ -391,9 +555,9 @@ export default function ProfileSettingsContent() {
                 icon={Phone}
                 label="Phone number"
                 value={phone}
-                placeholder="Add your phone number"
-                onSave={setPhone}
-                type="tel"
+                placeholder="No phone number on file"
+                editable={false}
+                locked={!!phone}
               />
             </div>
           )}

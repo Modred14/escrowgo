@@ -60,7 +60,7 @@ export default function RegisterPage() {
   const [form, setForm] = useState({
     name: "",
     email: "",
-    phoneCode: "+234",
+    phoneCode: "",
     phoneNumber: "",
     country: "",
     city: "",
@@ -189,8 +189,8 @@ export default function RegisterPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: form.name,
-          email: form.email,
+          name: form.name.trim(),
+          email: form.email.trim(),
           phone: form.phoneCode + form.phoneNumber,
           country: form.country,
           city: form.city,
@@ -201,7 +201,7 @@ export default function RegisterPage() {
       if (!res.ok) throw new Error(data.error || "Registration failed.");
 
       const signinRes = await signIn("credentials", {
-        email: form.email,
+        email: form.email.trim(),
         password: form.password,
         redirect: false,
       });
@@ -236,7 +236,7 @@ export default function RegisterPage() {
           <form onSubmit={handleSubmit} className="egv-form">
             <Field
               index={0}
-              label="Full name"
+              label="Full name (Surname first)"
               icon={<UserIcon />}
               required
               value={form.name}
@@ -272,13 +272,15 @@ export default function RegisterPage() {
                   className="egv-phone-code-inline"
                   aria-label="Country code"
                 >
+                  <option value="" disabled>
+                    Select
+                  </option>
                   {DIAL_CODES.map((code) => (
                     <option key={code} value={code}>
                       {code}
                     </option>
                   ))}
                 </select>
-
                 <span className="egv-phone-divider" />
                 <input
                   type="tel"
@@ -332,7 +334,6 @@ export default function RegisterPage() {
               onChange={(v) => updateField("password", v)}
               placeholder="At least 8 characters"
               error={errors.password}
-           
               trailing={
                 <button
                   type="button"
@@ -356,7 +357,7 @@ export default function RegisterPage() {
               onChange={(v) => updateField("confirmPassword", v)}
               placeholder="Re-enter your password"
               error={errors.confirmPassword}
-                 hint={
+              hint={
                 <div className="egv-password-help">
                   <p className="egv-password-strength">
                     Password strength: {passwordStrength}/5
@@ -391,7 +392,6 @@ export default function RegisterPage() {
                 </button>
               }
             />
-           
 
             <label
               className="egv-checkbox-row egv-field-in"
@@ -491,7 +491,7 @@ function Field({
         />
         {trailing}
       </div>
-      {hint &&  <div className="egv-field-hint mt-3">{hint}</div>}
+      {hint && <div className="egv-field-hint mt-3">{hint}</div>}
       {error && <p className="egv-error">{error}</p>}
     </div>
   );
@@ -1147,7 +1147,7 @@ function Styles() {
         transform: translateY(-1px);
         box-shadow: 0 10px 15px -10px rgba(14, 59, 57, 0.6);
       }
-       .egv-submit:disabled {
+      .egv-submit:disabled {
         background: #8f6b07;
         color: #faf6ee;
         transform: translateY(-1px);
