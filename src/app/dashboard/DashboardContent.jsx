@@ -12,49 +12,43 @@ import {
 import { RadialBarChart, RadialBar, PolarAngleAxis } from "recharts";
 import { useCountUp, formatNaira, C } from "./hooks";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
+import { QrCode, ScanLine, X } from "lucide-react";
 
 function useDashboardData() {
-  const [data] = useState({
-    totalOrders: 100,
-    completedOrders: 92,
-    pendingOrders: 8,
-    totalSales: 2000000,
-    ordersTrend: 6.1,
-    salesTrend: 12.4,
-    recentOrders: [
-      {
-        id: "ORD-2298",
-        item: "iPhone 15 Pro Max",
-        buyer: "T. Balogun",
-        amount: 850000,
-        status: "Completed",
-      },
-      {
-        id: "ORD-2297",
-        item: "MacBook Air M3",
-        buyer: "C. Okoye",
-        amount: 1120000,
-        status: "Completed",
-      },
-      {
-        id: "ORD-2296",
-        item: "PlayStation 5",
-        buyer: "A. Suleiman",
-        amount: 420000,
-        status: "Pending",
-      },
-      {
-        id: "ORD-2295",
-        item: "Canon EOS R6",
-        buyer: "F. Danjuma",
-        amount: 980000,
-        status: "Completed",
-      },
-    ],
+  const [data, setData] = useState({
+    totalOrders: 0,
+    completedOrders: 0,
+    pendingOrders: 0,
+    totalSales: 0,
+    ordersTrend: 0,
+    salesTrend: 0,
+    recentOrders: [],
   });
-  return data;
-}
+  const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      try {
+        const res = await fetch("/api/dashboard");
+        if (!res.ok) throw new Error("Failed to load dashboard data");
+        const json = await res.json();
+        if (!cancelled) setData(json);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return { data, loading };
+}
 function StatCard({
   icon: Icon,
   label,
@@ -120,32 +114,170 @@ function StatCard({
 
 export default function DashboardContent({ onNavigate }) {
   const { data: session, status } = useSession();
-  const data = useDashboardData();
+  const { data, loading: dataLoading } = useDashboardData();
   const [mounted, setMounted] = useState(false);
+  const [qrModalOpen, setQrModalOpen] = useState(false);
 
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 150);
     return () => clearTimeout(t);
   }, []);
 
-  const completionPct = Math.round(
-    (data.completedOrders / data.totalOrders) * 100,
-  );
+  const completionPct =
+    data.totalOrders > 0
+      ? Math.round((data.completedOrders / data.totalOrders) * 100)
+      : 0;
   const radialData = [
     { name: "completed", value: completionPct, fill: C.gold },
   ];
 
   const firstName = session?.user?.name ? session.user.name.split(" ")[0] : "";
-  const initials = session?.user?.name
-    ? session.user.name
-        .split(" ")
-        .map((s) => s[0])
-        .slice(0, 2)
-        .join("")
-    : "";
 
   return (
     <div>
+      <style jsx>{`
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.25s ease-out forwards;
+        }
+
+        @keyframes scaleIn {
+          from {
+            opacity: 0;
+            transform: scale(0.92) translateY(8px);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+          }
+        }
+        .animate-scaleIn {
+          animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes scanLine {
+          0% {
+            top: 24px;
+            opacity: 0;
+          }
+          10% {
+            opacity: 1;
+          }
+          90% {
+            opacity: 1;
+          }
+          100% {
+            top: calc(100% - 24px);
+            opacity: 0;
+          }
+        }
+        .animate-scanLine {
+          animation: scanLine 2.2s ease-in-out infinite;
+        }
+      `}</style>
+      {qrModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm animate-fadeIn"
+          onClick={() => setQrModalOpen(false)}
+        >
+          <div
+            className="relative w-full max-w-sm overflow-hidden rounded-3xl bg-white p-6 shadow-2xl animate-scaleIn"
+            style={{ border: `1px solid ${C.line}` }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setQrModalOpen(false)}
+              className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full transition-colors duration-200 hover:bg-slate-100"
+              style={{ color: C.textMuted }}
+            >
+              <X className="h-4 w-4" />
+            </button>
+
+            <div className="flex flex-col items-center gap-1 pb-5 pt-1 text-center">
+              <p className="text-[15px] font-semibold" style={{ color: C.ink }}>
+                Scan QR Code
+              </p>
+              <p className="text-[12px]" style={{ color: C.textMuted }}>
+                Point the camera at the delivery QR code
+              </p>
+            </div>
+
+            <div
+              className="relative mx-auto flex h-64 w-64 items-center justify-center overflow-hidden rounded-2xl"
+              style={{ backgroundColor: "#0B1220" }}
+            >
+              <div
+                className="absolute inset-0 opacity-40"
+                style={{
+                  backgroundImage:
+                    "linear-gradient(#1a2436 1px, transparent 1px), linear-gradient(90deg, #1a2436 1px, transparent 1px)",
+                  backgroundSize: "16px 16px",
+                }}
+              />
+
+              <div className="absolute inset-6">
+                <span
+                  className="absolute left-0 top-0 h-8 w-8 rounded-tl-lg border-l-2 border-t-2"
+                  style={{ borderColor: C.gold }}
+                />
+                <span
+                  className="absolute right-0 top-0 h-8 w-8 rounded-tr-lg border-r-2 border-t-2"
+                  style={{ borderColor: C.gold }}
+                />
+                <span
+                  className="absolute bottom-0 left-0 h-8 w-8 rounded-bl-lg border-b-2 border-l-2"
+                  style={{ borderColor: C.gold }}
+                />
+                <span
+                  className="absolute bottom-0 right-0 h-8 w-8 rounded-br-lg border-b-2 border-r-2"
+                  style={{ borderColor: C.gold }}
+                />
+              </div>
+
+              <span
+                className="absolute left-6 right-6 h-0.5 animate-scanLine"
+                style={{
+                  backgroundColor: C.gold,
+                  boxShadow: `0 0 12px 2px ${C.gold}`,
+                }}
+              />
+
+              <ScanLine
+                className="h-10 w-10 opacity-20"
+                style={{ color: C.gold }}
+              />
+            </div>
+
+            <p
+              className="mt-5 flex items-center justify-center gap-1.5 text-[11px]"
+              style={{ color: C.textMuted }}
+            >
+              <span
+                className="h-1.5 w-1.5 animate-pulse rounded-full"
+                style={{ backgroundColor: C.gold }}
+              />
+              Waiting for QR code…
+            </p>
+
+            <button
+              type="button"
+              onClick={() => setQrModalOpen(false)}
+              className="mt-5 w-full rounded-xl py-2.5 text-[13px] font-semibold text-white transition-transform duration-200 hover:scale-[1.01] active:scale-[0.99]"
+              style={{ backgroundColor: C.gold }}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
       {/* Header */}
       <div
         className="flex items-start justify-between opacity-0 animate-riseIn"
@@ -173,7 +305,6 @@ export default function DashboardContent({ onNavigate }) {
         </div>
 
         <div className="flex items-center gap-3">
-       
           {/* <div
             className="flex h-11 w-11 items-center justify-center rounded-full text-[14px] font-semibold ring-2 ring-offset-2"
             style={{
@@ -230,7 +361,9 @@ export default function DashboardContent({ onNavigate }) {
       {/* Content grid */}
       <div className="mt-6 grid grid-cols-1 gap-5 xl:grid-cols-3">
         {/* Create order panel */}
-        <button
+
+        <Link
+          href="/create-deal"
           className="group relative flex min-h-[300px] flex-col items-center justify-center gap-3 overflow-hidden rounded-2xl border-2 border-dashed opacity-0 animate-riseIn transition-all duration-300 hover:border-solid xl:col-span-2"
           style={{
             borderColor: "rgba(198,156,63,0.4)",
@@ -264,93 +397,48 @@ export default function DashboardContent({ onNavigate }) {
               to start a new escrow-protected order
             </p>
           </div>
-        </button>
-
-        {/* Completion radial + recent orders */}
-        <div
-          className="flex flex-col gap-5 rounded-2xl border bg-white p-5 opacity-0 animate-riseIn"
+        </Link>
+        <button
+          type="button"
+          onClick={() => setQrModalOpen(true)}
+          className="group relative flex flex-col items-center justify-center gap-4 overflow-hidden rounded-2xl border bg-white p-6 opacity-0 animate-riseIn transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"
           style={{ borderColor: C.line, animationDelay: "410ms" }}
         >
-          <div className="flex items-center justify-between">
-            <p className="text-[13px] font-semibold" style={{ color: C.ink }}>
-              Order Completion
-            </p>
-            <span className="text-[11px]" style={{ color: C.textMuted }}>
-              This month
-            </span>
-          </div>
-
-          <div className="relative mx-auto h-[150px] w-[150px]">
-            <RadialBarChart
-              width={150}
-              height={150}
-              cx="50%"
-              cy="50%"
-              innerRadius="72%"
-              outerRadius="100%"
-              barSize={10}
-              data={mounted ? radialData : [{ ...radialData[0], value: 0 }]}
-              startAngle={90}
-              endAngle={-270}
-            >
-              <PolarAngleAxis
-                type="number"
-                domain={[0, 100]}
-                angleAxisId={0}
-                tick={false}
-              />
-              <RadialBar
-                background={{ fill: "#F1EBDA" }}
-                dataKey="value"
-                cornerRadius={20}
-                fill={C.gold}
-                isAnimationActive
-                animationDuration={1500}
-                animationEasing="ease-out"
-              />
-            </RadialBarChart>
-            <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-              <span
-                className=" text-[24px] font-semibold"
-                style={{ color: C.ink }}
-              >
-                {completionPct}%
-              </span>
-              <span className="text-[10px]" style={{ color: C.textMuted }}>
-                completed
-              </span>
-            </div>
-          </div>
+          <div
+            className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+            style={{
+              background: `radial-gradient(circle at 50% 0%, ${C.gold}1a, transparent 70%)`,
+            }}
+          />
 
           <div
-            className="flex flex-col gap-2 border-t pt-3"
-            style={{ borderColor: C.line }}
+            className="relative flex h-16 w-16 items-center justify-center rounded-2xl transition-transform duration-300 group-hover:scale-105 group-hover:rotate-3"
+            style={{ backgroundColor: "#FBF0DE" }}
           >
-            {data.recentOrders.slice(0, 3).map((o) => (
-              <div
-                key={o.id}
-                className="flex items-center justify-between text-[12px]"
-              >
-                <div className="flex flex-col">
-                  <span className="font-medium" style={{ color: C.ink }}>
-                    {o.item}
-                  </span>
-                  <span style={{ color: C.textMuted }}>{o.buyer}</span>
-                </div>
-                <span
-                  className="rounded-full px-2 py-0.5 text-[10px] font-semibold"
-                  style={{
-                    backgroundColor:
-                      o.status === "Completed" ? C.greenSoft : "#FBF0DE",
-                    color: o.status === "Completed" ? C.green : C.goldDeep,
-                  }}
-                >
-                  {o.status}
-                </span>
-              </div>
-            ))}
+            <QrCode className="h-7 w-7" style={{ color: C.goldDeep }} />
+            <span
+              className="absolute inset-0 rounded-2xl border-2 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+              style={{ borderColor: C.gold }}
+            />
           </div>
-        </div>
+
+          <div className="relative flex flex-col items-center gap-1 text-center">
+            <p className="text-[13px] font-semibold" style={{ color: C.ink }}>
+              Scan Delivery QR Code
+            </p>
+            <p className="text-[11px]" style={{ color: C.textMuted }}>
+              Confirm pickup or delivery in seconds
+            </p>
+          </div>
+
+          <span
+            className="relative flex items-center gap-1.5 rounded-full px-4 py-1.5 text-[11px] font-semibold text-white transition-transform duration-300 group-hover:scale-[1.03]"
+            style={{ backgroundColor: C.gold }}
+          >
+            <ScanLine className="h-3.5 w-3.5" />
+            Open scanner
+          </span>
+        </button>
       </div>
     </div>
   );

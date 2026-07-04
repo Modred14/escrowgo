@@ -22,51 +22,36 @@ const STATUS_STYLES = {
 };
 
 function useWalletData() {
-  const [data] = useState({
-    moneyIn: 2000000,
-    totalWithdrawn: 1500000,
-    totalTransactions: 100,
-    sales: [
-      {
-        id: "TX-5510",
-        buyer: "John Micheal",
-        product: "Samsung S21 Ultra",
-        amount: 250000,
-        status: "Delivered",
-      },
-      {
-        id: "TX-5509",
-        buyer: "Kunle Ogundiran",
-        product: "Hoodie",
-        amount: 50000,
-        status: "Undelivered",
-      },
-      {
-        id: "TX-5508",
-        buyer: "Joshua Kimmich",
-        product: "Samsung S23 Ultra",
-        amount: 450000,
-        status: "Delivered",
-      },
-      {
-        id: "TX-5507",
-        buyer: "Kelvin Henry",
-        product: "iPhone 14 Pro",
-        amount: 750000,
-        status: "Undelivered",
-      },
-      {
-        id: "TX-5506",
-        buyer: "Faiq Modred",
-        product: "iPhone 14 Pro",
-        amount: 750000,
-        status: "In Dispute",
-      },
-    ],
+  const [data, setData] = useState({
+    moneyIn: 0,
+    totalWithdrawn: 0,
+    totalTransactions: 0,
+    sales: [],
   });
-  return data;
-}
+  const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      try {
+        const res = await fetch("/api/wallet/transactions");
+        if (!res.ok) throw new Error("Failed to load wallet data");
+        const json = await res.json();
+        if (!cancelled) setData(json);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return { ...data, loading };
+}
 function MiniStat({
   icon: Icon,
   label,
@@ -130,7 +115,8 @@ function StatusBadge({ status }) {
 }
 
 export default function WalletTransactions() {
-  const { moneyIn, totalWithdrawn, totalTransactions, sales } = useWalletData();
+  const { moneyIn, totalWithdrawn, totalTransactions, sales, loading } =
+    useWalletData();
   const [mounted, setMounted] = useState(false);
   const [query, setQuery] = useState("");
 
@@ -139,9 +125,11 @@ export default function WalletTransactions() {
     return () => clearTimeout(t);
   }, []);
 
-  const balance = 2000000;
-  const balanceCount = useCountUp(balance, { start: mounted, duration: 1600 });
-
+  const balance = moneyIn - totalWithdrawn;
+  const balanceCount = useCountUp(balance, {
+    start: mounted && !loading,
+    duration: 1600,
+  });
   const filteredSales = sales.filter(
     (s) =>
       s.buyer.toLowerCase().includes(query.toLowerCase()) ||
@@ -290,7 +278,7 @@ export default function WalletTransactions() {
       </div>
 
       {/* Sales history */}
-     <div
+      <div
         className="mt-6 overflow-hidden rounded-2xl border bg-white opacity-0 animate-riseIn"
         style={{ borderColor: C.line, animationDelay: "360ms" }}
       >
@@ -329,23 +317,38 @@ export default function WalletTransactions() {
         </div>
 
         {/* Mobile: stacked cards, no horizontal scroll */}
-        <div className="flex flex-col divide-y md:hidden" style={{ borderColor: C.line }}>
+        <div
+          className="flex flex-col divide-y md:hidden"
+          style={{ borderColor: C.line }}
+        >
           {filteredSales.map((row, i) => (
             <div
               key={row.id}
               className="flex items-center justify-between gap-3 p-4 opacity-0 animate-riseIn transition-colors duration-200"
-              style={{ borderColor: C.line, animationDelay: `${420 + i * 60}ms` }}
+              style={{
+                borderColor: C.line,
+                animationDelay: `${420 + i * 60}ms`,
+              }}
             >
               <div className="min-w-0">
-                <p className="truncate text-[13.5px] font-medium" style={{ color: C.ink }}>
+                <p
+                  className="truncate text-[13.5px] font-medium"
+                  style={{ color: C.ink }}
+                >
                   {row.product}
                 </p>
-                <p className="mt-0.5 truncate text-[12px]" style={{ color: C.textMuted }}>
+                <p
+                  className="mt-0.5 truncate text-[12px]"
+                  style={{ color: C.textMuted }}
+                >
                   {row.buyer}
                 </p>
               </div>
               <div className="flex shrink-0 flex-col items-end gap-1.5">
-                <span className="text-[13px] font-semibold" style={{ color: C.ink }}>
+                <span
+                  className="text-[13px] font-semibold"
+                  style={{ color: C.ink }}
+                >
                   {formatNaira(row.amount)}
                 </span>
                 <StatusBadge status={row.status} />
@@ -353,8 +356,12 @@ export default function WalletTransactions() {
             </div>
           ))}
           {filteredSales.length === 0 && (
-            <div className="px-5 py-8 text-center text-[13px]" style={{ color: C.textMuted }}>
-              No transactions match "{query}".
+            <div
+              className="px-5 py-8 text-center text-[13px]"
+              style={{ color: C.textMuted }}
+            >
+              No transactions match
+              {query && ` "${query}"`}.
             </div>
           )}
         </div>
@@ -420,7 +427,8 @@ export default function WalletTransactions() {
                     className="px-5 py-8 text-center text-[13px]"
                     style={{ color: C.textMuted }}
                   >
-                    No transactions match "{query}".
+                    No transactions match
+                    {query && ` "${query}"`}.
                   </td>
                 </tr>
               )}

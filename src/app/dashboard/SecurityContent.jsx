@@ -170,6 +170,7 @@ function PinDigitGroup({ label, values, setValues, refsArr, disabled, error }) {
 function PinCard({ onSuccess }) {
   const [pinSet, setPinSet] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(null);
+  const [statusLoading, setStatusLoading] = useState(true);
   const [newPin, setNewPin] = useState(["", "", "", ""]);
   const [confirmPin, setConfirmPin] = useState(["", "", "", ""]);
   const [status, setStatus] = useState("idle");
@@ -177,9 +178,34 @@ function PinCard({ onSuccess }) {
   const newRefs = useRef([]);
   const confirmRefs = useRef([]);
 
+  useEffect(() => {
+    let cancelled = false;
+    async function loadStatus() {
+      try {
+        const res = await fetch("/api/security/status");
+        if (!res.ok) throw new Error("Failed to load security status");
+        const json = await res.json();
+        if (!cancelled) {
+          setPinSet(json.pinSet);
+          setLastUpdated(
+            json.pinUpdatedAt ? new Date(json.pinUpdatedAt) : null,
+          );
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        if (!cancelled) setStatusLoading(false);
+      }
+    }
+    loadStatus();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const complete = newPin.every(Boolean) && confirmPin.every(Boolean);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setError(null);
     if (!complete) {
       setError("Enter all 4 digits in both fields.");
@@ -190,15 +216,33 @@ function PinCard({ onSuccess }) {
       return;
     }
     setStatus("saving");
-    setTimeout(() => {
+    try {
+      const res = await fetch("/api/security/pin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          newPin: newPin.join(""),
+          confirmPin: confirmPin.join(""),
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        setError(json.error || "Something went wrong.");
+        setStatus("idle");
+        return;
+      }
       setStatus("saved");
       setPinSet(true);
-      setLastUpdated(new Date());
+      setLastUpdated(new Date(json.pinUpdatedAt));
       setNewPin(["", "", "", ""]);
       setConfirmPin(["", "", "", ""]);
       onSuccess("Transaction PIN updated");
       setTimeout(() => setStatus("idle"), 1200);
-    }, 900);
+    } catch (err) {
+      console.error(err);
+      setError("Something went wrong. Try again.");
+      setStatus("idle");
+    }
   };
 
   return (
@@ -220,9 +264,11 @@ function PinCard({ onSuccess }) {
       />
 
       <p className="mt-4 text-[12px]" style={{ color: C.textMuted }}>
-        {pinSet
-          ? `Last updated ${formatWhen(lastUpdated)}`
-          : "You'll need this PIN to authorize every withdrawal."}
+        {statusLoading
+          ? "Loading…"
+          : pinSet
+            ? `Last updated ${formatWhen(lastUpdated)}`
+            : "You'll need this PIN to authorize every withdrawal."}
       </p>
 
       <div className="mt-5 grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-10">
@@ -336,13 +382,33 @@ function PasswordCard({ onSuccess }) {
   const [status, setStatus] = useState("idle");
   const [error, setError] = useState(null);
 
+  useEffect(() => {
+    let cancelled = false;
+    async function loadStatus() {
+      try {
+        const res = await fetch("/api/security/status");
+        if (!res.ok) throw new Error("Failed to load security status");
+        const json = await res.json();
+        if (!cancelled && json.passwordUpdatedAt) {
+          setLastChanged(new Date(json.passwordUpdatedAt));
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+    loadStatus();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const strength = scorePassword(values.next);
   const complete = values.current && values.next && values.confirm;
 
   const setField = (key) => (v) => setValues((s) => ({ ...s, [key]: v }));
   const toggleShow = (key) => () => setShow((s) => ({ ...s, [key]: !s[key] }));
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setError(null);
     if (!complete) {
       setError("Fill in all three fields.");
@@ -357,13 +423,28 @@ function PasswordCard({ onSuccess }) {
       return;
     }
     setStatus("saving");
-    setTimeout(() => {
+    try {
+      const res = await fetch("/api/security/password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        setError(json.error || "Something went wrong.");
+        setStatus("idle");
+        return;
+      }
       setStatus("saved");
-      setLastChanged(new Date());
+      setLastChanged(new Date(json.passwordUpdatedAt));
       setValues({ current: "", next: "", confirm: "" });
       onSuccess("Password updated");
       setTimeout(() => setStatus("idle"), 1200);
-    }, 900);
+    } catch (err) {
+      console.error(err);
+      setError("Something went wrong. Try again.");
+      setStatus("idle");
+    }
   };
 
   return (

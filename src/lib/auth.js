@@ -47,6 +47,7 @@ export const authOptions = {
           phone: user.phone,
           country: user.country,
           city: user.city,
+          image: user.image,
           location: user.deliveryAgent?.location ?? null,
           vehicleType: user.deliveryAgent?.vehicleType ?? null,
         };
@@ -54,7 +55,7 @@ export const authOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id;
         token.role = user.role;
@@ -62,8 +63,16 @@ export const authOptions = {
         token.phone = user.phone;
         token.country = user.country;
         token.city = user.city;
+        token.image = user.image;
         token.vehicleType = user.vehicleType;
       }
+      if (trigger === "update" && session) {
+        if (session.name !== undefined) token.name = session.name;
+        if (session.country !== undefined) token.country = session.country;
+        if (session.city !== undefined) token.city = session.city;
+        if (session.image !== undefined) token.image = session.image;
+      }
+
       return token;
     },
     async session({ session, token }) {
@@ -74,7 +83,9 @@ export const authOptions = {
         session.user.phone = token.phone;
         session.user.country = token.country;
         session.user.city = token.city;
+        session.user.image = token.image;
         session.user.vehicleType = token.vehicleType;
+        if (token.name) session.user.name = token.name;
       }
       return session;
     },

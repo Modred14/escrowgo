@@ -2,8 +2,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 
-
-
 export function useCountUp(
   target,
   { duration = 1400, start = false, decimals = 0 } = {},
@@ -29,7 +27,7 @@ export function useCountUp(
 }
 
 export function formatNaira(n) {
-  return "₦" + Math.round(n).toLocaleString("en-NG");
+  return "₦" + " " + Math.round(n).toLocaleString("en-NG");
 }
 
 export const C = {

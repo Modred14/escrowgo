@@ -65,17 +65,40 @@ export default function Sidebar({
 }) {
   const { data: session, status } = useSession();
   const [balanceVisible, setBalanceVisible] = useState(true);
+  const [balance, setBalance] = useState(0);
+  const [balanceLoading, setBalanceLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadBalance() {
+      try {
+        const res = await fetch("/api/wallet/summary");
+        if (!res.ok) throw new Error("Failed to load wallet balance");
+        const json = await res.json();
+        if (!cancelled) setBalance(json.balance);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        if (!cancelled) setBalanceLoading(false);
+      }
+    }
+    loadBalance();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const [internalOpen, setInternalOpen] = useState(false);
   const isControlled = open !== undefined && setOpen !== undefined;
   const isOpen = isControlled ? open : internalOpen;
   const setIsOpen = isControlled ? setOpen : setInternalOpen;
 
-  const balance = 2000000; // shared wallet balance
-  const balanceCount = useCountUp(balance, { start: true, duration: 1600 });
+  const balanceCount = useCountUp(balance, {
+    start: !balanceLoading,
+    duration: 1600,
+  });
   const currentPage = activePage ?? page;
   const handleNavigate = onNavigate ?? setPage;
-
   useEffect(() => {
     if (!isOpen) return;
     const prev = document.body.style.overflow;
@@ -164,7 +187,11 @@ export default function Sidebar({
             className="mt-1.5 truncate font-serif text-[22px] font-semibold tracking-tight sm:text-[25px]"
             style={{ color: C.cream }}
           >
-            {balanceVisible ? formatNaira(balanceCount) : "₦ • • • • • • •"}
+            {balanceLoading
+              ? "···"
+              : balanceVisible
+                ? formatNaira(balanceCount)
+                : "₦ • • • • • • •"}{" "}
           </p>
           <button
             className="mt-3 w-full rounded-xl py-1.5 text-[12px] font-semibold transition-all duration-300 hover:brightness-110 hover:shadow-lg active:scale-[0.98]"

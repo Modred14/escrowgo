@@ -374,19 +374,17 @@ function LogoutCard() {
 }
 
 export default function ProfileSettingsContent() {
-  const { data: session, status } = useSession();
+  const { data: session, status, update } = useSession();
   const fileInputRef = useRef(null);
+  const [saveError, setSaveError] = useState(null);
 
   const sessionName = session?.user?.name || "";
   const sessionEmail = session?.user?.email || "";
   const sessionImage = session?.user?.image || null;
   const sessionPhone = session?.user?.phone || "";
-  const sessionLocation =
-    session?.user?.city + ", " + session?.user?.country || "";
 
   const [photoOverride, setPhotoOverride] = useState(null);
   const [fullName, setFullName] = useState(sessionName);
-  // const [location, setLocation] = useState(sessionLocation);
   const [phone, setPhone] = useState(sessionPhone);
   const sessionCity = session?.user?.city || "";
   const sessionCountry = session?.user?.country || "";
@@ -407,19 +405,53 @@ export default function ProfileSettingsContent() {
 
   const activePhoto = photoOverride ?? sessionImage;
 
-  const handleFileSelect = useCallback((e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => setPhotoOverride(reader.result);
-    reader.readAsDataURL(file);
-    e.target.value = "";
-  }, []);
+  const persist = useCallback(
+    async (patch) => {
+      setSaveError(null);
+      try {
+        const res = await fetch("/api/profile", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(patch),
+        });
+        const json = await res.json();
+        if (!res.ok) {
+          setSaveError(json.error || "Failed to save changes.");
+          return false;
+        }
+        await update(patch);
+        return true;
+      } catch (err) {
+        console.error(err);
+        setSaveError("Failed to save changes.");
+        return false;
+      }
+    },
+    [update],
+  );
+
+  const handleFileSelect = useCallback(
+    (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const dataUrl = reader.result;
+        setPhotoOverride(dataUrl);
+        await persist({ image: dataUrl });
+      };
+      reader.readAsDataURL(file);
+      e.target.value = "";
+    },
+    [persist],
+  );
+
+  const handleRemovePhoto = useCallback(async () => {
+    setPhotoOverride("");
+    await persist({ image: null });
+  }, [persist]);
 
   const isLoading = status === "loading";
-  useEffect(() => {
-    console.log(session?.user);
-  }, [isLoading]);
 
   return (
     <div>
@@ -428,9 +460,10 @@ export default function ProfileSettingsContent() {
         onClose={() => setLocationModalOpen(false)}
         initialCountry={locationCountry}
         initialCity={locationCity}
-        onSave={({ country, city }) => {
+        onSave={async ({ country, city }) => {
           setLocationCountry(country);
           setLocationCity(city);
+          await persist({ country, city });
         }}
       />
       <div
@@ -502,7 +535,7 @@ export default function ProfileSettingsContent() {
                 <ImagePlus size={14} /> Upload photo
               </button>
               <button
-                onClick={() => setPhotoOverride("")}
+                onClick={handleRemovePhoto}
                 disabled={!activePhoto}
                 className="inline-flex items-center gap-2 rounded-xl border px-5 py-2.5 text-[13px] font-semibold transition-all duration-300 hover:bg-[#FBEAEA] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
                 style={{ borderColor: "rgba(214,69,69,0.4)", color: C.red }}
@@ -520,7 +553,14 @@ export default function ProfileSettingsContent() {
           >
             Profile information
           </p>
-
+          {saveError && (
+            <p
+              className="mb-3 text-[12.5px] font-medium"
+              style={{ color: C.red }}
+            >
+              {saveError}
+            </p>
+          )}
           {isLoading ? (
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {[0, 1, 2, 3].map((i) => (
@@ -534,7 +574,10 @@ export default function ProfileSettingsContent() {
                 label="Full name"
                 value={fullName}
                 placeholder="Add your name"
-                onSave={setFullName}
+                onSave={async (val) => {
+                  setFullName(val);
+                  await persist({ name: val });
+                }}
               />
               <EditableField
                 icon={MapPin}
