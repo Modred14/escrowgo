@@ -17,6 +17,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
 const GEONAMES_USERNAME = "Modred";
 
 const COUNTRY_CODES = {
@@ -76,6 +77,7 @@ function Select({
   icon: Icon,
   labels,
   disabledOptions,
+   disabled,
 }) {
   return (
     <div className="relative group">
@@ -89,7 +91,8 @@ function Select({
           Icon ? "pl-10" : "pl-4"
         } pr-10 text-sm text-slate-800 shadow-sm outline-none transition-all duration-200 hover:border-slate-300 focus:border-amber-400 focus:ring-4 focus:ring-amber-100 ${
           value ? "" : "text-slate-400"
-        }`}
+        } ${disabled ? "cursor-not-allowed opacity-60" : ""}`}
+        disabled={disabled}
       >
         <option value="" disabled>
           {placeholder}
@@ -110,7 +113,7 @@ function Select({
     </div>
   );
 }
-function LocationPicker({ label, value, onChange }) {
+function LocationPicker({ label, value, onChange, disabled }) {
   const { countryCode, stateCode, stateName, city } = value;
 
   const [states, setStates] = useState([]);
@@ -146,7 +149,7 @@ function LocationPicker({ label, value, onChange }) {
     };
   }, [countryCode]);
 
-  // Fetch cities/towns scoped to the selected state via adminCode1 (exact code match)
+ 
   useEffect(() => {
     if (!countryCode || !stateCode) {
       setCities([]);
@@ -188,6 +191,7 @@ function LocationPicker({ label, value, onChange }) {
             SUPPORTED_COUNTRIES.map((c) => [c.isoCode, c.name]),
           )}
           icon={MapPin}
+           disabled={disabled}
         />
       </Field>
 
@@ -204,6 +208,7 @@ function LocationPicker({ label, value, onChange }) {
                 city: "",
               });
             }}
+             disabled={disabled}
             placeholder={loadingStates ? "Loading states…" : "Select state"}
             options={states.map((s) => s.adminCode1)}
             labels={Object.fromEntries(
@@ -226,6 +231,7 @@ function LocationPicker({ label, value, onChange }) {
             }
             options={cities}
             icon={MapPin}
+            disabled={disabled}
           />
         </Field>
       )}
@@ -444,7 +450,7 @@ export default function CreateOrderPage() {
   const [dragActive, setDragActive] = useState(false);
   const [productName, setProductName] = useState("");
   const [price, setPrice] = useState("");
-  const [orderResult, setOrderResult] = useState(null);
+  // const [orderResult, setOrderResult] = useState(null);
   const [submitError, setSubmitError] = useState("");
   const [buyerLocation, setBuyerLocation] = useState({
     countryCode: "",
@@ -478,6 +484,19 @@ export default function CreateOrderPage() {
     },
     [images.length],
   );
+  const dateInputRef = useRef(null);
+
+  const openDatePicker = () => {
+    if (dateInputRef.current?.showPicker) {
+      try {
+        dateInputRef.current.showPicker();
+      } catch (err) {
+        dateInputRef.current.focus();
+      }
+    } else {
+      dateInputRef.current?.focus();
+    }
+  };
 
   const removeImage = (idx) => {
     setImages((prev) => prev.filter((_, i) => i !== idx));
@@ -600,7 +619,17 @@ export default function CreateOrderPage() {
         );
       }
 
-      setOrderResult(data);
+      const params = new URLSearchParams({
+        paymentLink: data.paymentLink,
+        amount: String(data.amount),
+        deliveryFee: String(data.deliveryFee ?? 0),
+        expectedDelivery: computedExpectedDeliveryDate
+          ? computedExpectedDeliveryDate.toISOString()
+          : "",
+        createdOn: new Date().toISOString(),
+      });
+
+      router.push(`/orders/${data.dealSlug}/success?${params.toString()}`);
     } catch (err) {
       toast.error(err.message || "Something went wrong. Please try again.");
     } finally {
@@ -609,7 +638,6 @@ export default function CreateOrderPage() {
   };
 
   const handleCreateAnother = () => {
-    setOrderResult(null);
     setSubmitError("");
     setImages([]);
     setProductName("");
@@ -711,423 +739,421 @@ export default function CreateOrderPage() {
 
       <div className="mx-auto max-w-5xl">
         {/* Header */}
-        {orderResult ? (
-          <PaymentLinkSuccess
-            result={orderResult}
-            onCreateAnother={handleCreateAnother}
-          />
-        ) : (
-          <div>
-            <div
-              className="reveal mb-8 text-center sm:mb-10"
-              style={{ animationDelay: "0ms" }}
-            >
-              <span className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-amber-700">
-                <ShieldCheck className="h-3.5 w-3.5" />
-                Secure transaction
-              </span>
-              <h1 className="text-3xl font-semibold text-slate-900 sm:text-4xl">
-                Create your order
-              </h1>
-              <p className="mx-auto mt-2 max-w-md text-sm text-slate-500 sm:text-base">
-                Set up a secure escrow order by entering your transaction
-                details below.
-              </p>
-            </div>
 
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:gap-8">
-              {/* FORM COLUMN */}
-              <div className="space-y-6 lg:col-span-2">
-                {/* Courier fee banner */}
-                <div
-                  className="reveal flex gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4"
-                  style={{ animationDelay: "60ms" }}
-                >
-                  <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-emerald-600">
-                    <Info className="h-4 w-4 text-white" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-emerald-900">
-                      Courier fee
-                    </p>
-                    <p className="mt-0.5 text-[13px] leading-relaxed text-emerald-800/80">
-                      If the seller opts to use EscrowGo's courier service, an
-                      additional delivery fee will apply. Shipping charges are
-                      calculated automatically based on pickup and delivery
-                      locations, so pricing stays transparent before the
-                      transaction is finalized.
-                    </p>
-                  </div>
+        <div>
+          <div
+            className="reveal mb-8 text-center sm:mb-10"
+            style={{ animationDelay: "0ms" }}
+          >
+            <span className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-amber-700">
+              <ShieldCheck className="h-3.5 w-3.5" />
+              Secure transaction
+            </span>
+            <h1 className="text-3xl font-semibold text-slate-900 sm:text-4xl">
+              Create your order
+            </h1>
+            <p className="mx-auto mt-2 max-w-md text-sm text-slate-500 sm:text-base">
+              Set up a secure escrow order by entering your transaction details
+              below.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:gap-8">
+            {/* FORM COLUMN */}
+            <div className="space-y-6 lg:col-span-2">
+              {/* Courier fee banner */}
+              <div
+                className="reveal flex gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4"
+                style={{ animationDelay: "60ms" }}
+              >
+                <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-emerald-600">
+                  <Info className="h-4 w-4 text-white" />
                 </div>
+                <div>
+                  <p className="text-sm font-semibold text-emerald-900">
+                    Courier fee
+                  </p>
+                  <p className="mt-0.5 text-[13px] leading-relaxed text-emerald-800/80">
+                    If the seller opts to use EscrowGo's courier service, an
+                    additional delivery fee will apply. Shipping charges are
+                    calculated automatically based on pickup and delivery
+                    locations, so pricing stays transparent before the
+                    transaction is finalized.
+                  </p>
+                </div>
+              </div>
 
-                {/* Product picture upload */}
+              {/* Product picture upload */}
+              <div
+                className="reveal rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
+                style={{ animationDelay: "120ms" }}
+              >
+                <SectionLabel step="01">Product picture</SectionLabel>
+
                 <div
-                  className="reveal rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
-                  style={{ animationDelay: "120ms" }}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    if (!submitting) setDragActive(true);
+                  }}
+                  onDragLeave={() => setDragActive(false)}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    setDragActive(false);
+                  if (!submitting) addFiles(e.dataTransfer.files);
+                  }}
+                  onClick={() => !submitting &&  images.length < 3 && inputRef.current?.click()}
+                  className={`relative flex min-h-[160px] cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 text-center transition-all duration-300 ${
+                    dragActive
+                      ? "scale-[1.01] border-amber-400 bg-amber-50"
+                      : "border-amber-300/70 bg-amber-50/40 hover:border-amber-400 hover:bg-amber-50"
+                  }`}
                 >
-                  <SectionLabel step="01">Product picture</SectionLabel>
-
+                  <input
+                    ref={inputRef}
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    disabled={submitting}
+                    className="hidden"
+                    onChange={(e) => addFiles(e.target.files)}
+                  />
                   <div
-                    onDragOver={(e) => {
-                      e.preventDefault();
-                      setDragActive(true);
-                    }}
-                    onDragLeave={() => setDragActive(false)}
-                    onDrop={(e) => {
-                      e.preventDefault();
-                      setDragActive(false);
-                      addFiles(e.dataTransfer.files);
-                    }}
-                    onClick={() =>
-                      images.length < 3 && inputRef.current?.click()
-                    }
-                    className={`relative flex min-h-[160px] cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 text-center transition-all duration-300 ${
-                      dragActive
-                        ? "scale-[1.01] border-amber-400 bg-amber-50"
-                        : "border-amber-300/70 bg-amber-50/40 hover:border-amber-400 hover:bg-amber-50"
+                    className={`flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 text-amber-600 transition-transform duration-300 ${
+                      dragActive ? "scale-110 -translate-y-1" : ""
                     }`}
                   >
-                    <input
-                      ref={inputRef}
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      className="hidden"
-                      onChange={(e) => addFiles(e.target.files)}
-                    />
-                    <div
-                      className={`flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 text-amber-600 transition-transform duration-300 ${
-                        dragActive ? "scale-110 -translate-y-1" : ""
-                      }`}
-                    >
-                      <Upload className="h-5 w-5" />
-                    </div>
-                    <p className="mt-3 text-sm font-medium text-amber-700">
-                      Click or drag to upload images of product
-                    </p>
-                    <p className="mt-1 text-xs text-amber-600/70">
-                      PNG, JPG — less than 15MB
-                    </p>
+                    <Upload className="h-5 w-5" />
                   </div>
-
-                  {images.length > 0 && (
-                    <div className="mt-4 grid grid-cols-3 gap-3">
-                      {images.map((img, idx) => (
-                        <div
-                          key={img.url}
-                          className="pop-in group relative aspect-square overflow-hidden rounded-xl border border-slate-200"
-                        >
-                          <img
-                            src={img.url}
-                            alt={img.name}
-                            className="h-full w-full object-cover"
-                          />
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              removeImage(idx);
-                            }}
-                            className="absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-slate-900/70 text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100"
-                          >
-                            <X className="h-3.5 w-3.5" />
-                          </button>
-                        </div>
-                      ))}
-                      {Array.from({ length: 3 - images.length }).map((_, i) => (
-                        <div
-                          key={i}
-                          className="flex aspect-square items-center justify-center rounded-xl border border-dashed border-slate-200 text-slate-300"
-                        >
-                          <ImageIcon className="h-5 w-5" />
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  <div className="mt-4 flex items-center gap-2 rounded-lg bg-amber-50 px-3.5 py-2.5 text-[13px] text-amber-800">
-                    <Info className="h-4 w-4 flex-shrink-0 text-amber-500" />
-                    Upload up to 3 high-quality images to showcase your product
-                  </div>
+                  <p className="mt-3 text-sm font-medium text-amber-700">
+                    Click or drag to upload images of product
+                  </p>
+                  <p className="mt-1 text-xs text-amber-600/70">
+                    PNG, JPG — less than 15MB
+                  </p>
                 </div>
 
-                {/* Product information */}
-                <div
-                  className="reveal rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
-                  style={{ animationDelay: "180ms" }}
-                >
-                  <SectionLabel step="02">Product information</SectionLabel>
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <Field label="Product name">
-                      <input
-                        type="text"
-                        value={productName}
-                        onChange={(e) => setProductName(e.target.value)}
-                        placeholder="Enter your product name"
-                        className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 shadow-sm outline-none transition-all duration-200 placeholder:text-slate-400 hover:border-slate-300 focus:border-amber-400 focus:ring-4 focus:ring-amber-100"
-                      />
-                    </Field>
-                    <Field label="Price">
-                      <div className="relative">
-                        <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm font-medium text-slate-400">
-                          ₦
-                        </span>
-                        <input
-                          type="number"
-                          min="0"
-                          value={price}
-                          onChange={(e) => setPrice(e.target.value)}
-                          placeholder="Enter the price"
-                          className="w-full rounded-xl border border-slate-200 bg-white py-3 pl-8 pr-4 text-sm text-slate-800 shadow-sm outline-none transition-all duration-200 placeholder:text-slate-400 hover:border-slate-300 focus:border-amber-400 focus:ring-4 focus:ring-amber-100"
+                {images.length > 0 && (
+                  <div className="mt-4 grid grid-cols-3 gap-3">
+                    {images.map((img, idx) => (
+                      <div
+                        key={img.url}
+                        className="pop-in group relative aspect-square overflow-hidden rounded-xl border border-slate-200"
+                      >
+                        <img
+                          src={img.url}
+                          alt={img.name}
+                          className="h-full w-full object-cover"
                         />
+                        <button
+                          type="button"
+                          disabled={submitting}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            removeImage(idx);
+                          }}
+                          className="absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-slate-900/70 text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </button>
                       </div>
-                    </Field>
+                    ))}
+                    {Array.from({ length: 3 - images.length }).map((_, i) => (
+                      <div
+                        key={i}
+                        className="flex aspect-square items-center justify-center rounded-xl border border-dashed border-slate-200 text-slate-300"
+                      >
+                        <ImageIcon className="h-5 w-5" />
+                      </div>
+                    ))}
                   </div>
-                </div>
+                )}
 
-                {/* Delivery information */}
-                <div
-                  className="reveal rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
-                  style={{ animationDelay: "240ms" }}
-                >
-                  <SectionLabel step="03">Delivery information</SectionLabel>
-                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                    <LocationPicker
-                      label="Buyer location"
-                      value={buyerLocation}
-                      onChange={setBuyerLocation}
-                    />
-                    <LocationPicker
-                      label="Seller location"
-                      value={sellerLocation}
-                      onChange={setSellerLocation}
-                    />
-                  </div>
+                <div className="mt-4 flex items-center gap-2 rounded-lg bg-amber-50 px-3.5 py-2.5 text-[13px] text-amber-800">
+                  <Info className="h-4 w-4 flex-shrink-0 text-amber-500" />
+                  Upload up to 3 high-quality images to showcase your product
                 </div>
+              </div>
 
-                {/* Delivery system */}
-                <div
-                  className="reveal rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
-                  style={{ animationDelay: "300ms" }}
-                >
-                  <SectionLabel step="04">Delivery</SectionLabel>
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <Field label="Delivery system">
-                      <Select
-                        value={deliveryOption}
-                        onChange={setDeliveryOption}
-                        placeholder="Choose the delivery system"
-                        options={["ESCROWGO", "SELF"]}
-                        disabledOptions={
-                          agentAvailability.eligible ? [] : ["ESCROWGO"]
-                        }
-                        icon={Truck}
-                      />
-                    </Field>
-                    <Field label="Expected delivery date">
+              {/* Product information */}
+              <div
+                className="reveal rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
+                style={{ animationDelay: "180ms" }}
+              >
+                <SectionLabel step="02">Product information</SectionLabel>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <Field label="Product name">
+                    <input
+                      type="text"
+                      value={productName}
+                       disabled={submitting}
+                      onChange={(e) => setProductName(e.target.value)}
+                      placeholder="Enter your product name"
+                      className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 shadow-sm outline-none transition-all duration-200 placeholder:text-slate-400 hover:border-slate-300 focus:border-amber-400 focus:ring-4 focus:ring-amber-100"
+                    />
+                  </Field>
+                  <Field label="Price">
+                    <div className="relative">
+                      <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm font-medium text-slate-400">
+                        ₦
+                      </span>
                       <input
+                        type="number"
+                        min="0"
+                        value={price}
+                        disabled={submitting}
+                        onChange={(e) => setPrice(e.target.value)}
+                        placeholder="Enter the price"
+                        className="w-full rounded-xl border border-slate-200 bg-white py-3 pl-8 pr-4 text-sm text-slate-800 shadow-sm outline-none transition-all duration-200 placeholder:text-slate-400 hover:border-slate-300 focus:border-amber-400 focus:ring-4 focus:ring-amber-100"
+                      />
+                    </div>
+                  </Field>
+                </div>
+              </div>
+
+              {/* Delivery information */}
+              <div
+                className="reveal rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
+                style={{ animationDelay: "240ms" }}
+              >
+                <SectionLabel step="03">Delivery information</SectionLabel>
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                  <LocationPicker
+                    label="Seller location"
+                    value={sellerLocation}
+                     disabled={submitting}
+                    onChange={setSellerLocation}
+                  />{" "}
+                  <LocationPicker
+                    label="Buyer location"
+                    value={buyerLocation}
+                    onChange={setBuyerLocation}
+                     disabled={submitting}
+                  />
+                </div>
+              </div>
+
+              {/* Delivery system */}
+              <div
+                className="reveal rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
+                style={{ animationDelay: "300ms" }}
+              >
+                <SectionLabel step="04">Delivery</SectionLabel>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <Field label="Delivery system">
+                    <Select
+                      value={deliveryOption}
+                      onChange={setDeliveryOption}
+                      placeholder="Choose the delivery system"
+                      options={["ESCROWGO", "SELF"]}
+                      disabledOptions={
+                        agentAvailability.eligible ? [] : ["ESCROWGO"]
+                      }
+                      icon={Truck}
+                       disabled={submitting}
+                    />
+                  </Field>
+                  <Field label="Expected delivery date">
+                    <div onClick={() => !submitting && openDatePicker()} className={submitting ? "cursor-not-allowed" : "cursor-pointer"}>
+                      <input
+                        ref={dateInputRef}
                         type="date"
                         value={expectedDeliveryDate}
                         min={new Date().toISOString().split("T")[0]}
                         onChange={(e) =>
                           setExpectedDeliveryDate(e.target.value)
                         }
-                        className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 shadow-sm outline-none transition-all duration-200 hover:border-slate-300 focus:border-amber-400 focus:ring-4 focus:ring-amber-100"
+                        className="w-full cursor-pointer rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 shadow-sm outline-none transition-all duration-200 hover:border-slate-300 focus:border-amber-400 focus:ring-4 focus:ring-amber-100"
+                        disabled={submitting}
                       />
-                    </Field>
-                  </div>
-
-                  <div className="mt-4 flex items-start gap-2 rounded-lg bg-amber-50 px-3.5 py-2.5 text-[13px] leading-relaxed text-amber-800">
-                    <Info className="h-4 w-4 flex-shrink-0 text-amber-500 mt-0.5" />
-                    <span>
-                      <strong>Note:</strong> If the order isn't collected after
-                      the delivery date, the money will be refunded. If you use
-                      EscrowGo delivery, we need up to 3 days to find a courier.
-                      If none is available, the buyer will be asked to arrange
-                      delivery. If a courier is found, delivery may take up to 7
-                      more days, so 10 extra days is added to the delivery date.
-                    </span>
-                  </div>
-
-                  {agentAvailability.loading && (
-                    <p className="pop-in mt-3 text-[13px] text-slate-400">
-                      Checking courier availability near you…
-                    </p>
-                  )}
-
-                  {!agentAvailability.loading && agentAvailability.checked && (
-                    <p
-                      className={`pop-in mt-3 flex items-center gap-1.5 text-[13px] ${
-                        agentAvailability.eligible
-                          ? "text-emerald-600"
-                          : "text-slate-500"
-                      }`}
-                    >
-                      {agentAvailability.eligible ? (
-                        <>
-                          <ShieldCheck className="h-3.5 w-3.5" />
-                          {agentAvailability.count} EscrowGo couriers are
-                          available on this route — courier delivery unlocked.
-                        </>
-                      ) : (
-                        <>
-                          {!deliveryOption && (
-                            <>
-                              <Info className="h-3.5 w-3.5" />
-                              Only {agentAvailability.count} courier
-                              {agentAvailability.count === 1 ? "" : "s"}{" "}
-                              available on this route (3+ needed). You'll need
-                              to arrange delivery yourselves for now.
-                            </>
-                          )}
-                        </>
-                      )}
-                    </p>
-                  )}
-                  {deliveryOption && (
-                    <p className="pop-in mt-3 text-[13px] text-slate-500">
-                      {deliveryOption === "ESCROWGO"
-                        ? "EscrowGo will handle pickup and delivery. The fee is calculated automatically below."
-                        : "The buyer and seller will coordinate delivery directly. No courier fee applies."}
-                    </p>
-                  )}
+                    </div>
+                  </Field>
                 </div>
-              </div>
 
-              {/* TICKET / SUMMARY COLUMN */}
-              <div className="lg:col-span-1">
-                <div
-                  className="reveal lg:sticky lg:top-8"
-                  style={{ animationDelay: "150ms" }}
-                >
-                  <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-md">
-                    <div className="bg-slate-900 px-5 py-4">
-                      <p className="text-[11px] font-semibold uppercase tracking-widest text-amber-400">
-                        Escrow ticket
-                      </p>
-                      <p className="mt-1 text-lg font-semibold text-white">
-                        Order summary
-                      </p>
-                    </div>
-
-                    <div className="space-y-3 px-5 py-5">
-                      <div className="flex items-start justify-between gap-3">
-                        <span className="text-[13px] text-slate-500">
-                          Product
-                        </span>
-                        <span className="max-w-[60%] text-right text-sm font-medium text-slate-800">
-                          {productName || "—"}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-[13px] text-slate-500">
-                          Price
-                        </span>
-                        <span className="text-sm font-medium text-slate-800">
-                          ₦{formatNaira(numericPrice)}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-[13px] text-slate-500">
-                          Delivery fee
-                        </span>
-                        <span className="text-sm font-medium text-slate-800">
-                          {deliveryOption
-                            ? `₦${formatNaira(deliveryFee)}`
-                            : "—"}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between text-[13px] text-slate-500">
-                        <span>Route</span>
-                        <span className="text-right text-slate-600">
-                          {formatLocation(sellerLocation) || "Seller"} →{" "}
-                          {formatLocation(buyerLocation) || "Buyer"}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between text-[13px] text-slate-500">
-                        <span>Expected delivery</span>
-                        <span className="text-right text-slate-600">
-                          {computedExpectedDeliveryDate
-                            ? computedExpectedDeliveryDate.toLocaleDateString(
-                                "en-NG",
-                                {
-                                  day: "numeric",
-                                  month: "short",
-                                  year: "numeric",
-                                },
-                              )
-                            : "—"}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="perforation ticket-notch mx-0" />
-
-                    <div className="px-5 py-5">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-semibold text-slate-900">
-                          Held in escrow
-                        </span>
-                        <span className="text-xl font-semibold text-slate-900 transition-all duration-300">
-                          ₦{formatNaira(total)}
-                        </span>
-                      </div>
-                      <div className="mt-4 flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2.5">
-                        <ShieldCheck className="h-4 w-4 flex-shrink-0 text-emerald-600" />
-                        <p className="text-[12px] leading-snug text-emerald-800">
-                          Funds stay protected until the buyer confirms
-                          delivery.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+                <div className="mt-4 flex items-start gap-2 rounded-lg bg-amber-50 px-3.5 py-2.5 text-[13px] leading-relaxed text-amber-800">
+                  <Info className="h-4 w-4 flex-shrink-0 text-amber-500 mt-0.5" />
+                  <span>
+                    <strong>Note:</strong> If the order isn't collected after
+                    the delivery date, the money will be refunded. If you use
+                    EscrowGo delivery, we need up to 3 days to find a courier.
+                    If none is available, the buyer will be asked to arrange
+                    delivery. If a courier is found, delivery may take up to 7
+                    more days, so 10 extra days is added to the delivery date.
+                  </span>
                 </div>
-              </div>
-            </div>
 
-            {/* Submit */}
-            <div
-              className="reveal mt-8 flex justify-center"
-              style={{ animationDelay: "360ms" }}
-            >
-              <button
-                type="button"
-                onClick={handleSubmit}
-                disabled={!canSubmit || submitting}
-                className={`btn-shimmer relative inline-flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl px-8 py-3.5 text-sm font-semibold shadow-lg shadow-amber-500/20 transition-all duration-300 sm:w-auto sm:min-w-[280px] ${
-                  canSubmit
-                    ? "bg-gradient-to-r from-amber-500 to-amber-600 text-white hover:-translate-y-0.5 hover:shadow-xl hover:shadow-amber-500/30 active:translate-y-0"
-                    : "cursor-not-allowed bg-slate-200 text-slate-400 shadow-none"
-                }`}
-              >
-                {submitting ? (
-                  <>
-                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
-                    Generating link...
-                  </>
-                ) : (
-                  <>
-                    Generate payment link
-                    <ArrowRight className="h-4 w-4" />
-                  </>
+                {agentAvailability.loading && (
+                  <p className="pop-in mt-3 text-[13px] text-slate-400">
+                    Checking courier availability near you…
+                  </p>
                 )}
-              </button>
+
+                {!agentAvailability.loading && agentAvailability.checked && (
+                  <p
+                    className={`pop-in mt-3 flex items-center gap-1.5 text-[13px] ${
+                      agentAvailability.eligible
+                        ? "text-emerald-600"
+                        : "text-slate-500"
+                    }`}
+                  >
+                    {agentAvailability.eligible ? (
+                      <>
+                        <ShieldCheck className="h-3.5 w-3.5" />
+                        {agentAvailability.count} EscrowGo couriers are
+                        available on this route — courier delivery unlocked.
+                      </>
+                    ) : (
+                      <>
+                        {!deliveryOption && (
+                          <>
+                            <Info className="h-3.5 w-3.5" />
+                            Only {agentAvailability.count} courier
+                            {agentAvailability.count === 1 ? "" : "s"} available
+                            on this route (3+ needed). You'll need to arrange
+                            delivery yourselves for now.
+                          </>
+                        )}
+                      </>
+                    )}
+                  </p>
+                )}
+                {deliveryOption && (
+                  <p className="pop-in mt-3 text-[13px] text-slate-500">
+                    {deliveryOption === "ESCROWGO"
+                      ? "EscrowGo will handle pickup and delivery. The fee is calculated automatically below."
+                      : "The buyer and seller will coordinate delivery directly. No courier fee applies."}
+                  </p>
+                )}
+              </div>
             </div>
 
-            <p
-              className="reveal mt-4 text-center text-[12px] text-slate-400"
-              style={{ animationDelay: "420ms" }}
-            >
-              By generating a payment link, you agree that funds will be held in
-              escrow until delivery is confirmed.
-            </p>
-            {submitError && (
-              <p className="pop-in mt-3 text-center text-[12px] font-medium text-red-500">
-                {submitError}
-              </p>
-            )}
+            {/* TICKET / SUMMARY COLUMN */}
+            <div className="lg:col-span-1">
+              <div
+                className="reveal lg:sticky lg:top-8"
+                style={{ animationDelay: "150ms" }}
+              >
+                <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-md">
+                  <div className="bg-slate-900 px-5 py-4">
+                    <p className="text-[11px] font-semibold uppercase tracking-widest text-amber-400">
+                      Escrow ticket
+                    </p>
+                    <p className="mt-1 text-lg font-semibold text-white">
+                      Order summary
+                    </p>
+                  </div>
+
+                  <div className="space-y-3 px-5 py-5">
+                    <div className="flex items-start justify-between gap-3">
+                      <span className="text-[13px] text-slate-500">
+                        Product
+                      </span>
+                      <span className="max-w-[60%] text-right text-sm font-medium text-slate-800">
+                        {productName || "—"}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[13px] text-slate-500">Price</span>
+                      <span className="text-sm font-medium text-slate-800">
+                        ₦{formatNaira(numericPrice)}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[13px] text-slate-500">
+                        Delivery fee
+                      </span>
+                      <span className="text-sm font-medium text-slate-800">
+                        {deliveryOption ? `₦${formatNaira(deliveryFee)}` : "—"}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-[13px] text-slate-500">
+                      <span>Route</span>
+                      <span className="text-right text-slate-600">
+                        {formatLocation(sellerLocation) || "Seller"} →{" "}
+                        {formatLocation(buyerLocation) || "Buyer"}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-[13px] text-slate-500">
+                      <span>Expected delivery</span>
+                      <span className="text-right text-slate-600">
+                        {computedExpectedDeliveryDate
+                          ? computedExpectedDeliveryDate.toLocaleDateString(
+                              "en-NG",
+                              {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric",
+                              },
+                            )
+                          : "—"}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="perforation ticket-notch mx-0" />
+
+                  <div className="px-5 py-5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-semibold text-slate-900">
+                        Held in escrow
+                      </span>
+                      <span className="text-xl font-semibold text-slate-900 transition-all duration-300">
+                        ₦{formatNaira(total)}
+                      </span>
+                    </div>
+                    <div className="mt-4 flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2.5">
+                      <ShieldCheck className="h-4 w-4 flex-shrink-0 text-emerald-600" />
+                      <p className="text-[12px] leading-snug text-emerald-800">
+                        Funds stay protected until the buyer confirms delivery.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-        )}
+
+          {/* Submit */}
+          <div
+            className="reveal mt-8 flex justify-center"
+            style={{ animationDelay: "360ms" }}
+          >
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={!canSubmit || submitting}
+              className={`btn-shimmer relative inline-flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl px-8 py-3.5 text-sm font-semibold shadow-lg shadow-amber-500/20 transition-all duration-300 sm:w-auto sm:min-w-[280px] ${
+                canSubmit
+                  ? "bg-gradient-to-r from-amber-500 to-amber-600 text-white hover:-translate-y-0.5 hover:shadow-xl hover:shadow-amber-500/30 active:translate-y-0"
+                  : "cursor-not-allowed bg-slate-200 text-slate-400 shadow-none"
+              }`}
+            >
+              {submitting ? (
+                <>
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+                  Generating link...
+                </>
+              ) : (
+                <>
+                  Generate payment link
+                  <ArrowRight className="h-4 w-4" />
+                </>
+              )}
+            </button>
+          </div>
+
+          <p
+            className="reveal mt-4 text-center text-[12px] text-slate-400"
+            style={{ animationDelay: "420ms" }}
+          >
+            By generating a payment link, you agree that funds will be held in
+            escrow until delivery is confirmed.
+          </p>
+          {submitError && (
+            <p className="pop-in mt-3 text-center text-[12px] font-medium text-red-500">
+              {submitError}
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );

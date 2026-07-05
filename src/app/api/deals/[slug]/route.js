@@ -1,33 +1,57 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-export async function GET(_req, props) {
-  const params = await props.params;
-  const session = await getServerSession(authOptions);
+export async function GET(_request, { params }) {
+  try {
+    const { slug } = params;
 
-  const deal = await prisma.deal.findUnique({
-    where: { slug: params.slug },
-    include: {
-      product: true,
-      seller: { select: { id: true, name: true, email: true, phone: true, createdAt: true } },
-      buyer: { select: { id: true, name: true, email: true } },
-      payments: { orderBy: { createdAt: "desc" } },
-      escrow: true,
-      delivery: { include: { agent: { include: { user: true } } } },
-      qrCode: { select: { id: true, code: true, isUsed: true, usedAt: true } },
-    },
-  });
+    const deal = await prisma.deal.findUnique({
+      where: { slug },
+      include: {
+        seller: { select: { name: true } },
+        product: true,
+        payments: { orderBy: { createdAt: "desc" }, take: 1 },
+      },
+    });
 
-  if (!deal) {
-    return NextResponse.json({ error: "Deal not found." }, { status: 404 });
+    if (!deal) {
+      return NextResponse.json({ error: "Order not found" }, { status: 404 });
+    }
+
+    const latestPayment = deal.payments[0] || null;
+
+    return NextResponse.json({
+      slug: deal.slug,
+      status: deal.status,
+      sellerName: deal.seller?.name || "Seller",
+      sellerLocation: deal.sellerLocation,
+      buyerLocation: deal.buyerLocation,
+      deliveryOption: deal.deliveryOption,
+      deliveryFee: deal.deliveryFee,
+      expectedDeliveryDate: deal.expectedDeliveryDate,
+      createdAt: deal.createdAt,
+      product: deal.product
+        ? {
+            name: deal.product.name,
+            description: deal.product.description,
+            price: deal.product.price,
+            images: deal.product.images,
+          }
+        : null,
+      payment: latestPayment
+        ? {
+            amount: latestPayment.amount,
+            currency: latestPayment.currency,
+            status: latestPayment.status,
+            checkoutUrl: latestPayment.checkoutUrl,
+          }
+        : null,
+    });
+  } catch (error) {
+    console.error("get-deal error:", error);
+    return NextResponse.json(
+      { error: "Something went wrong while fetching this order" },
+      { status: 500 },
+    );
   }
-
-  const isOwningBuyer = session?.user?.id && deal.buyerId === session.user.id;
-  if (deal.qrCode && !isOwningBuyer) {
-    deal.qrCode = { id: deal.qrCode.id, isUsed: deal.qrCode.isUsed, usedAt: deal.qrCode.usedAt };
-  }
-
-  return NextResponse.json({ deal });
 }
