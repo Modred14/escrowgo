@@ -1,8 +1,3 @@
-/**
- * Uploads a File to Cloudinary using an unsigned upload preset.
- * Only the cloud name + preset (both public, non-secret config) are used
- * client-side — the Cloudinary API secret never appears in the browser.
- */
 export async function uploadToCloudinary(file) {
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
   const preset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;

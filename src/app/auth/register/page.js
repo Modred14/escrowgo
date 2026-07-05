@@ -239,6 +239,7 @@ export default function RegisterPage() {
               label="Full name (Surname first)"
               icon={<UserIcon />}
               required
+              disabled={loading}
               value={form.name}
               onChange={(v) => updateField("name", v)}
               onBlur={(e) => handleFieldBlur("name", e.target.value)}
@@ -248,6 +249,7 @@ export default function RegisterPage() {
             <Field
               index={1}
               label="Email"
+              disabled={loading}
               icon={<MailIcon />}
               type="email"
               required
@@ -276,7 +278,7 @@ export default function RegisterPage() {
                     Select
                   </option>
                   {DIAL_CODES.map((code) => (
-                    <option key={code} value={code}>
+                    <option key={code} value={code} disabled={loading}>
                       {code}
                     </option>
                   ))}
@@ -285,6 +287,7 @@ export default function RegisterPage() {
                 <input
                   type="tel"
                   value={form.phoneNumber}
+                  disabled={loading}
                   onChange={(e) => updateField("phoneNumber", e.target.value)}
                   onBlur={(e) => handleFieldBlur("phoneNumber", e.target.value)}
                   placeholder="80xxxxxxxx"
@@ -305,6 +308,7 @@ export default function RegisterPage() {
               onBlur={() => handleFieldBlur("country", form.country)}
               placeholder="Select a country"
               options={COUNTRIES}
+              disabled={loading}
               error={errors.country}
             />
 
@@ -320,7 +324,7 @@ export default function RegisterPage() {
                 form.country ? "Select a city" : "Select a country first"
               }
               options={cities}
-              disabled={!form.country}
+              disabled={!form.country || loading}
               error={errors.city}
             />
 
@@ -330,6 +334,7 @@ export default function RegisterPage() {
               icon={<LockIcon />}
               type={showPassword ? "text" : "password"}
               required
+              disabled={loading}
               value={form.password}
               onChange={(v) => updateField("password", v)}
               placeholder="At least 8 characters"
@@ -350,6 +355,7 @@ export default function RegisterPage() {
             <Field
               index={6}
               label="Confirm password"
+              disabled={loading}
               icon={<LockIcon />}
               type={showConfirmPassword ? "text" : "password"}
               required
@@ -403,6 +409,7 @@ export default function RegisterPage() {
                 checked={form.agreedToTerms}
                 onChange={(e) => updateField("agreedToTerms", e.target.checked)}
                 className="egv-checkbox"
+                disabled={loading}
               />
               <span className="egv-checkbox-label">
                 I have read and agree to the{" "}
@@ -472,6 +479,7 @@ function Field({
   onChange,
   error,
   hint,
+  disabled,
   ...rest
 }) {
   return (
@@ -487,6 +495,7 @@ function Field({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           className=" egv-input"
+          disabled={disabled}
           aria-invalid={!!error}
         />
         {trailing}

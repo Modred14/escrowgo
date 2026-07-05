@@ -80,6 +80,7 @@ function LoginForm() {
               label="Email"
               icon={<MailIcon />}
               type="email"
+              disabled={loading}
               required
               value={form.email}
               onChange={(v) => setForm({ ...form, email: v })}
@@ -89,6 +90,7 @@ function LoginForm() {
               index={1}
               label="Password"
               icon={<LockIcon />}
+              disabled={loading}
               type={showPassword ? "text" : "password"}
               required
               value={form.password}
@@ -155,7 +157,7 @@ function LoginForm() {
   );
 }
 
-function Field({ index, label, icon, trailing, value, onChange, ...rest }) {
+function Field({ index, label, icon, trailing, value, disabled, onChange, ...rest }) {
   return (
     <div
       className="egv-field egv-field-in"
@@ -168,6 +170,7 @@ function Field({ index, label, icon, trailing, value, onChange, ...rest }) {
           {...rest}
           value={value}
           onChange={(e) => onChange(e.target.value)}
+          disabled={disabled}
           className="egv-input"
         />
         {trailing}

@@ -386,6 +386,12 @@ export default function ProfileSettingsContent() {
   const [photoOverride, setPhotoOverride] = useState(null);
   const [fullName, setFullName] = useState(sessionName);
   const [phone, setPhone] = useState(sessionPhone);
+
+  useEffect(() => {
+    if (status === "authenticated") {
+      setPhone(sessionPhone);
+    }
+  }, [status, sessionPhone]);
   const sessionCity = session?.user?.city || "";
   const sessionCountry = session?.user?.country || "";
 
@@ -402,6 +408,12 @@ export default function ProfileSettingsContent() {
     nameInitialized.current = true;
     if (!fullName) setFullName(sessionName);
   }
+  useEffect(() => {
+    if (status === "authenticated") {
+      setLocationCountry(sessionCountry);
+      setLocationCity(sessionCity);
+    }
+  }, [status, sessionCountry, sessionCity]);
 
   const activePhoto = photoOverride ?? sessionImage;
 
@@ -419,8 +431,8 @@ export default function ProfileSettingsContent() {
           setSaveError(json.error || "Failed to save changes.");
           return false;
         }
-        await update(patch);
-        return true;
+        await update(json);
+        return json;
       } catch (err) {
         console.error(err);
         setSaveError("Failed to save changes.");
@@ -439,6 +451,8 @@ export default function ProfileSettingsContent() {
         const dataUrl = reader.result;
         setPhotoOverride(dataUrl);
         await persist({ image: dataUrl });
+        const result = await persist({ image: dataUrl });
+        if (result && result.image) setPhotoOverride(result.image);
       };
       reader.readAsDataURL(file);
       e.target.value = "";
@@ -501,17 +515,19 @@ export default function ProfileSettingsContent() {
         ) : (
           <div className="flex flex-col items-start justify-center gap-6 sm:flex-row sm:items-center">
             <div className="relative shrink-0">
-              <Avatar src={activePhoto} name={fullName} />
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center rounded-full transition-all duration-300 hover:brightness-105 active:scale-95"
-                style={{
-                  backgroundColor: C.gold,
-                  color: C.ink,
-                  boxShadow: "0 6px 14px -6px rgba(198,156,63,0.7)",
-                }}
-              >
-                <Camera size={14} />
+              <button onClick={() => fileInputRef.current?.click()}>
+                <Avatar src={activePhoto} name={fullName} />
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center rounded-full transition-all duration-300 hover:brightness-105 active:scale-95"
+                  style={{
+                    backgroundColor: C.gold,
+                    color: C.ink,
+                    boxShadow: "0 6px 14px -6px rgba(198,156,63,0.7)",
+                  }}
+                >
+                  <Camera size={14} />
+                </button>
               </button>
               <input
                 ref={fileInputRef}

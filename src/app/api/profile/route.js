@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { uploadToCloudinary } from "@/lib/cloudinary";
 
 export async function PATCH(req) {
   const session = await getServerSession(authOptions);
@@ -21,7 +22,20 @@ export async function PATCH(req) {
   }
   if (typeof body.country === "string") data.country = body.country;
   if (typeof body.city === "string") data.city = body.city;
-  if (body.image === null || typeof body.image === "string") data.image = body.image;
+
+  if (body.image === null) {
+    data.image = null;
+  } else if (typeof body.image === "string") {
+    try {
+      data.image = await uploadToCloudinary(body.image);
+    } catch (err) {
+      console.error("Cloudinary upload error:", err);
+      return NextResponse.json(
+        { error: "Failed to upload image." },
+        { status: 400 },
+      );
+    }
+  }
 
   if (Object.keys(data).length === 0) {
     return NextResponse.json({ error: "Nothing to update." }, { status: 400 });
