@@ -48,7 +48,7 @@ function useQrScanner(active, onScan) {
     }
 
     async function start() {
-        setError(null);
+      setError(null);
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: "environment" },
@@ -185,13 +185,13 @@ export default function DashboardContent({ onNavigate }) {
   const [mounted, setMounted] = useState(false);
   const [qrModalOpen, setQrModalOpen] = useState(false);
 
- const handleScan = useCallback((scannedValue) => {
-  console.log("Scanned:", scannedValue);
+  const handleScan = useCallback((scannedValue) => {
+    console.log("Scanned:", scannedValue);
 
-  // call delivery-confirm API
-}, []);
+    // call delivery-confirm API
+  }, []);
 
-const { videoRef, error: qrError } = useQrScanner(qrModalOpen, handleScan);
+  const { videoRef, error: qrError } = useQrScanner(qrModalOpen, handleScan);
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 150);
     return () => clearTimeout(t);
@@ -288,14 +288,12 @@ const { videoRef, error: qrError } = useQrScanner(qrModalOpen, handleScan);
               className="relative mx-auto flex h-64 w-64 items-center justify-center overflow-hidden rounded-2xl"
               style={{ backgroundColor: "#0B1220" }}
             >
-               <video
-    ref={videoRef}
-    className="absolute inset-0 h-full w-full object-cover"
-    muted
-    playsInline
-  />
-           
-
+              <video
+                ref={videoRef}
+                className="absolute inset-0 h-full w-full object-cover"
+                muted
+                playsInline
+              />
 
               <div className="absolute inset-6">
                 <span
@@ -328,11 +326,11 @@ const { videoRef, error: qrError } = useQrScanner(qrModalOpen, handleScan);
                 className="h-10 w-10 opacity-20"
                 style={{ color: C.gold }}
               />
-               {qrError && (
-    <p className="absolute bottom-2 px-4 text-center text-[11px] text-red-400">
-      {qrError}
-    </p>
-  )}
+              {qrError && (
+                <p className="absolute bottom-2 px-4 text-center text-[11px] text-red-400">
+                  {qrError}
+                </p>
+              )}
             </div>
 
             <p
@@ -400,41 +398,58 @@ const { videoRef, error: qrError } = useQrScanner(qrModalOpen, handleScan);
 
       {/* Stat cards */}
       <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard
-          icon={ShoppingBag}
-          label="Total Orders"
-          value={data.totalOrders}
-          trend={data.ordersTrend}
-          tint={{ bg: "#EAF0FF", fg: "#3457D5" }}
-          mounted={mounted}
-          delay={140}
-        />
-        <StatCard
-          icon={CheckCircle2}
-          label="Completed Orders"
-          value={data.completedOrders}
-          tint={{ bg: C.greenSoft, fg: C.green }}
-          mounted={mounted}
-          delay={190}
-        />
-        <StatCard
-          icon={Clock3}
-          label="Pending Orders"
-          value={data.pendingOrders}
-          tint={{ bg: "#FBF0DE", fg: C.goldDeep }}
-          mounted={mounted}
-          delay={240}
-        />
-        <StatCard
-          icon={Wallet}
-          label="Total Sales"
-          value={data.totalSales}
-          prefix="₦"
-          trend={data.salesTrend}
-          tint={{ bg: C.greenSoft, fg: C.green }}
-          mounted={mounted}
-          delay={290}
-        />
+        {dataLoading ? (
+          Array.from({ length: 4 }).map((_, i) => (
+            <div
+              key={i}
+              className="rounded-2xl border bg-white p-5"
+              style={{ borderColor: C.line }}
+            >
+              <div className="skeleton h-10 w-10 rounded-xl" />
+              <div className="skeleton mt-4 h-3 w-24 rounded-md" />
+              <div className="skeleton mt-2 h-6 w-20 rounded-md" />
+            </div>
+          ))
+        ) : (
+          <>
+            {" "}
+            <StatCard
+              icon={ShoppingBag}
+              label="Total Orders"
+              value={data.totalOrders}
+              trend={data.ordersTrend}
+              tint={{ bg: "#EAF0FF", fg: "#3457D5" }}
+              mounted={mounted}
+              delay={140}
+            />
+            <StatCard
+              icon={CheckCircle2}
+              label="Completed Orders"
+              value={data.completedOrders}
+              tint={{ bg: C.greenSoft, fg: C.green }}
+              mounted={mounted}
+              delay={190}
+            />
+            <StatCard
+              icon={Clock3}
+              label="Pending Orders"
+              value={data.pendingOrders}
+              tint={{ bg: "#FBF0DE", fg: C.goldDeep }}
+              mounted={mounted}
+              delay={240}
+            />
+            <StatCard
+              icon={Wallet}
+              label="Total Sales"
+              value={data.totalSales}
+              prefix="₦"
+              trend={data.salesTrend}
+              tint={{ bg: C.greenSoft, fg: C.green }}
+              mounted={mounted}
+              delay={290}
+            />
+          </>
+        )}
       </div>
 
       {/* Content grid */}

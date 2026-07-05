@@ -183,16 +183,16 @@ export default function Sidebar({
           >
             Available
           </p>
-          <p
-            className="mt-1.5 truncate font-serif text-[22px] font-semibold tracking-tight sm:text-[25px]"
-            style={{ color: C.cream }}
-          >
-            {balanceLoading
-              ? "···"
-              : balanceVisible
-                ? formatNaira(balanceCount)
-                : "₦ • • • • • • •"}{" "}
-          </p>
+          {balanceLoading ? (
+            <div className="skeleton mt-2 h-6 w-28 rounded-md sm:h-7" />
+          ) : (
+            <p
+              className="mt-1.5 truncate font-serif text-[22px] font-semibold tracking-tight sm:text-[25px]"
+              style={{ color: C.cream }}
+            >
+              {balanceVisible ? formatNaira(balanceCount) : "₦ • • • • • • •"}
+            </p>
+          )}
           <button
             className="mt-3 w-full rounded-xl py-1.5 text-[12px] font-semibold transition-all duration-300 hover:brightness-110 hover:shadow-lg active:scale-[0.98]"
             style={{

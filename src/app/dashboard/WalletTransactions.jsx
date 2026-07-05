@@ -187,12 +187,16 @@ export default function WalletTransactions() {
             >
               Available balance
             </p>
-            <p
-              className="mt-1 font-serif text-[30px] font-semibold tracking-tight sm:text-[38px]"
-              style={{ color: C.ink }}
-            >
-              {formatNaira(balanceCount)}
-            </p>
+            {loading ? (
+              <div className="skeleton mt-2 h-9 w-40 rounded-md sm:h-11" />
+            ) : (
+              <p
+                className="mt-1 font-serif text-[30px] font-semibold tracking-tight sm:text-[38px]"
+                style={{ color: C.ink }}
+              >
+                {formatNaira(balanceCount)}
+              </p>
+            )}
             <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <button
                 className="inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-[13px] font-semibold transition-all duration-300 hover:brightness-95 active:scale-[0.98] sm:w-auto"
@@ -249,32 +253,48 @@ export default function WalletTransactions() {
 
       {/* Mini stats */}
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <MiniStat
-          icon={ArrowDownToLine}
-          label="Money in"
-          value={moneyIn}
-          prefix="₦"
-          tint={{ bg: C.greenSoft, fg: C.green }}
-          mounted={mounted}
-          delay={200}
-        />
-        <MiniStat
-          icon={ArrowUpFromLine}
-          label="Total withdrawn"
-          value={totalWithdrawn}
-          prefix="₦"
-          tint={{ bg: C.redSoft, fg: C.red }}
-          mounted={mounted}
-          delay={250}
-        />
-        <MiniStat
-          icon={Receipt}
-          label="Total transactions"
-          value={totalTransactions}
-          tint={{ bg: "#FBF0DE", fg: C.goldDeep }}
-          mounted={mounted}
-          delay={300}
-        />
+        {loading ? (
+          Array.from({ length: 3 }).map((_, i) => (
+            <div
+              key={i}
+              className="rounded-2xl border bg-white p-5"
+              style={{ borderColor: C.line }}
+            >
+              <div className="skeleton h-10 w-10 rounded-xl" />
+              <div className="skeleton mt-4 h-3 w-24 rounded-md" />
+              <div className="skeleton mt-2 h-6 w-20 rounded-md" />
+            </div>
+          ))
+        ) : (
+          <>
+            <MiniStat
+              icon={ArrowDownToLine}
+              label="Money in"
+              value={moneyIn}
+              prefix="₦"
+              tint={{ bg: C.greenSoft, fg: C.green }}
+              mounted={mounted}
+              delay={200}
+            />
+            <MiniStat
+              icon={ArrowUpFromLine}
+              label="Total withdrawn"
+              value={totalWithdrawn}
+              prefix="₦"
+              tint={{ bg: C.redSoft, fg: C.red }}
+              mounted={mounted}
+              delay={250}
+            />
+            <MiniStat
+              icon={Receipt}
+              label="Total transactions"
+              value={totalTransactions}
+              tint={{ bg: "#FBF0DE", fg: C.goldDeep }}
+              mounted={mounted}
+              delay={300}
+            />{" "}
+          </>
+        )}
       </div>
 
       {/* Sales history */}
@@ -321,41 +341,58 @@ export default function WalletTransactions() {
           className="flex flex-col divide-y md:hidden"
           style={{ borderColor: C.line }}
         >
-          {filteredSales.map((row, i) => (
-            <div
-              key={row.id}
-              className="flex items-center justify-between gap-3 p-4 opacity-0 animate-riseIn transition-colors duration-200"
-              style={{
-                borderColor: C.line,
-                animationDelay: `${420 + i * 60}ms`,
-              }}
-            >
-              <div className="min-w-0">
-                <p
-                  className="truncate text-[13.5px] font-medium"
-                  style={{ color: C.ink }}
-                >
-                  {row.product}
-                </p>
-                <p
-                  className="mt-0.5 truncate text-[12px]"
-                  style={{ color: C.textMuted }}
-                >
-                  {row.buyer}
-                </p>
+          {loading &&
+            Array.from({ length: 4 }).map((_, i) => (
+              <div
+                key={i}
+                className="flex items-center justify-between gap-3 p-4"
+              >
+                <div className="min-w-0 flex-1">
+                  <div className="skeleton h-3.5 w-32 rounded-md" />
+                  <div className="skeleton mt-2 h-3 w-20 rounded-md" />
+                </div>
+                <div className="flex shrink-0 flex-col items-end gap-1.5">
+                  <div className="skeleton h-3.5 w-16 rounded-md" />
+                  <div className="skeleton h-5 w-20 rounded-full" />
+                </div>
               </div>
-              <div className="flex shrink-0 flex-col items-end gap-1.5">
-                <span
-                  className="text-[13px] font-semibold"
-                  style={{ color: C.ink }}
-                >
-                  {formatNaira(row.amount)}
-                </span>
-                <StatusBadge status={row.status} />
+            ))}
+          {!loading &&
+            filteredSales.map((row, i) => (
+              <div
+                key={row.id}
+                className="flex items-center justify-between gap-3 p-4 opacity-0 animate-riseIn transition-colors duration-200"
+                style={{
+                  borderColor: C.line,
+                  animationDelay: `${420 + i * 60}ms`,
+                }}
+              >
+                <div className="min-w-0">
+                  <p
+                    className="truncate text-[13.5px] font-medium"
+                    style={{ color: C.ink }}
+                  >
+                    {row.product}
+                  </p>
+                  <p
+                    className="mt-0.5 truncate text-[12px]"
+                    style={{ color: C.textMuted }}
+                  >
+                    {row.buyer}
+                  </p>
+                </div>
+                <div className="flex shrink-0 flex-col items-end gap-1.5">
+                  <span
+                    className="text-[13px] font-semibold"
+                    style={{ color: C.ink }}
+                  >
+                    {formatNaira(row.amount)}
+                  </span>
+                  <StatusBadge status={row.status} />
+                </div>
               </div>
-            </div>
-          ))}
-          {filteredSales.length === 0 && (
+            ))}
+          {!loading && filteredSales.length === 0 && (
             <div
               className="px-5 py-8 text-center text-[13px]"
               style={{ color: C.textMuted }}
@@ -388,39 +425,61 @@ export default function WalletTransactions() {
               </tr>
             </thead>
             <tbody>
-              {filteredSales.map((row, i) => (
-                <tr
-                  key={row.id}
-                  className="opacity-0 animate-riseIn border-t transition-colors duration-200 hover:bg-[#FBF7EF]"
-                  style={{
-                    borderColor: C.line,
-                    animationDelay: `${420 + i * 60}ms`,
-                  }}
-                >
-                  <td
-                    className="px-5 py-3.5 text-[13.5px] font-medium"
-                    style={{ color: C.ink }}
+              {loading &&
+                Array.from({ length: 4 }).map((_, i) => (
+                  <tr
+                    key={i}
+                    className="border-t"
+                    style={{ borderColor: C.line }}
                   >
-                    {row.buyer}
-                  </td>
-                  <td
-                    className="px-5 py-3.5 text-[13.5px]"
-                    style={{ color: C.inkFaint }}
+                    <td className="px-5 py-3.5">
+                      <div className="skeleton h-3.5 w-28 rounded-md" />
+                    </td>
+                    <td className="px-5 py-3.5">
+                      <div className="skeleton h-3.5 w-24 rounded-md" />
+                    </td>
+                    <td className="px-5 py-3.5">
+                      <div className="skeleton h-3.5 w-20 rounded-md" />
+                    </td>
+                    <td className="px-5 py-3.5">
+                      <div className="skeleton h-5 w-20 rounded-full" />
+                    </td>
+                  </tr>
+                ))}
+              {!loading &&
+                filteredSales.map((row, i) => (
+                  <tr
+                    key={row.id}
+                    className="opacity-0 animate-riseIn border-t transition-colors duration-200 hover:bg-[#FBF7EF]"
+                    style={{
+                      borderColor: C.line,
+                      animationDelay: `${420 + i * 60}ms`,
+                    }}
                   >
-                    {row.product}
-                  </td>
-                  <td
-                    className="px-5 py-3.5 text-[13.5px]"
-                    style={{ color: C.textMuted }}
-                  >
-                    {formatNaira(row.amount)}
-                  </td>
-                  <td className="px-5 py-3.5">
-                    <StatusBadge status={row.status} />
-                  </td>
-                </tr>
-              ))}
-              {filteredSales.length === 0 && (
+                    <td
+                      className="px-5 py-3.5 text-[13.5px] font-medium"
+                      style={{ color: C.ink }}
+                    >
+                      {row.buyer}
+                    </td>
+                    <td
+                      className="px-5 py-3.5 text-[13.5px]"
+                      style={{ color: C.inkFaint }}
+                    >
+                      {row.product}
+                    </td>
+                    <td
+                      className="px-5 py-3.5 text-[13.5px]"
+                      style={{ color: C.textMuted }}
+                    >
+                      {formatNaira(row.amount)}
+                    </td>
+                    <td className="px-5 py-3.5">
+                      <StatusBadge status={row.status} />
+                    </td>
+                  </tr>
+                ))}
+              {!loading && filteredSales.length === 0 && (
                 <tr>
                   <td
                     colSpan={4}
