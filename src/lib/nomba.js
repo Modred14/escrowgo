@@ -1,6 +1,6 @@
 import crypto from "crypto";
 
-const BASE_URL = process.env.NOMBA_BASE_URL || "https://sandbox.api.nomba.com";
+const BASE_URL = process.env.NOMBA_BASE_URL;
 
 export function isMockMode() {
   return (
@@ -89,10 +89,32 @@ export async function createCheckoutOrder({ orderReference, amount, currency, ca
   };
 }
 
-/**
- * Verifies the HMAC signature Nomba attaches to webhook payloads.
- * Header name per Nomba docs: "nomba-sig-value".
- */
+export async function verifyTransactionStatus({ orderReference }) {
+  if (isMockMode()) {
+    return { status: "SUCCESS", mock: true };
+  }
+
+  const token = await getAccessToken();
+  const res = await fetch(
+    `${BASE_URL}/v1/transactions/accounts/single?orderReference=${orderReference}`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        accountId: process.env.NOMBA_ACCOUNT_ID,
+      },
+    },
+  );
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Nomba transaction verification failed: ${res.status} ${text}`);
+  }
+
+  const data = await res.json();
+  return { status: data?.data?.status, mock: false, raw: data };
+}
+
 export function verifyWebhookSignature(rawBody, signature) {
   if (isMockMode()) return true;
   if (!signature || !process.env.NOMBA_WEBHOOK_SECRET) {
