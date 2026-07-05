@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useState, useRef, useEffect } from "react";
-import { useParams, useSearchParams, useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import {
   Link2,
   Copy,
@@ -68,26 +68,46 @@ function ShareButton({ href, icon: Icon, iconBg, label }) {
 
 function SuccessContent() {
   const { slug } = useParams();
-  const searchParams = useSearchParams();
   const router = useRouter();
-  const params = new URLSearchParams({
-    amount: String(data.amount),
-    deliveryFee: String(data.deliveryFee ?? 0),
-    expectedDelivery: computedExpectedDeliveryDate
-      ? computedExpectedDeliveryDate.toISOString()
-      : "",
-    createdOn: new Date().toISOString(),
-  });
 
-  router.push(`/orders/${data.dealSlug}/success?${params.toString()}`);
   const escrowgoLink =
     typeof window !== "undefined"
       ? `${window.location.origin}/pay/${slug}`
       : "";
-  const amount = searchParams.get("amount") || 0;
-  const deliveryFee = searchParams.get("deliveryFee") || 0;
-  const expectedDelivery = searchParams.get("expectedDelivery") || "";
-  const createdOn = searchParams.get("createdOn") || "";
+
+  const [order, setOrder] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    if (!slug) return;
+    let cancelled = false;
+
+    async function fetchOrder() {
+      try {
+        setLoading(true);
+        setError(false);
+        const res = await fetch(`/api/orders/${slug}`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data?.error || "Failed to fetch order");
+        if (!cancelled) setOrder(data);
+      } catch (err) {
+        if (!cancelled) setError(true);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    fetchOrder();
+    return () => {
+      cancelled = true;
+    };
+  }, [slug]);
+
+  const amount = order?.amount || 0;
+  const deliveryFee = order?.deliveryFee || 0;
+  const expectedDelivery = order?.expectedDelivery || "";
+  const createdOn = order?.createdOn || "";
 
   const [copied, setCopied] = useState(false);
   const timeoutRef = useRef(null);
@@ -98,33 +118,24 @@ function SuccessContent() {
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(paymentLink);
+      await navigator.clipboard.writeText(escrowgoLink);
       setCopied(true);
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
       timeoutRef.current = setTimeout(() => setCopied(false), 2200);
-      const whatsappHref = `https://wa.me/?text=${encodeURIComponent(
-        `Here's your EscrowGo payment link: ${escrowgoLink}`,
-      )}`;
-      const telegramHref = `https://t.me/share/url?url=${encodeURIComponent(
-        escrowgoLink,
-      )}&text=${encodeURIComponent("Here's your EscrowGo payment link")}`;
-      const mailHref = `mailto:?subject=${encodeURIComponent(
-        "Your EscrowGo payment link",
-      )}&body=${encodeURIComponent(escrowgoLink)}`;
     } catch {
       // clipboard can fail silently on old/insecure browsers
     }
   };
 
   const whatsappHref = `https://wa.me/?text=${encodeURIComponent(
-    `Here's your EscrowGo payment link: ${paymentLink}`,
+    `Here's your EscrowGo payment link: ${escrowgoLink}`,
   )}`;
   const telegramHref = `https://t.me/share/url?url=${encodeURIComponent(
-    paymentLink,
+    escrowgoLink,
   )}&text=${encodeURIComponent("Here's your EscrowGo payment link")}`;
   const mailHref = `mailto:?subject=${encodeURIComponent(
     "Your EscrowGo payment link",
-  )}&body=${encodeURIComponent(paymentLink)}`;
+  )}&body=${encodeURIComponent(escrowgoLink)}`;
 
   return (
     <div className="min-h-screen bg-[#FBF1D9] px-4 py-12 sm:px-6">
@@ -161,8 +172,102 @@ function SuccessContent() {
         @media (prefers-reduced-motion: reduce) {
           .reveal, .badge-pop { animation: none !important; opacity: 1 !important; }
         }
+          @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+        @keyframes pulseGlow {
+          0%, 100% { opacity: 0.6; }
+          50% { opacity: 1; }
+        }
+        @keyframes shakeIn {
+          0% { opacity: 0; transform: scale(0.9); }
+          60% { opacity: 1; transform: scale(1.03); }
+          100% { opacity: 1; transform: scale(1); }
+        }
+        .spinner-ring {
+          animation: spin 0.9s linear infinite;
+        }
+        .pulse-glow {
+          animation: pulseGlow 1.8s ease-in-out infinite;
+        }
+        .shake-in {
+          animation: shakeIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+        }
       `}</style>
 
+   {loading && (
+        <div className="mx-auto flex max-w-xl flex-col items-center justify-center gap-5 py-24">
+          <div className="relative flex h-16 w-16 items-center justify-center">
+            <div className="pulse-glow absolute h-16 w-16 rounded-full bg-amber-400/20 blur-xl" />
+            <svg className="spinner-ring h-12 w-12" viewBox="0 0 50 50">
+              <circle
+                cx="25"
+                cy="25"
+                r="20"
+                fill="none"
+                stroke="#FDE4B0"
+                strokeWidth="4"
+              />
+              <circle
+                cx="25"
+                cy="25"
+                r="20"
+                fill="none"
+                stroke="#F5B43C"
+                strokeWidth="4"
+                strokeLinecap="round"
+                strokeDasharray="90 150"
+              />
+            </svg>
+          </div>
+          <div className="text-center">
+            <p className="text-sm font-semibold text-amber-900">
+              Loading your order
+            </p>
+            <p className="pulse-glow mt-1 text-[13px] text-amber-700/60">
+              Fetching the latest details…
+            </p>
+          </div>
+        </div>
+      )}
+
+      {!loading && error && (
+        <div className="shake-in mx-auto max-w-xl">
+          <div className="flex flex-col items-center gap-4 rounded-3xl border border-red-100 bg-white/80 px-6 py-14 text-center shadow-lg shadow-red-900/5 backdrop-blur">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-red-50">
+              <svg
+                className="h-7 w-7 text-red-500"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="13" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+            </div>
+            <div>
+              <p className="text-[15px] font-semibold text-slate-800">
+                We couldn't load this order
+              </p>
+              <p className="mx-auto mt-1.5 max-w-xs text-[13px] leading-relaxed text-slate-500">
+                Please check the link or try refreshing the page.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => window.location.reload()}
+              className="mt-1 rounded-xl bg-slate-900 px-5 py-2.5 text-[13px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-800"
+            >
+              Try again
+            </button>
+          </div>
+        </div>
+      )}
+      {!loading && !error && (
       <div className="mx-auto max-w-xl">
         {/* Header */}
         <div
@@ -255,8 +360,8 @@ function SuccessContent() {
               </p>
               <p className="mt-1 text-[13px] leading-relaxed text-slate-500">
                 Share the payment link with the buyer. Once payment is
-                completed, we'll notify you by email and hold the funds securely
-                until the order is completed.
+                completed, we'll notify you by email and hold the funds
+                securely until the order is completed.
               </p>
             </div>
           </div>
@@ -300,7 +405,7 @@ function SuccessContent() {
           Go to dashboard
           <LayoutDashboard className="h-4 w-4" />
         </button>
-      </div>
+      </div>)}
     </div>
   );
 }

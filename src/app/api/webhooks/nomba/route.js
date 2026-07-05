@@ -7,8 +7,9 @@ import { notify } from "@/lib/notifications";
 export async function POST(req) {
   const rawBody = await req.text();
   const signature = req.headers.get("nomba-signature");
+  const timestamp = req.headers.get("nomba-timestamp");
 
-  if (!verifyWebhookSignature(rawBody, signature)) {
+  if (!verifyWebhookSignature(rawBody, signature, timestamp)) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
   }
 
@@ -19,17 +20,15 @@ export async function POST(req) {
     return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
   }
 
-  const eventType = event?.event_type || event?.eventType;
-  const orderReference =
-    event?.data?.order?.orderReference ||
-    event?.data?.orderReference ||
-    event?.data?.merchant_tx_ref;
+  const eventType = event?.event_type;
+  const orderReference = event?.data?.transaction?.merchantTxRef;
 
   if (!orderReference) {
-    return NextResponse.json(
-      { error: "Missing order reference" },
-      { status: 400 },
-    );
+    console.log("[webhook] no merchantTxRef in payload — ignoring", eventType);
+    return NextResponse.json({
+      received: true,
+      note: "No merchant reference in payload",
+    });
   }
 
   const payment = await prisma.payment.findUnique({
@@ -39,15 +38,9 @@ export async function POST(req) {
     return NextResponse.json({ received: true, note: "Unknown reference" });
   }
 
-  const isSuccessEvent =
-    !eventType ||
-    eventType.toLowerCase().includes("success") ||
-    event?.data?.transaction?.status === "success" ||
-    event?.data?.status === "success";
-
-  if (isSuccessEvent) {
+  if (eventType === "payment_success") {
     await markPaymentSuccess(payment.id);
-  } else {
+  } else if (eventType === "payment_failed") {
     await prisma.payment.update({
       where: { id: payment.id },
       data: { status: "FAILED" },
@@ -57,6 +50,8 @@ export async function POST(req) {
       message: "Your payment could not be completed. Please try again.",
       type: "ERROR",
     });
+  } else {
+    console.log("[webhook] unhandled event type:", eventType);
   }
 
   return NextResponse.json({ received: true });

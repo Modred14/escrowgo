@@ -32,10 +32,14 @@ async function getNombaAccessToken() {
     }),
   });
 
-  const json = await res.json();
-  if (!res.ok || json.code !== "00") {
-    throw new Error(json?.description || "Failed to authenticate with Nomba");
-  }
+ const json = await res.json();
+if (!res.ok || json.code !== "00") {
+  console.error("Nomba auth failed:", res.status, JSON.stringify(json), {
+  clientIdLen: process.env.NOMBA_CLIENT_ID,
+  accountIdLen: process.env.NOMBA_ACCOUNT_ID,
+});
+  throw new Error(json?.description || "Failed to authenticate with Nomba");
+}
 
   cachedNombaToken = json.data.access_token;
   cachedNombaTokenExpiry = new Date(json.data.expiresAt).getTime();
@@ -223,50 +227,47 @@ export async function POST(request) {
       orderReference,
       amount: total,
       customerEmail: buyerEmail,
-      callbackUrl: `${process.env.NEXT_PUBLIC_APP_URL}/deals/${slug}/complete`,
+      callbackUrl: `${process.env.NEXT_PUBLIC_APP_URL}/deal/${slug}/complete`,
       productName,
     });
-
-    const deal = await prisma.$transaction(async (tx) => {
-      return tx.deal.create({
-        data: {
-          slug,
-          sellerId: session.user.id,
-          sellerLocation: formatLocationString(sellerLocation),
-          buyerLocation: formatLocationString(buyerLocation),
-          deliveryOption,
-          estimatedDeliveryDays,
-          deliveryFee,
-          expectedDeliveryDate: new Date(Date.now() + estimatedDeliveryDays * 86400000),
-          status: "PENDING_PAYMENT",
-          product: {
-            create: {
-              name: productName,
-              description,
-              price,
-              images: imageUrls,
-            },
-          },
-          payments: {
-            create: {
-              amount: total,
-              currency: "NGN",
-              provider: "nomba",
-              providerRef: nombaData.orderReference,
-              checkoutUrl: nombaData.checkoutLink,
-              status: "PENDING",
-            },
-          },
-          qrCode: {
-            create: {
-              code: crypto.randomBytes(16).toString("hex"),
-            },
+console.log("NOMBA RESPONSE:", JSON.stringify(nombaData, null, 2));
+   const deal = await prisma.deal.create({
+      data: {
+        slug,
+        sellerId: session.user.id,
+        sellerLocation: formatLocationString(sellerLocation),
+        buyerLocation: formatLocationString(buyerLocation),
+        deliveryOption,
+        estimatedDeliveryDays,
+        deliveryFee,
+        expectedDeliveryDate: new Date(Date.now() + estimatedDeliveryDays * 86400000),
+        status: "PENDING_PAYMENT",
+        product: {
+          create: {
+            name: productName,
+            description,
+            price,
+            images: imageUrls,
           },
         },
-        include: { product: true, payments: true },
-      });
+        payments: {
+          create: {
+            amount: total,
+            currency: "NGN",
+            provider: "nomba",
+            providerRef: nombaData.orderReference,
+            checkoutUrl: nombaData.checkoutLink,
+            status: "PENDING",
+          },
+        },
+        qrCode: {
+          create: {
+            code: crypto.randomBytes(16).toString("hex"),
+          },
+        },
+      },
+      include: { product: true, payments: true },
     });
-
     return NextResponse.json({
       dealSlug: deal.slug,
       paymentLink: nombaData.checkoutLink,

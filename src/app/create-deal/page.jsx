@@ -584,7 +584,7 @@ export default function CreateOrderPage() {
 
   const numericPrice = Number(price) || 0;
   const total = numericPrice + deliveryFee;
-
+const router = useRouter();
   const canSubmit =
     productName.trim() &&
     numericPrice > 0 &&
@@ -619,17 +619,7 @@ export default function CreateOrderPage() {
         );
       }
 
-      const params = new URLSearchParams({
-        paymentLink: data.paymentLink,
-        amount: String(data.amount),
-        deliveryFee: String(data.deliveryFee ?? 0),
-        expectedDelivery: computedExpectedDeliveryDate
-          ? computedExpectedDeliveryDate.toISOString()
-          : "",
-        createdOn: new Date().toISOString(),
-      });
-
-      router.push(`/orders/${data.dealSlug}/success?${params.toString()}`);
+      router.push(`/orders/${data.dealSlug}}`);
     } catch (err) {
       toast.error(err.message || "Something went wrong. Please try again.");
     } finally {

@@ -11,8 +11,8 @@ import Timeline from "@/components/Timeline";
 import { PageLoader, Spinner } from "@/components/Loader";
 import { formatNaira, formatDate } from "@/lib/utils";
 
-export default function DealPage() {
-  const { slug } = useParams();
+export default async function DealPage() {
+  const { slug } = await params;
   const router = useRouter();
   const { data: session, status: sessionStatus } = useSession();
   const [deal, setDeal] = useState(null);
