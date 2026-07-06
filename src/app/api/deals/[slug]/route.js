@@ -12,6 +12,7 @@ export async function GET(_request, { params }) {
         product: true,
         payments: { orderBy: { createdAt: "desc" }, take: 1 },
         qrCode: true,
+        delivery: true,
       },
     });
 
@@ -54,6 +55,12 @@ export async function GET(_request, { params }) {
         ? {
             code: deal.qrCode.code,
             isUsed: deal.qrCode.isUsed,
+          }
+        : null,
+      delivery: deal.delivery
+        ? {
+            status: deal.delivery.status,
+            fee: deal.delivery.fee,
           }
         : null,
     });

@@ -340,7 +340,7 @@ export default function WalletTransactions() {
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search product"
+                placeholder="Search merchant or product"
                 className="w-full rounded-lg border py-2 pl-8 pr-3 text-[12.5px] outline-none transition-all duration-300 sm:w-[200px] sm:focus:w-[240px]"
                 style={{ borderColor: C.line, color: C.ink }}
               />
@@ -396,6 +396,7 @@ export default function WalletTransactions() {
                     className="mt-0.5 truncate text-[12px]"
                     style={{ color: C.textMuted }}
                   >
+                    {row.merchant}
                     {row.courier && row.courier !== "Self delivery" && (
                       <> · courier: {row.courier}</>
                     )}
@@ -428,17 +429,21 @@ export default function WalletTransactions() {
           <table className="w-full min-w-[640px] border-collapse">
             <thead>
               <tr>
-                {["Product", "Courier", "Total amount", "Delivery status"].map(
-                  (h) => (
-                    <th
-                      key={h}
-                      className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.08em]"
-                      style={{ color: C.goldDeep }}
-                    >
-                      {h}
-                    </th>
-                  ),
-                )}
+                {[
+                  "Merchant name",
+                  "Product",
+                  "Courier",
+                  "Total amount",
+                  "Delivery status",
+                ].map((h) => (
+                  <th
+                    key={h}
+                    className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.08em]"
+                    style={{ color: C.goldDeep }}
+                  >
+                    {h}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
@@ -476,6 +481,12 @@ export default function WalletTransactions() {
                       animationDelay: `${420 + i * 60}ms`,
                     }}
                   >
+                    <td
+                      className="px-5 py-3.5 text-[13.5px] font-medium"
+                      style={{ color: C.ink }}
+                    >
+                      {row.merchant}
+                    </td>
                     <td
                       className="px-5 py-3.5 text-[13.5px]"
                       style={{ color: C.inkFaint }}

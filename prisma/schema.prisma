@@ -98,6 +98,12 @@ model Deal {
 
   status                DealStatus     @default(PENDING_PAYMENT)
 
+  // Set by /api/cron/refund-check when an EscrowGo Delivery order passes its
+  // expectedDeliveryDate while the courier already has the item — the delay
+  // is EscrowGo's fault, so we don't auto-refund, we flag it for a human to
+  // resolve instead. Also used by the wallet page to show "In Dispute".
+  flaggedForReviewAt    DateTime?
+
   product               Product?
   payments              Payment[]
   escrow                Escrow?
