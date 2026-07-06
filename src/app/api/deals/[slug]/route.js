@@ -11,6 +11,7 @@ export async function GET(_request, { params }) {
         seller: { select: { name: true } },
         product: true,
         payments: { orderBy: { createdAt: "desc" }, take: 1 },
+        qrCode: true,
       },
     });
 
@@ -21,8 +22,11 @@ export async function GET(_request, { params }) {
     const latestPayment = deal.payments[0] || null;
 
     return NextResponse.json({
+      id: deal.id,
       slug: deal.slug,
       status: deal.status,
+      sellerId: deal.sellerId,
+      buyerId: deal.buyerId,
       sellerName: deal.seller?.name || "Seller",
       sellerLocation: deal.sellerLocation,
       buyerLocation: deal.buyerLocation,
@@ -44,6 +48,12 @@ export async function GET(_request, { params }) {
             currency: latestPayment.currency,
             status: latestPayment.status,
             checkoutUrl: latestPayment.checkoutUrl,
+          }
+        : null,
+      qrCode: deal.qrCode
+        ? {
+            code: deal.qrCode.code,
+            isUsed: deal.qrCode.isUsed,
           }
         : null,
     });

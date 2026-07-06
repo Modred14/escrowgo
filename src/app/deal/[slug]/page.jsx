@@ -11,8 +11,8 @@ import Timeline from "@/components/Timeline";
 import { PageLoader, Spinner } from "@/components/Loader";
 import { formatNaira, formatDate } from "@/lib/utils";
 
-export default async function DealPage() {
-  const { slug } = await params;
+export default function DealPage() {
+  const { slug } = useParams();
   const router = useRouter();
   const { data: session, status: sessionStatus } = useSession();
   const [deal, setDeal] = useState(null);
@@ -27,7 +27,7 @@ export default async function DealPage() {
       const res = await fetch(`/api/deals/${slug}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Deal not found.");
-      setDeal(data.deal);
+      setDeal(data);
     } catch (err) {
       toast.error(err.message);
     } finally {
@@ -185,7 +185,7 @@ export default async function DealPage() {
                 <div>
                   <p className="text-ink/40">Seller</p>
                   <p className="mt-0.5 font-semibold text-ink">
-                    {deal.seller.name}
+                    {deal.sellerName}
                   </p>
                 </div>
                 <div>

@@ -91,6 +91,7 @@ function useDashboardData() {
     ordersTrend: 0,
     salesTrend: 0,
     recentOrders: [],
+    pendingPickups: [],
   });
   const [loading, setLoading] = useState(true);
 
@@ -188,17 +189,13 @@ const [scanResult, setScanResult] = useState(null);
 
 const handleScan = useCallback(async (scannedValue) => {
   try {
-    const url = new URL(scannedValue);
-    const parts = url.pathname.split("/").filter(Boolean); // ["verify", "gg-a1e0a382"]
-    const slug = parts[1];
-    const code = url.searchParams.get("code");
+    const code = (scannedValue || "").trim();
+    if (!code) throw new Error("This doesn't look like a valid EscrowGo QR code");
 
-    if (!slug || !code) throw new Error("This doesn't look like a valid EscrowGo QR code");
-
-    const res = await fetch("/api/deals/verify-qr", {
+    const res = await fetch("/api/qr/verify", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ slug, code }),
+      body: JSON.stringify({ code }),
     });
     const data = await res.json();
 
@@ -209,7 +206,7 @@ const handleScan = useCallback(async (scannedValue) => {
 
     setScanResult({
       success: true,
-      message: `Delivery confirmed for "${data.product}". Funds released.`,
+      message: `Delivery confirmed for "${data.deal?.productName}". Funds released.`,
     });
     setQrModalOpen(false);
   } catch (err) {
@@ -479,6 +476,52 @@ const handleScan = useCallback(async (scannedValue) => {
           </>
         )}
       </div>
+
+      {/* Pending Products to Pick Up (buyer-side: paid but not yet confirmed via QR) */}
+      {!dataLoading && data.pendingPickups?.length > 0 && (
+        <div
+          className="mt-6 rounded-2xl border bg-white p-5 opacity-0 animate-riseIn"
+          style={{ borderColor: C.line, animationDelay: "320ms" }}
+        >
+          <div className="flex items-center gap-2">
+            <div
+              className="flex h-8 w-8 items-center justify-center rounded-lg"
+              style={{ backgroundColor: "#FBF0DE", color: C.goldDeep }}
+            >
+              <QrCode size={16} strokeWidth={2.2} />
+            </div>
+            <p className="text-[13px] font-bold uppercase tracking-[0.1em]" style={{ color: C.ink }}>
+              Pending Products to Pick Up
+            </p>
+          </div>
+
+          <div className="mt-4 divide-y" style={{ borderColor: C.line }}>
+            {data.pendingPickups.map((item) => (
+              <div
+                key={item.slug}
+                className="flex items-center justify-between gap-3 py-3"
+              >
+                <div className="min-w-0">
+                  <p className="truncate text-[13px] font-semibold" style={{ color: C.ink }}>
+                    {item.productName}
+                  </p>
+                  <p className="text-[12px]" style={{ color: C.textMuted }}>
+                    {formatNaira(item.price)}
+                  </p>
+                </div>
+                <Link
+                  href={`/deal/${item.slug}`}
+                  className="flex flex-shrink-0 items-center gap-1.5 rounded-xl px-3 py-2 text-[12px] font-semibold transition"
+                  style={{ backgroundColor: C.ink, color: C.gold }}
+                >
+                  <QrCode size={13} />
+                  View QR Code
+                </Link>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Content grid */}
       <div className="mt-6 grid grid-cols-1 gap-5 xl:grid-cols-3">

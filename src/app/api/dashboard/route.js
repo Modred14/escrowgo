@@ -57,6 +57,27 @@ export async function GET() {
     status: COMPLETED.includes(d.status) ? "Completed" : "Pending",
   }));
 
+  // Buyer-side: products this user has paid for that are still awaiting pickup
+  // confirmation (their QR hasn't been scanned yet). Disappears automatically
+  // the moment the QR is used, since that flips status to PAYMENT_RELEASED.
+  const pickupDeals = await prisma.deal.findMany({
+    where: {
+      buyerId: session.user.id,
+      status: { in: ["FUNDS_HELD", "OUT_FOR_DELIVERY", "DELIVERED"] },
+    },
+    include: { product: true, qrCode: true },
+    orderBy: { createdAt: "desc" },
+  });
+
+  const pendingPickups = pickupDeals
+    .filter((d) => !d.qrCode || !d.qrCode.isUsed)
+    .map((d) => ({
+      slug: d.slug,
+      productName: d.product?.name ?? "Untitled product",
+      price: d.product?.price ?? 0,
+      status: d.status,
+    }));
+
   return NextResponse.json({
     totalOrders,
     completedOrders,
@@ -65,5 +86,6 @@ export async function GET() {
     ordersTrend: pctChange(thisMonthDeals.length, lastMonthDeals.length),
     salesTrend: pctChange(thisMonthSales, lastMonthSales),
     recentOrders,
+    pendingPickups,
   });
 }

@@ -1,83 +1,71 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { notify } from "@/lib/notifications";
 
+const TIMEOUT_MS = 3 * 24 * 60 * 60 * 1000; // 3 days
+
+/**
+ * Call this on a schedule with header: Authorization: Bearer <CRON_SECRET>
+ *
+ * If no courier has accepted an EscrowGo Delivery job within 3 days of the
+ * deal becoming FUNDS_HELD (i.e. 3 days since the buyer's payment succeeded),
+ * the seller is notified and the deal is automatically switched to Self
+ * Delivery. From that point on, only the seller can scan the buyer's QR
+ * (enforced by /api/qr/verify's deliveryOption check).
+ */
+export async function GET(req) {
+  return handleCourierTimeoutSweep(req);
+}
 export async function POST(req) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) {
-    return NextResponse.json({ error: "You must be logged in to scan a release code." }, { status: 401 });
+  return handleCourierTimeoutSweep(req);
+}
+
+async function handleCourierTimeoutSweep(req) {
+  const auth = req.headers.get("authorization");
+  const expected = `Bearer ${process.env.CRON_SECRET}`;
+  if (!process.env.CRON_SECRET || auth !== expected) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { code } = await req.json();
-  if (!code) return NextResponse.json({ error: "No code provided." }, { status: 400 });
+  const cutoff = new Date(Date.now() - TIMEOUT_MS);
 
-  const qrCode = await prisma.qRCode.findUnique({
-    where: { code: code.trim() },
-    include: {
-      deal: {
-        include: {
-          product: true,
-          escrow: true,
-          delivery: { include: { agent: true } },
-        },
-      },
+  const candidates = await prisma.deal.findMany({
+    where: {
+      deliveryOption: "ESCROWGO",
+      status: "FUNDS_HELD",
+      delivery: { status: "UNASSIGNED" },
     },
+    include: { product: true, delivery: true, payments: true },
   });
 
-  if (!qrCode) {
-    return NextResponse.json({ error: "Invalid or unrecognized QR code." }, { status: 404 });
+  const switched = [];
+
+  for (const deal of candidates) {
+    const successPayment = deal.payments.find((p) => p.status === "SUCCESS");
+    if (!successPayment?.paidAt || successPayment.paidAt > cutoff) continue;
+
+    await prisma.deal.update({
+      where: { id: deal.id },
+      data: { deliveryOption: "SELF" },
+    });
+    await prisma.delivery.update({
+      where: { id: deal.delivery.id },
+      data: { pickupLocation: deal.sellerLocation, dropoffLocation: deal.buyerLocation },
+    });
+
+    await notify(deal.sellerId, {
+      title: "No courier available — switched to Self Delivery",
+      message: `No EscrowGo courier accepted "${deal.product.name}" within 3 days. Please deliver it yourself, then scan the buyer's QR code once it's delivered.`,
+      type: "WARNING",
+    });
+    await notify(deal.buyerId, {
+      title: "Delivery method changed",
+      message: `No courier was available for "${deal.product.name}" in time, so the seller will now deliver it directly.`,
+      type: "INFO",
+    });
+
+    switched.push(deal.id);
   }
 
-  if (qrCode.isUsed) {
-    return NextResponse.json({ error: "This QR code has already been used to release payment." }, { status: 409 });
-  }
-
-  const deal = qrCode.deal;
-
-  // --- Authorized-account check: only the seller, or the assigned courier, may release escrow.
-  const isSeller = deal.sellerId === session.user.id;
-  const isAssignedAgent =
-    session.user.role === "DELIVERY_AGENT" &&
-    deal.delivery?.agent?.userId === session.user.id;
-
-  if (!isSeller && !isAssignedAgent) {
-    return NextResponse.json(
-      { error: "Your account isn't authorized to release this delivery's escrow." },
-      { status: 403 }
-    );
-  }
-
-  if (!["DELIVERED"].includes(deal.status)) {
-    return NextResponse.json(
-      { error: "This deal must be marked as delivered before escrow can be released." },
-      { status: 400 }
-    );
-  }
-
-  const now = new Date();
-
-  await prisma.qRCode.update({ where: { id: qrCode.id }, data: { isUsed: true, usedAt: now } });
-  await prisma.escrow.update({
-    where: { dealId: deal.id },
-    data: { status: "RELEASED", releasedAt: now },
-  });
-  await prisma.deal.update({ where: { id: deal.id }, data: { status: "PAYMENT_RELEASED" } });
-
-  await notify(deal.buyerId, {
-    title: "Escrow released",
-    message: `Delivery confirmed. Payment for "${deal.product.name}" has been released to the seller.`,
-    type: "SUCCESS",
-  });
-  await notify(deal.sellerId, {
-    title: "Payment released to you",
-    message: `Delivery of "${deal.product.name}" was confirmed and escrow has been released.`,
-    type: "SUCCESS",
-  });
-
-  return NextResponse.json({
-    success: true,
-    deal: { slug: deal.slug, status: "PAYMENT_RELEASED", productName: deal.product.name },
-  });
+  return NextResponse.json({ checked: candidates.length, switched: switched.length, dealIds: switched });
 }

@@ -28,7 +28,12 @@ export async function GET() {
     }),
     prisma.deal.findMany({
       where: { sellerId },
-      include: { product: true, buyer: true },
+      include: {
+        product: true,
+        seller: { select: { name: true } },
+        buyer: { select: { name: true } },
+        delivery: { include: { agent: { include: { user: { select: { name: true } } } } } },
+      },
       orderBy: { createdAt: "desc" },
     }),
   ]);
@@ -43,8 +48,11 @@ export async function GET() {
   const sales = deals.map((d) => ({
     id: d.slug ?? d.id,
     buyer: d.buyer?.name ?? "Awaiting buyer",
+    seller: d.seller?.name ?? "You",
+    courier: d.deliveryOption === "ESCROWGO" ? (d.delivery?.agent?.user?.name ?? "Not yet assigned") : "Self delivery",
     product: d.product?.name ?? "Untitled product",
     amount: d.product?.price ?? 0,
+    deliveryStatus: d.delivery?.status ?? "UNASSIGNED",
     status: toUiStatus(d.status),
   }));
 
