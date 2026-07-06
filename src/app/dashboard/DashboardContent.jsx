@@ -184,12 +184,38 @@ export default function DashboardContent({ onNavigate }) {
   const { data, loading: dataLoading } = useDashboardData();
   const [mounted, setMounted] = useState(false);
   const [qrModalOpen, setQrModalOpen] = useState(false);
+const [scanResult, setScanResult] = useState(null);
 
-  const handleScan = useCallback((scannedValue) => {
-    console.log("Scanned:", scannedValue);
+const handleScan = useCallback(async (scannedValue) => {
+  try {
+    const url = new URL(scannedValue);
+    const parts = url.pathname.split("/").filter(Boolean); // ["verify", "gg-a1e0a382"]
+    const slug = parts[1];
+    const code = url.searchParams.get("code");
 
-    // call delivery-confirm API
-  }, []);
+    if (!slug || !code) throw new Error("This doesn't look like a valid EscrowGo QR code");
+
+    const res = await fetch("/api/deals/verify-qr", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ slug, code }),
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      setScanResult({ success: false, message: data.error || "Verification failed" });
+      return;
+    }
+
+    setScanResult({
+      success: true,
+      message: `Delivery confirmed for "${data.product}". Funds released.`,
+    });
+    setQrModalOpen(false);
+  } catch (err) {
+    setScanResult({ success: false, message: err.message || "Could not read this QR code" });
+  }
+}, []);
 
   const { videoRef, error: qrError } = useQrScanner(qrModalOpen, handleScan);
   useEffect(() => {
@@ -207,6 +233,8 @@ export default function DashboardContent({ onNavigate }) {
 
   const firstName = session?.user?.name ? session.user.name.split(" ")[0] : "";
 
+
+  
   return (
     <div>
       <style jsx>{`
