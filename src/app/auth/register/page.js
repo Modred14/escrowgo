@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import { Spinner } from "@/components/Loader";
@@ -55,8 +55,10 @@ function getCitiesForCountry(country) {
     .map((c) => c.name)
     .sort((a, b) => a.localeCompare(b));
 }
-export default function RegisterPage() {
+function RegisterForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -208,7 +210,7 @@ export default function RegisterPage() {
       if (signinRes?.error) throw new Error(signinRes.error);
 
       toast.success("Account created. Welcome to EscrowGo!");
-      router.push("/dashboard");
+      router.replace(callbackUrl);
       router.refresh();
     } catch (err) {
       toast.error(err.message);
@@ -444,7 +446,7 @@ export default function RegisterPage() {
 
             <button
               type="button"
-              onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+              onClick={() => signIn("google", { callbackUrl })}
               className="egv-google egv-field-in"
               style={{ animationDelay: "670ms" }}
             >
@@ -458,7 +460,10 @@ export default function RegisterPage() {
             style={{ animationDelay: "700ms" }}
           >
             Already have an account?{" "}
-            <Link href="/auth/login" className="text-brass-dark font-bold ">
+            <Link
+              href={`/auth/login?callbackUrl=${encodeURIComponent(callbackUrl)}`}
+              className="text-brass-dark font-bold "
+            >
               Log in
             </Link>
           </p>
@@ -467,6 +472,14 @@ export default function RegisterPage() {
 
       <Styles />
     </main>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={null}>
+      <RegisterForm />
+    </Suspense>
   );
 }
 

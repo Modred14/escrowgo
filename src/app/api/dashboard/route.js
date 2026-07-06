@@ -57,6 +57,22 @@ export async function GET() {
     status: COMPLETED.includes(d.status) ? "Completed" : "Pending",
   }));
 
+  // Seller-side: every deal this user created that hasn't been fully
+  // completed yet (escrow not released) or closed out (cancelled/refunded).
+  // Mirrors the buyer's "Pending Products to Pick Up", but from the seller's
+  // side, and includes deals still awaiting payment too.
+  const pendingDeliveries = deals
+    .filter((d) => !COMPLETED.includes(d.status) && !CLOSED_OUT.includes(d.status))
+    .map((d) => ({
+      slug: d.slug,
+      productName: d.product?.name ?? "Untitled product",
+      price: d.product?.price ?? 0,
+      buyer: d.buyer?.name ?? "Awaiting buyer",
+      status: d.status,
+      deliveryOption: d.deliveryOption,
+      flagged: !!d.flaggedForReviewAt,
+    }));
+
   // Buyer-side: products this user has paid for that are still awaiting pickup
   // confirmation (their QR hasn't been scanned yet). Disappears automatically
   // the moment the QR is used, since that flips status to PAYMENT_RELEASED.

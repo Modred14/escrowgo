@@ -17,6 +17,13 @@ import { QrCode, ScanLine, X } from "lucide-react";
 
 import jsQR from "jsqr";
 
+const DEAL_STATUS_LABELS = {
+  PENDING_PAYMENT: "Awaiting payment",
+  FUNDS_HELD: "Paid — awaiting delivery",
+  OUT_FOR_DELIVERY: "Out for delivery",
+  DELIVERED: "Delivered — awaiting pickup confirmation",
+};
+
 function useQrScanner(active, onScan) {
   const videoRef = useRef(null);
   const streamRef = useRef(null);
@@ -92,6 +99,7 @@ function useDashboardData() {
     salesTrend: 0,
     recentOrders: [],
     pendingPickups: [],
+    pendingDeliveries: [],
   });
   const [loading, setLoading] = useState(true);
 
@@ -516,6 +524,50 @@ const handleScan = useCallback(async (scannedValue) => {
                 >
                   <QrCode size={13} />
                   View QR Code
+                </Link>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Pending Deliveries (seller-side: deals created that aren't completed/closed out yet) */}
+      {!dataLoading && data.pendingDeliveries?.length > 0 && (
+        <div
+          className="mt-6 rounded-2xl border bg-white p-5 opacity-0 animate-riseIn"
+          style={{ borderColor: C.line, animationDelay: "360ms" }}
+        >
+          <div className="flex items-center gap-2">
+            <div
+              className="flex h-8 w-8 items-center justify-center rounded-lg"
+              style={{ backgroundColor: "#FBF0DE", color: C.goldDeep }}
+            >
+              <ShoppingBag size={16} strokeWidth={2.2} />
+            </div>
+            <p className="text-[13px] font-bold uppercase tracking-[0.1em]" style={{ color: C.ink }}>
+              Pending Deliveries
+            </p>
+          </div>
+
+          <div className="mt-4 divide-y" style={{ borderColor: C.line }}>
+            {data.pendingDeliveries.map((item) => (
+              <div key={item.slug} className="flex items-center justify-between gap-3 py-3">
+                <div className="min-w-0">
+                  <p className="truncate text-[13px] font-semibold" style={{ color: C.ink }}>
+                    {item.productName}
+                  </p>
+                  <p className="text-[12px]" style={{ color: C.textMuted }}>
+                    {item.buyer} · {formatNaira(item.price)} ·{" "}
+                    {DEAL_STATUS_LABELS[item.status] || item.status}
+                    {item.flagged && " · Under review"}
+                  </p>
+                </div>
+                <Link
+                  href={`/deal/${item.slug}`}
+                  className="flex flex-shrink-0 items-center gap-1.5 rounded-xl border px-3 py-2 text-[12px] font-semibold transition"
+                  style={{ borderColor: C.line, color: C.ink }}
+                >
+                  Manage
                 </Link>
               </div>
             ))}

@@ -59,7 +59,7 @@ function LoginForm() {
       return;
     }
     toast.success("Welcome back.");
-    router.push(callbackUrl);
+    router.replace(callbackUrl);
     router.refresh();
   }
 
@@ -145,7 +145,10 @@ function LoginForm() {
             style={{ animationDelay: "280ms" }}
           >
             Don't have an account?{" "}
-            <Link href="/auth/register" className="text-brass-dark font-bold ">
+            <Link
+              href={`/auth/register?callbackUrl=${encodeURIComponent(callbackUrl)}`}
+              className="text-brass-dark font-bold "
+            >
               Sign up
             </Link>
           </p>

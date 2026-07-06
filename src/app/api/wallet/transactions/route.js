@@ -7,10 +7,29 @@ import { prisma } from "@/lib/prisma";
 // NOTE: schema has no real "dispute" flag — FUNDS_HELD/OUT_FOR_DELIVERY are
 // shown as "In Dispute" only as a placeholder for "in progress, not settled".
 
-function toUiStatus(status) {
-  if (status === "DELIVERED" || status === "PAYMENT_RELEASED") return "Delivered";
-  if (status === "CANCELLED" || status === "REFUNDED") return "Undelivered";
-  return "In Dispute";
+// DealStatus -> UI status mapping. Only genuinely flagged deals show as
+// "In Dispute" (flaggedForReviewAt is set by the delivery-deadline cron).
+// Everything else reflects its real, current state.
+function toUiStatus(deal) {
+  if (deal.flaggedForReviewAt) return "In Dispute";
+  switch (deal.status) {
+    case "PENDING_PAYMENT":
+      return "Awaiting Payment";
+    case "FUNDS_HELD":
+      return "In Escrow";
+    case "OUT_FOR_DELIVERY":
+      return "Out For Delivery";
+    case "DELIVERED":
+      return "Awaiting Pickup Confirmation";
+    case "PAYMENT_RELEASED":
+      return "Completed";
+    case "CANCELLED":
+      return "Cancelled";
+    case "REFUNDED":
+      return "Refunded";
+    default:
+      return deal.status;
+  }
 }
 
 export async function GET() {
@@ -21,9 +40,12 @@ export async function GET() {
 
   const sellerId = session.user.id;
 
-  const [payments, deals] = await Promise.all([
-    prisma.payment.findMany({
-      where: { status: "SUCCESS", deal: { sellerId } },
+  const [releasedEscrows, deals] = await Promise.all([
+    // Only escrow that has actually been RELEASED to the seller counts as
+    // real balance. Money still held in escrow (FUNDS_HELD/OUT_FOR_DELIVERY/
+    // DELIVERED-but-unscanned) must NOT show up as spendable balance.
+    prisma.escrow.findMany({
+      where: { status: "RELEASED", deal: { sellerId } },
       select: { amount: true },
     }),
     prisma.deal.findMany({
@@ -38,7 +60,7 @@ export async function GET() {
     }),
   ]);
 
-  const moneyIn = payments.reduce((sum, p) => sum + p.amount, 0);
+  const moneyIn = releasedEscrows.reduce((sum, e) => sum + e.amount, 0);
 
   // No withdrawal-tracking model exists yet — placeholder until one is added.
   const totalWithdrawn = 0;
@@ -47,13 +69,13 @@ export async function GET() {
 
   const sales = deals.map((d) => ({
     id: d.slug ?? d.id,
-    buyer: d.buyer?.name ?? "Awaiting buyer",
+    merchant: d.buyer?.name ?? "Awaiting merchant",
     seller: d.seller?.name ?? "You",
     courier: d.deliveryOption === "ESCROWGO" ? (d.delivery?.agent?.user?.name ?? "Not yet assigned") : "Self delivery",
     product: d.product?.name ?? "Untitled product",
     amount: d.product?.price ?? 0,
     deliveryStatus: d.delivery?.status ?? "UNASSIGNED",
-    status: toUiStatus(d.status),
+    status: toUiStatus(d),
   }));
 
   return NextResponse.json({

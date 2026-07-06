@@ -12,12 +12,26 @@ import {
   AlertTriangle,
   Search,
   ArrowRight,
+  Clock3,
+  ShieldCheck,
+  Truck,
+  PackageCheck,
+  Ban,
 } from "lucide-react";
 import { useCountUp, formatNaira, C } from "./hooks";
 
 const STATUS_STYLES = {
-  Delivered: { bg: C.greenSoft, fg: C.green, icon: CheckCircle2 },
-  Undelivered: { bg: C.redSoft, fg: C.red, icon: XCircle },
+  "Awaiting Payment": { bg: "#F1F0EC", fg: C.textMuted, icon: Clock3 },
+  "In Escrow": { bg: "#FBF0DE", fg: C.goldDeep, icon: ShieldCheck },
+  "Out For Delivery": { bg: "#FBF0DE", fg: C.goldDeep, icon: Truck },
+  "Awaiting Pickup Confirmation": {
+    bg: "#FBF0DE",
+    fg: C.goldDeep,
+    icon: PackageCheck,
+  },
+  Completed: { bg: C.greenSoft, fg: C.green, icon: CheckCircle2 },
+  Cancelled: { bg: C.redSoft, fg: C.red, icon: Ban },
+  Refunded: { bg: C.redSoft, fg: C.red, icon: XCircle },
   "In Dispute": { bg: "#FBF0DE", fg: C.goldDeep, icon: AlertTriangle },
 };
 
@@ -102,7 +116,11 @@ function MiniStat({
 }
 
 function StatusBadge({ status }) {
-  const s = STATUS_STYLES[status];
+  const s = STATUS_STYLES[status] || {
+    bg: "#F1F0EC",
+    fg: C.textMuted,
+    icon: Clock3,
+  };
   const Icon = s.icon;
   return (
     <span
@@ -132,7 +150,7 @@ export default function WalletTransactions() {
   });
   const filteredSales = sales.filter(
     (s) =>
-      s.buyer.toLowerCase().includes(query.toLowerCase()) ||
+      s.merchant.toLowerCase().includes(query.toLowerCase()) ||
       s.product.toLowerCase().includes(query.toLowerCase()),
   );
 
@@ -322,7 +340,7 @@ export default function WalletTransactions() {
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search buyer or product"
+                placeholder="Search product"
                 className="w-full rounded-lg border py-2 pl-8 pr-3 text-[12.5px] outline-none transition-all duration-300 sm:w-[200px] sm:focus:w-[240px]"
                 style={{ borderColor: C.line, color: C.ink }}
               />
@@ -378,7 +396,9 @@ export default function WalletTransactions() {
                     className="mt-0.5 truncate text-[12px]"
                     style={{ color: C.textMuted }}
                   >
-                    {row.buyer}
+                    {row.courier && row.courier !== "Self delivery" && (
+                      <> · courier: {row.courier}</>
+                    )}
                   </p>
                 </div>
                 <div className="flex shrink-0 flex-col items-end gap-1.5">
@@ -408,20 +428,17 @@ export default function WalletTransactions() {
           <table className="w-full min-w-[640px] border-collapse">
             <thead>
               <tr>
-                {[
-                  "Buyer name",
-                  "Product",
-                  "Total amount",
-                  "Delivery status",
-                ].map((h) => (
-                  <th
-                    key={h}
-                    className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.08em]"
-                    style={{ color: C.goldDeep }}
-                  >
-                    {h}
-                  </th>
-                ))}
+                {["Product", "Courier", "Total amount", "Delivery status"].map(
+                  (h) => (
+                    <th
+                      key={h}
+                      className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.08em]"
+                      style={{ color: C.goldDeep }}
+                    >
+                      {h}
+                    </th>
+                  ),
+                )}
               </tr>
             </thead>
             <tbody>
@@ -442,6 +459,9 @@ export default function WalletTransactions() {
                       <div className="skeleton h-3.5 w-20 rounded-md" />
                     </td>
                     <td className="px-5 py-3.5">
+                      <div className="skeleton h-3.5 w-20 rounded-md" />
+                    </td>
+                    <td className="px-5 py-3.5">
                       <div className="skeleton h-5 w-20 rounded-full" />
                     </td>
                   </tr>
@@ -457,16 +477,16 @@ export default function WalletTransactions() {
                     }}
                   >
                     <td
-                      className="px-5 py-3.5 text-[13.5px] font-medium"
-                      style={{ color: C.ink }}
+                      className="px-5 py-3.5 text-[13.5px]"
+                      style={{ color: C.inkFaint }}
                     >
-                      {row.buyer}
+                      {row.product}
                     </td>
                     <td
                       className="px-5 py-3.5 text-[13.5px]"
                       style={{ color: C.inkFaint }}
                     >
-                      {row.product}
+                      {row.courier}
                     </td>
                     <td
                       className="px-5 py-3.5 text-[13.5px]"
@@ -482,7 +502,7 @@ export default function WalletTransactions() {
               {!loading && filteredSales.length === 0 && (
                 <tr>
                   <td
-                    colSpan={4}
+                    colSpan={5}
                     className="px-5 py-8 text-center text-[13px]"
                     style={{ color: C.textMuted }}
                   >
