@@ -68,7 +68,10 @@ function PendingPickupRow({ item }) {
           </div>
         )}
         <div className="min-w-0">
-          <p className="truncate text-[13px] font-semibold" style={{ color: C.ink }}>
+          <p
+            className="truncate text-[13px] font-semibold"
+            style={{ color: C.ink }}
+          >
             {item.productName}
           </p>
           <p className="text-[12px]" style={{ color: C.textMuted }}>
@@ -284,34 +287,41 @@ export default function DashboardContent({ onNavigate }) {
   const { data, loading: dataLoading } = useDashboardData();
   const [mounted, setMounted] = useState(false);
   const [qrModalOpen, setQrModalOpen] = useState(false);
-const [scanResult, setScanResult] = useState(null);
+  const [scanResult, setScanResult] = useState(null);
 
-const handleScan = useCallback(async (scannedValue) => {
-  try {
-    const code = (scannedValue || "").trim();
-    if (!code) throw new Error("This doesn't look like a valid EscrowGo QR code");
+  const handleScan = useCallback(async (scannedValue) => {
+    try {
+      const code = (scannedValue || "").trim();
+      if (!code)
+        throw new Error("This doesn't look like a valid EscrowGo QR code");
 
-    const res = await fetch("/api/qr/verify", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ code }),
-    });
-    const data = await res.json();
+      const res = await fetch("/api/qr/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code }),
+      });
+      const data = await res.json();
 
-    if (!res.ok) {
-      setScanResult({ success: false, message: data.error || "Verification failed" });
-      return;
+      if (!res.ok) {
+        setScanResult({
+          success: false,
+          message: data.error || "Verification failed",
+        });
+        return;
+      }
+
+      setScanResult({
+        success: true,
+        message: `Delivery confirmed for "${data.deal?.productName}". Funds released.`,
+      });
+      setQrModalOpen(false);
+    } catch (err) {
+      setScanResult({
+        success: false,
+        message: err.message || "Could not read this QR code",
+      });
     }
-
-    setScanResult({
-      success: true,
-      message: `Delivery confirmed for "${data.deal?.productName}". Funds released.`,
-    });
-    setQrModalOpen(false);
-  } catch (err) {
-    setScanResult({ success: false, message: err.message || "Could not read this QR code" });
-  }
-}, []);
+  }, []);
 
   const { videoRef, error: qrError } = useQrScanner(qrModalOpen, handleScan);
   useEffect(() => {
@@ -329,8 +339,6 @@ const handleScan = useCallback(async (scannedValue) => {
 
   const firstName = session?.user?.name ? session.user.name.split(" ")[0] : "";
 
-
-  
   return (
     <div>
       <style jsx>{`
@@ -589,7 +597,10 @@ const handleScan = useCallback(async (scannedValue) => {
             >
               <QrCode size={16} strokeWidth={2.2} />
             </div>
-            <p className="text-[13px] font-bold uppercase tracking-[0.1em]" style={{ color: C.ink }}>
+            <p
+              className="text-[13px] font-bold uppercase tracking-[0.1em]"
+              style={{ color: C.ink }}
+            >
               Pending Products to Pick Up
             </p>
           </div>
@@ -603,7 +614,6 @@ const handleScan = useCallback(async (scannedValue) => {
       )}
 
       {/* Pending Deliveries (seller-side: deals created that aren't completed/closed out yet) */}
-      
 
       {/* Content grid */}
       <div className="mt-6 grid grid-cols-1 gap-5 xl:grid-cols-3">
@@ -699,16 +709,25 @@ const handleScan = useCallback(async (scannedValue) => {
             >
               <ShoppingBag size={16} strokeWidth={2.2} />
             </div>
-            <p className="text-[13px] font-bold uppercase tracking-[0.1em]" style={{ color: C.ink }}>
+            <p
+              className="text-[13px] font-bold uppercase tracking-[0.1em]"
+              style={{ color: C.ink }}
+            >
               Pending Deliveries
             </p>
           </div>
 
           <div className="mt-4 divide-y" style={{ borderColor: C.line }}>
             {data.pendingDeliveries.map((item) => (
-              <div key={item.slug} className="flex items-center justify-between gap-3 py-3">
+              <div
+                key={item.slug}
+                className="flex items-center justify-between gap-3 py-3"
+              >
                 <div className="min-w-0">
-                  <p className="truncate text-[13px] font-semibold" style={{ color: C.ink }}>
+                  <p
+                    className="truncate text-[13px] font-semibold"
+                    style={{ color: C.ink }}
+                  >
                     {item.productName}
                   </p>
                   <p className="text-[12px]" style={{ color: C.textMuted }}>
@@ -719,7 +738,9 @@ const handleScan = useCallback(async (scannedValue) => {
                 </div>
                 <div className="flex flex-shrink-0 items-center gap-2">
                   {item.isOpen && item.payLink && (
-                    <CopyPayLinkButton payLink={item.payLink} />
+                    <CopyPayLinkButton
+                      payLink={item.payLink?.replace("/deal/", "/pay/")}
+                    />
                   )}
                   <Link
                     href={`/deal/${item.slug}`}
