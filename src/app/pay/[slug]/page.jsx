@@ -1,7 +1,7 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
-import { useParams, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useRef, useState } from "react";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 import {
   ShieldCheck,
@@ -506,16 +506,92 @@ function OrderSummary({ slug }) {
   );
 }
 
+/**
+ * Return screen shown when Nomba redirects the customer back to
+ * /pay/{paymentId}?orderReference=EGO-xxxx after a completed payment.
+ * Polls /api/payments/{id} until the webhook has marked it SUCCESS (or FAILED),
+ * then redirects to the dashboard.
+ */
+function PaymentReturn({ paymentId }) {
+  const router = useRouter();
+  const [status, setStatus] = useState("PENDING");
+  const [error, setError] = useState("");
+  const pollRef = useRef(null);
+
+  useEffect(() => {
+    let attempts = 0;
+    const MAX = 20; // poll for up to ~20 s
+
+    async function poll() {
+      try {
+        const res = await fetch(`/api/payments/${paymentId}`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Could not load payment.");
+        const s = data.payment?.status;
+        setStatus(s);
+        if (s === "SUCCESS") {
+          toast.success("Payment confirmed — funds are in escrow!");
+          clearInterval(pollRef.current);
+          setTimeout(() => router.push("/dashboard"), 2000);
+          return;
+        }
+        if (s === "FAILED") {
+          setError("Payment was not completed. Please try again.");
+          clearInterval(pollRef.current);
+          return;
+        }
+      } catch (err) {
+        setError(err.message);
+        clearInterval(pollRef.current);
+      }
+      attempts++;
+      if (attempts >= MAX) {
+        clearInterval(pollRef.current);
+        setError("Payment status could not be confirmed. Please check your dashboard.");
+      }
+    }
+
+    poll();
+    pollRef.current = setInterval(poll, 1000);
+    return () => clearInterval(pollRef.current);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [paymentId]);
+
+  if (error) return CenteredError(error);
+
+  return (
+    <div className="min-h-screen bg-[#FBF1D9] flex flex-col items-center justify-center px-4">
+      {sharedStyles}
+      <div className="reveal mx-auto max-w-sm w-full overflow-hidden rounded-3xl border border-slate-200/70 bg-white shadow-2xl shadow-slate-900/10 text-center p-8">
+        {status === "SUCCESS" ? (
+          <>
+            <CheckCircle2 className="mx-auto h-12 w-12 text-emerald-500 mb-4" />
+            <h2 className="text-lg font-semibold text-slate-800">Payment confirmed!</h2>
+            <p className="mt-2 text-[13px] text-slate-500">Your funds are secured in escrow. Redirecting to your dashboard…</p>
+          </>
+        ) : (
+          <>
+            <Spinner className="mx-auto mb-4" />
+            <h2 className="text-lg font-semibold text-slate-800">Confirming your payment…</h2>
+            <p className="mt-2 text-[13px] text-slate-500">Please wait while we verify your transaction with Nomba.</p>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function PayRouter() {
   const { slug } = useParams();
   const searchParams = useSearchParams();
   const isMock = searchParams.get("mock") === "1";
+  // Nomba appends ?orderReference=... when redirecting the customer back after payment.
+  const orderReference = searchParams.get("orderReference");
 
-  return isMock ? (
-    <MockCheckout paymentId={slug} />
-  ) : (
-    <OrderSummary slug={slug} />
-  );
+  if (isMock) return <MockCheckout paymentId={slug} />;
+  // When Nomba redirects back, slug is the paymentId and orderReference is set.
+  if (orderReference) return <PaymentReturn paymentId={slug} />;
+  return <OrderSummary slug={slug} />;
 }
 
 export default function PublicOrderPage() {

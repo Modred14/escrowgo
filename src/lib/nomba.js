@@ -57,7 +57,10 @@ export async function createCheckoutOrder({ orderReference, amount, currency, ca
   }
 
   const token = await getAccessToken();
-  const res = await fetch(`${BASE_URL}/v1/checkout/order`, {
+  // Nomba sandbox uses /sandbox/checkout/order; production uses /v1/checkout/order.
+  const isSandbox = BASE_URL?.includes("sandbox.nomba.com");
+  const checkoutPath = isSandbox ? "/sandbox/checkout/order" : "/v1/checkout/order";
+  const res = await fetch(`${BASE_URL}${checkoutPath}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
