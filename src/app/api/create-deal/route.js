@@ -1,3 +1,4 @@
+// src/app/api/create-deal/route.js
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import crypto from "crypto";
@@ -147,6 +148,17 @@ function formatLocationString(loc) {
   return [loc.city, loc.stateName, loc.countryCode].filter(Boolean).join(", ");
 }
 
+function getBaseUrl(request) {
+  const envUrl = process.env.NEXT_PUBLIC_APP_URL;
+  if (envUrl && /^https?:\/\//.test(envUrl)) return envUrl.replace(/\/$/, "");
+  const origin = request.headers.get("origin");
+  if (origin) return origin.replace(/\/$/, "");
+  const host = request.headers.get("host");
+  const proto = request.headers.get("x-forwarded-proto") || "https";
+  if (host) return `${proto}://${host}`;
+  return "http://localhost:3000";
+}
+
 function slugify(text) {
   return text
     .toLowerCase()
@@ -227,7 +239,7 @@ export async function POST(request) {
       orderReference,
       amount: total,
       customerEmail: buyerEmail,
-      callbackUrl: `${process.env.NEXT_PUBLIC_APP_URL}/deal/${slug}/complete`,
+      callbackUrl: `${getBaseUrl(request)}/deal/${slug}/complete`,
       productName,
     });
 console.log("NOMBA RESPONSE:", JSON.stringify(nombaData, null, 2));

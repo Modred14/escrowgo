@@ -1,9 +1,22 @@
+// src/app/api/payments/initiate/route.js
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createCheckoutOrder } from "@/lib/nomba";
 import { randomToken } from "@/lib/utils";
+
+function getBaseUrl(req) {
+  const envUrl = process.env.NEXT_PUBLIC_APP_URL;
+  if (envUrl && /^https?:\/\//.test(envUrl)) return envUrl.replace(/\/$/, "");
+  // Fallback: derive from the incoming request so callbackUrl is never "undefined/..."
+  const origin = req.headers.get("origin");
+  if (origin) return origin.replace(/\/$/, "");
+  const host = req.headers.get("host");
+  const proto = req.headers.get("x-forwarded-proto") || "https";
+  if (host) return `${proto}://${host}`;
+  return "http://localhost:3000";
+}
 
 export async function POST(req) {
   const session = await getServerSession(authOptions);
@@ -66,7 +79,7 @@ export async function POST(req) {
       orderReference,
       amount: totalAmount,
       currency: "NGN",
-      callbackUrl: `${process.env.NEXT_PUBLIC_APP_URL}/pay/${payment.id}`,
+      callbackUrl: `${getBaseUrl(req)}/pay/${payment.id}`,
       customerEmail: session.user.email,
       description: `escrowgo deal: ${deal.product.name}`,
     });
