@@ -38,23 +38,35 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const sellerId = session.user.id;
+  const userId = session.user.id;
 
-  const [releasedEscrows, deals] = await Promise.all([
+  const [releasedEscrows, deals, purchaseDeals] = await Promise.all([
     // Only escrow that has actually been RELEASED to the seller counts as
     // real balance. Money still held in escrow (FUNDS_HELD/OUT_FOR_DELIVERY/
     // DELIVERED-but-unscanned) must NOT show up as spendable balance.
     prisma.escrow.findMany({
-      where: { status: "RELEASED", deal: { sellerId } },
+      where: { status: "RELEASED", deal: { sellerId: userId } },
       select: { amount: true },
     }),
     prisma.deal.findMany({
-      where: { sellerId },
+      where: { sellerId: userId },
       include: {
         product: true,
         seller: { select: { name: true } },
         buyer: { select: { name: true } },
         delivery: { include: { agent: { include: { user: { select: { name: true } } } } } },
+      },
+      orderBy: { createdAt: "desc" },
+    }),
+    // Buyer-side: every deal this user has paid for (or is attached to as
+    // buyer), including its QR code, so the buyer's own transaction history
+    // can list their release codes without visiting each deal page.
+    prisma.deal.findMany({
+      where: { buyerId: userId },
+      include: {
+        product: true,
+        seller: { select: { name: true } },
+        qrCode: true,
       },
       orderBy: { createdAt: "desc" },
     }),
@@ -78,10 +90,29 @@ export async function GET() {
     status: toUiStatus(d),
   }));
 
+  const totalSpent = purchaseDeals
+    .filter((d) => d.status !== "PENDING_PAYMENT" && d.status !== "CANCELLED")
+    .reduce((sum, d) => sum + (d.product?.price ?? 0) + (d.deliveryFee ?? 0), 0);
+
+  const purchases = purchaseDeals.map((d) => ({
+    id: d.slug ?? d.id,
+    slug: d.slug,
+    seller: d.seller?.name ?? "Seller",
+    product: d.product?.name ?? "Untitled product",
+    amount: (d.product?.price ?? 0) + (d.deliveryFee ?? 0),
+    status: toUiStatus(d),
+    qrCode: d.qrCode
+      ? { code: d.qrCode.code, isUsed: d.qrCode.isUsed }
+      : null,
+  }));
+
   return NextResponse.json({
     moneyIn,
     totalWithdrawn,
     totalTransactions,
     sales,
+    totalSpent,
+    totalPurchases: purchases.length,
+    purchases,
   });
 }

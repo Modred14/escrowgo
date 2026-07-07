@@ -17,6 +17,7 @@ import {
   Truck,
   PackageCheck,
   Ban,
+  X,
 } from "lucide-react";
 import { useCountUp, formatNaira, C } from "./hooks";
 
@@ -41,6 +42,9 @@ function useWalletData() {
     totalWithdrawn: 0,
     totalTransactions: 0,
     sales: [],
+    totalSpent: 0,
+    totalPurchases: 0,
+    purchases: [],
   });
   const [loading, setLoading] = useState(true);
 
@@ -132,9 +136,242 @@ function StatusBadge({ status }) {
   );
 }
 
+// Small tappable QR preview. Renders a 56x56 thumbnail from the deal's
+// release code; taps invoke onOpen so the parent can show the full-size
+// modal. Deals without an active (unused) QR code fall back to a plain
+// status icon and aren't clickable.
+function QrThumb({ code, onOpen }) {
+  const [dataUrl, setDataUrl] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (code) {
+      import("qrcode").then((QR) => {
+        QR.toDataURL(code, {
+          margin: 1,
+          width: 112,
+          color: { dark: "#0E1A17", light: "#F3F5F2" },
+        }).then((url) => {
+          if (!cancelled) setDataUrl(url);
+        });
+      });
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, [code]);
+
+  if (!code) {
+    return (
+      <div
+        className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-lg border"
+        style={{ borderColor: C.line, backgroundColor: "#F3F5F2" }}
+      >
+        <Receipt size={18} style={{ color: C.textMuted }} />
+      </div>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={onOpen}
+      className="flex h-14 w-14 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg border transition-transform duration-200 hover:scale-105 active:scale-95"
+      style={{ borderColor: C.line }}
+      aria-label="View full QR code"
+    >
+      {dataUrl ? (
+        <img src={dataUrl} alt="QR code preview" className="h-full w-full" />
+      ) : (
+        <div className="skeleton h-full w-full" />
+      )}
+    </button>
+  );
+}
+
+// Full-size QR modal shown when a purchase's preview is tapped.
+function QrCodeModal({ purchase, onClose }) {
+  const [dataUrl, setDataUrl] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    setDataUrl(null);
+    if (purchase?.qrCode?.code) {
+      import("qrcode").then((QR) => {
+        QR.toDataURL(purchase.qrCode.code, {
+          margin: 2,
+          width: 260,
+          color: { dark: "#0E1A17", light: "#F3F5F2" },
+        }).then((url) => {
+          if (!cancelled) setDataUrl(url);
+        });
+      });
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, [purchase?.qrCode?.code]);
+
+  if (!purchase) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-xs rounded-2xl bg-white p-6 text-center shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between">
+          <p
+            className="text-[13px] font-semibold uppercase tracking-wide"
+            style={{ color: C.textMuted }}
+          >
+            Release QR code
+          </p>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-full p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+            aria-label="Close"
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        <p
+          className="mt-1 truncate text-[13px] font-semibold"
+          style={{ color: C.ink }}
+        >
+          {purchase.product}
+        </p>
+        <p className="text-[12px]" style={{ color: C.textMuted }}>
+          Sold by {purchase.seller}
+        </p>
+
+        <div className="mt-4 flex justify-center">
+          {dataUrl ? (
+            <img
+              src={dataUrl}
+              alt="Full release QR code"
+              className="h-56 w-56 rounded-xl border"
+              style={{ borderColor: C.line }}
+            />
+          ) : (
+            <div className="skeleton h-56 w-56 rounded-xl" />
+          )}
+        </div>
+
+        <p className="mt-3 break-all font-mono text-[10px] text-slate-400">
+          {purchase.qrCode?.code}
+        </p>
+        <p className="mt-2 text-[12px]" style={{ color: C.textMuted }}>
+          Show this to the seller or courier to release payment.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// Buyer-side list of QR release codes. Small preview per row; tapping opens
+// the full QR in a modal. Purely presentational — the underlying data
+// (status, qrCode.isUsed) is refetched from /api/wallet/transactions on
+// every load, so this always reflects the buyer's live transaction state.
+function PurchasesList({ purchases, loading }) {
+  const [selected, setSelected] = useState(null);
+
+  return (
+    <div
+      className="mt-6 overflow-hidden rounded-2xl border bg-white opacity-0 animate-riseIn"
+      style={{ borderColor: C.line, animationDelay: "420ms" }}
+    >
+      <div
+        className="flex items-center justify-between border-b p-5"
+        style={{ borderColor: C.line }}
+      >
+        <p
+          className="font-serif text-[17px] font-semibold"
+          style={{ color: C.ink }}
+        >
+          Your purchases
+        </p>
+        <p className="text-[12px]" style={{ color: C.textMuted }}>
+          Tap a QR to view it full-size
+        </p>
+      </div>
+
+      <div className="flex flex-col divide-y" style={{ borderColor: C.line }}>
+        {loading &&
+          Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="flex items-center gap-3 p-4">
+              <div className="skeleton h-14 w-14 flex-shrink-0 rounded-lg" />
+              <div className="min-w-0 flex-1">
+                <div className="skeleton h-3.5 w-32 rounded-md" />
+                <div className="skeleton mt-2 h-3 w-20 rounded-md" />
+              </div>
+            </div>
+          ))}
+
+        {!loading &&
+          purchases.map((p, i) => {
+            const activeCode =
+              p.qrCode && !p.qrCode.isUsed ? p.qrCode.code : null;
+            return (
+              <div
+                key={p.id}
+                className="flex items-center justify-between gap-3 p-4 opacity-0 animate-riseIn"
+                style={{ animationDelay: `${460 + i * 60}ms` }}
+              >
+                <div className="flex min-w-0 items-center gap-3">
+                  <QrThumb
+                    code={activeCode}
+                    onOpen={() => setSelected(p)}
+                  />
+                  <div className="min-w-0">
+                    <p
+                      className="truncate text-[13.5px] font-medium"
+                      style={{ color: C.ink }}
+                    >
+                      {p.product}
+                    </p>
+                    <p
+                      className="mt-0.5 truncate text-[12px]"
+                      style={{ color: C.textMuted }}
+                    >
+                      Sold by {p.seller} · {formatNaira(p.amount)}
+                    </p>
+                  </div>
+                </div>
+                <StatusBadge status={p.status} />
+              </div>
+            );
+          })}
+
+        {!loading && purchases.length === 0 && (
+          <div
+            className="px-5 py-8 text-center text-[13px]"
+            style={{ color: C.textMuted }}
+          >
+            You haven't bought anything yet.
+          </div>
+        )}
+      </div>
+
+      <QrCodeModal purchase={selected} onClose={() => setSelected(null)} />
+    </div>
+  );
+}
+
 export default function WalletTransactions() {
-  const { moneyIn, totalWithdrawn, totalTransactions, sales, loading } =
-    useWalletData();
+  const {
+    moneyIn,
+    totalWithdrawn,
+    totalTransactions,
+    sales,
+    purchases,
+    loading,
+  } = useWalletData();
   const [mounted, setMounted] = useState(false);
   const [query, setQuery] = useState("");
 
@@ -521,6 +758,9 @@ export default function WalletTransactions() {
           </table>
         </div>
       </div>
+
+      {/* Buyer-side: purchases with release QR codes */}
+      <PurchasesList purchases={purchases} loading={loading} />
     </div>
   );
 }
