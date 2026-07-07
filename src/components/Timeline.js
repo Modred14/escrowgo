@@ -51,7 +51,7 @@ export default function Timeline({ deal }) {
         return (
           <li key={step.key} className="relative">
             <span
-              className={`absolute -left-[33px] flex h-6 w-6 items-center justify-center rounded-full border-2 text-[11px] font-bold ${
+              className={`absolute -left-[40px] flex h-6 w-6 items-center justify-center rounded-full border-2 text-[11px] font-bold ${
                 done
                   ? "border-mint bg-mint text-ink"
                   : isCurrent
