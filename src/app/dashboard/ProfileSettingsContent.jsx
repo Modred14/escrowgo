@@ -13,8 +13,10 @@ import {
   ShieldCheck,
   BadgeCheck,
   Camera,
+  Download,
 } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
+import toast from "react-hot-toast";
 import { C } from "./hooks";
 import { City } from "country-state-city";
 
@@ -303,6 +305,72 @@ function LocationEditModal({
             Save
           </button>
         </div>
+      </div>
+    </div>
+  );
+}
+function BusinessReportCard() {
+  const [downloading, setDownloading] = useState(false);
+
+  async function handleDownload() {
+    setDownloading(true);
+    try {
+      const res = await fetch("/api/profile/report");
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Could not generate the report.");
+      }
+      const blob = await res.blob();
+      const disposition = res.headers.get("Content-Disposition") || "";
+      const match = disposition.match(/filename="?([^"]+)"?/);
+      const filename = match?.[1] || "EscrowGo-Business-Report.pdf";
+
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setDownloading(false);
+    }
+  }
+
+  return (
+    <div>
+      <p
+        className="mb-2.5 text-[11px] font-semibold uppercase tracking-[0.12em]"
+        style={{ color: C.textMuted }}
+      >
+        Business report
+      </p>
+      <div
+        className="flex flex-col gap-4 rounded-xl border p-5 transition-all duration-300 sm:flex-row sm:items-center sm:justify-between"
+        style={{ borderColor: C.line, backgroundColor: "#FBF7EF" }}
+      >
+        <div>
+          <p className="text-[14px] font-semibold" style={{ color: C.ink }}>
+            EscrowGo credibility report
+          </p>
+          <p className="mt-0.5 text-[12.5px]" style={{ color: C.textMuted }}>
+            A downloadable PDF summary of your transaction history and Trust
+            Score, generated fresh every time — share it with customers to
+            build trust.
+          </p>
+        </div>
+        <button
+          onClick={handleDownload}
+          disabled={downloading}
+          className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-[13px] font-semibold transition-all duration-300 hover:brightness-95 active:scale-[0.98] disabled:opacity-60"
+          style={{ backgroundColor: C.ink, color: C.gold }}
+        >
+          <Download size={14} />
+          {downloading ? "Preparing…" : "Download report"}
+        </button>
       </div>
     </div>
   );
@@ -620,6 +688,10 @@ export default function ProfileSettingsContent() {
               />
             </div>
           )}
+        </div>
+
+        <div className="mt-7 border-t pt-6" style={{ borderColor: C.line }}>
+          <BusinessReportCard />
         </div>
 
         <div className="mt-7 border-t pt-6" style={{ borderColor: C.line }}>

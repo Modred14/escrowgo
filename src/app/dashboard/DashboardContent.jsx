@@ -1,3 +1,4 @@
+// src/app/dashboard/DashboardContent.jsx
 "use client";
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
@@ -8,12 +9,15 @@ import {
   TrendingUp,
   Plus,
   Bell,
+  Copy,
+  Check,
 } from "lucide-react";
 import { RadialBarChart, RadialBar, PolarAngleAxis } from "recharts";
 import { useCountUp, formatNaira, C } from "./hooks";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { QrCode, ScanLine, X } from "lucide-react";
+import toast from "react-hot-toast";
 
 import jsQR from "jsqr";
 
@@ -23,6 +27,93 @@ const DEAL_STATUS_LABELS = {
   OUT_FOR_DELIVERY: "Out for delivery",
   DELIVERED: "Delivered — awaiting pickup confirmation",
 };
+
+function PendingPickupRow({ item }) {
+  const [qrDataUrl, setQrDataUrl] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (item.qrCode) {
+      import("qrcode").then((QR) => {
+        QR.toDataURL(item.qrCode, {
+          margin: 1,
+          width: 72,
+          color: { dark: "#0E1A17", light: "#F3F5F2" },
+        }).then((url) => {
+          if (!cancelled) setQrDataUrl(url);
+        });
+      });
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, [item.qrCode]);
+
+  return (
+    <div className="flex items-center justify-between gap-3 py-3">
+      <div className="flex min-w-0 items-center gap-3">
+        {qrDataUrl ? (
+          <img
+            src={qrDataUrl}
+            alt="QR code"
+            className="h-14 w-14 flex-shrink-0 rounded-lg border"
+            style={{ borderColor: C.line }}
+          />
+        ) : (
+          <div
+            className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-lg border"
+            style={{ borderColor: C.line, backgroundColor: "#F3F5F2" }}
+          >
+            <QrCode size={20} style={{ color: C.textMuted }} />
+          </div>
+        )}
+        <div className="min-w-0">
+          <p className="truncate text-[13px] font-semibold" style={{ color: C.ink }}>
+            {item.productName}
+          </p>
+          <p className="text-[12px]" style={{ color: C.textMuted }}>
+            {formatNaira(item.price)}
+          </p>
+        </div>
+      </div>
+      <Link
+        href={`/deal/${item.slug}`}
+        className="flex flex-shrink-0 items-center gap-1.5 rounded-xl px-3 py-2 text-[12px] font-semibold transition"
+        style={{ backgroundColor: C.ink, color: C.gold }}
+      >
+        <QrCode size={13} />
+        View QR Code
+      </Link>
+    </div>
+  );
+}
+
+function CopyPayLinkButton({ payLink }) {
+  const [copied, setCopied] = useState(false);
+
+  async function handleCopy() {
+    try {
+      const fullUrl = `${window.location.origin}${payLink}`;
+      await navigator.clipboard.writeText(fullUrl);
+      setCopied(true);
+      toast.success("Payment link copied");
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error("Could not copy link");
+    }
+  }
+
+  return (
+    <button
+      onClick={handleCopy}
+      className="flex items-center gap-1.5 rounded-xl px-3 py-2 text-[12px] font-semibold transition"
+      style={{ backgroundColor: C.ink, color: C.gold }}
+    >
+      {copied ? <Check size={13} /> : <Copy size={13} />}
+      {copied ? "Copied" : "Copy pay link"}
+    </button>
+  );
+}
 
 function useQrScanner(active, onScan) {
   const videoRef = useRef(null);
@@ -505,75 +596,14 @@ const handleScan = useCallback(async (scannedValue) => {
 
           <div className="mt-4 divide-y" style={{ borderColor: C.line }}>
             {data.pendingPickups.map((item) => (
-              <div
-                key={item.slug}
-                className="flex items-center justify-between gap-3 py-3"
-              >
-                <div className="min-w-0">
-                  <p className="truncate text-[13px] font-semibold" style={{ color: C.ink }}>
-                    {item.productName}
-                  </p>
-                  <p className="text-[12px]" style={{ color: C.textMuted }}>
-                    {formatNaira(item.price)}
-                  </p>
-                </div>
-                <Link
-                  href={`/deal/${item.slug}`}
-                  className="flex flex-shrink-0 items-center gap-1.5 rounded-xl px-3 py-2 text-[12px] font-semibold transition"
-                  style={{ backgroundColor: C.ink, color: C.gold }}
-                >
-                  <QrCode size={13} />
-                  View QR Code
-                </Link>
-              </div>
+              <PendingPickupRow key={item.slug} item={item} />
             ))}
           </div>
         </div>
       )}
 
       {/* Pending Deliveries (seller-side: deals created that aren't completed/closed out yet) */}
-      {!dataLoading && data.pendingDeliveries?.length > 0 && (
-        <div
-          className="mt-6 rounded-2xl border bg-white p-5 opacity-0 animate-riseIn"
-          style={{ borderColor: C.line, animationDelay: "360ms" }}
-        >
-          <div className="flex items-center gap-2">
-            <div
-              className="flex h-8 w-8 items-center justify-center rounded-lg"
-              style={{ backgroundColor: "#FBF0DE", color: C.goldDeep }}
-            >
-              <ShoppingBag size={16} strokeWidth={2.2} />
-            </div>
-            <p className="text-[13px] font-bold uppercase tracking-[0.1em]" style={{ color: C.ink }}>
-              Pending Deliveries
-            </p>
-          </div>
-
-          <div className="mt-4 divide-y" style={{ borderColor: C.line }}>
-            {data.pendingDeliveries.map((item) => (
-              <div key={item.slug} className="flex items-center justify-between gap-3 py-3">
-                <div className="min-w-0">
-                  <p className="truncate text-[13px] font-semibold" style={{ color: C.ink }}>
-                    {item.productName}
-                  </p>
-                  <p className="text-[12px]" style={{ color: C.textMuted }}>
-                    {item.buyer} · {formatNaira(item.price)} ·{" "}
-                    {DEAL_STATUS_LABELS[item.status] || item.status}
-                    {item.flagged && " · Under review"}
-                  </p>
-                </div>
-                <Link
-                  href={`/deal/${item.slug}`}
-                  className="flex flex-shrink-0 items-center gap-1.5 rounded-xl border px-3 py-2 text-[12px] font-semibold transition"
-                  style={{ borderColor: C.line, color: C.ink }}
-                >
-                  Manage
-                </Link>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      
 
       {/* Content grid */}
       <div className="mt-6 grid grid-cols-1 gap-5 xl:grid-cols-3">
@@ -657,6 +687,53 @@ const handleScan = useCallback(async (scannedValue) => {
           </span>
         </button>
       </div>
+      {!dataLoading && data.pendingDeliveries?.length > 0 && (
+        <div
+          className="mt-6 rounded-2xl border bg-white p-5 opacity-0 animate-riseIn"
+          style={{ borderColor: C.line, animationDelay: "360ms" }}
+        >
+          <div className="flex items-center gap-2">
+            <div
+              className="flex h-8 w-8 items-center justify-center rounded-lg"
+              style={{ backgroundColor: "#FBF0DE", color: C.goldDeep }}
+            >
+              <ShoppingBag size={16} strokeWidth={2.2} />
+            </div>
+            <p className="text-[13px] font-bold uppercase tracking-[0.1em]" style={{ color: C.ink }}>
+              Pending Deliveries
+            </p>
+          </div>
+
+          <div className="mt-4 divide-y" style={{ borderColor: C.line }}>
+            {data.pendingDeliveries.map((item) => (
+              <div key={item.slug} className="flex items-center justify-between gap-3 py-3">
+                <div className="min-w-0">
+                  <p className="truncate text-[13px] font-semibold" style={{ color: C.ink }}>
+                    {item.productName}
+                  </p>
+                  <p className="text-[12px]" style={{ color: C.textMuted }}>
+                    {item.buyer} · {formatNaira(item.price)} ·{" "}
+                    {DEAL_STATUS_LABELS[item.status] || item.status}
+                    {item.flagged && " · Under review"}
+                  </p>
+                </div>
+                <div className="flex flex-shrink-0 items-center gap-2">
+                  {item.isOpen && item.payLink && (
+                    <CopyPayLinkButton payLink={item.payLink} />
+                  )}
+                  <Link
+                    href={`/deal/${item.slug}`}
+                    className="flex items-center gap-1.5 rounded-xl border px-3 py-2 text-[12px] font-semibold transition"
+                    style={{ borderColor: C.line, color: C.ink }}
+                  >
+                    Manage
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

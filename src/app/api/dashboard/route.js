@@ -1,3 +1,4 @@
+// src/app/api/dashboard/route.js
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -60,7 +61,8 @@ export async function GET() {
   // Seller-side: every deal this user created that hasn't been fully
   // completed yet (escrow not released) or closed out (cancelled/refunded).
   // Mirrors the buyer's "Pending Products to Pick Up", but from the seller's
-  // side, and includes deals still awaiting payment too.
+  // side, and includes deals still awaiting payment too. Deals still awaiting
+  // payment ("open" deals) get a payLink so the seller can copy/share it again.
   const pendingDeliveries = deals
     .filter((d) => !COMPLETED.includes(d.status) && !CLOSED_OUT.includes(d.status))
     .map((d) => ({
@@ -71,11 +73,14 @@ export async function GET() {
       status: d.status,
       deliveryOption: d.deliveryOption,
       flagged: !!d.flaggedForReviewAt,
+      isOpen: d.status === "PENDING_PAYMENT",
+      payLink: d.status === "PENDING_PAYMENT" ? `/deal/${d.slug}` : null,
     }));
 
   // Buyer-side: products this user has paid for that are still awaiting pickup
   // confirmation (their QR hasn't been scanned yet). Disappears automatically
   // the moment the QR is used, since that flips status to PAYMENT_RELEASED.
+  // Includes the QR code itself so it can be rendered right in the list.
   const pickupDeals = await prisma.deal.findMany({
     where: {
       buyerId: session.user.id,
@@ -92,6 +97,7 @@ export async function GET() {
       productName: d.product?.name ?? "Untitled product",
       price: d.product?.price ?? 0,
       status: d.status,
+      qrCode: d.qrCode?.code ?? null,
     }));
 
   return NextResponse.json({
@@ -103,5 +109,6 @@ export async function GET() {
     salesTrend: pctChange(thisMonthSales, lastMonthSales),
     recentOrders,
     pendingPickups,
+    pendingDeliveries,
   });
 }

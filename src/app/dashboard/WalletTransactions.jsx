@@ -222,12 +222,7 @@ export default function WalletTransactions() {
               >
                 <ArrowUpFromLine size={14} /> Withdraw money
               </button>
-              <button
-                className="inline-flex items-center justify-center gap-2 rounded-xl border px-5 py-2.5 text-[13px] font-semibold transition-all duration-300 hover:bg-white/40 active:scale-[0.98] sm:w-auto"
-                style={{ borderColor: "rgba(22,19,13,0.2)", color: C.ink }}
-              >
-                <ArrowDownToLine size={14} /> Fund wallet
-              </button>
+            
             </div>
           </div>
 
