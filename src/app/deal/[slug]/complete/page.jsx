@@ -1,3 +1,4 @@
+// src/app/deal/[slug]/complete/page.jsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -21,7 +22,7 @@ export default function OrderCompletePage() {
   const { slug } = useParams();
   const searchParams = useSearchParams();
   const router = useRouter();
-  const orderReference = searchParams.get("orderId");
+  const orderReference = searchParams.get("orderReference");
 
   const [state, setState] = useState({ loading: true, error: "", data: null });
   const [qrDataUrl, setQrDataUrl] = useState("");

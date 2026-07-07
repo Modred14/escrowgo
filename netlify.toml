@@ -7,3 +7,5 @@
 
 [build.environment]
   NEXT_TELEMETRY_DISABLED = "1"
+  NEXT_PUBLIC_APP_URL = "https://escrow-go.netlify.app"
+  NEXTAUTH_URL = "https://escrow-go.netlify.app"
