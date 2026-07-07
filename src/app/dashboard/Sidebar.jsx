@@ -22,6 +22,10 @@ import Image from "next/image";
 import { useSession } from "next-auth/react";
 import toast from "react-hot-toast";
 
+function handleWithdraw() {
+  toast.error("Withdrawal is not allowed in demo mode.");
+}
+
 function NavItem({ icon: Icon, label, active, delay, onClick }) {
   return (
     <button
@@ -116,9 +120,9 @@ function CourierWelcomeModal({ open, onClose, onGoToDelivery }) {
             className="mt-2 text-[13.5px] leading-relaxed"
             style={{ color: "rgba(251,247,239,0.6)" }}
           >
-            You&apos;re officially an EscrowGo courier. Start accepting
-            pickups, confirm handoffs with QR scanning, and earn on every
-            delivery you complete.
+            You&apos;re officially an EscrowGo courier. Start accepting pickups,
+            confirm handoffs with QR scanning, and earn on every delivery you
+            complete.
           </p>
 
           <button
@@ -200,9 +204,7 @@ export default function Sidebar({
   const NAV_ITEMS = [
     { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
     { key: "wallet", label: "Wallet & Transactions", icon: Wallet },
-    ...(isCourier
-      ? [{ key: "delivery", label: "Delivery", icon: Truck }]
-      : []),
+    ...(isCourier ? [{ key: "delivery", label: "Delivery", icon: Truck }] : []),
     { key: "security", label: "Security", icon: ShieldCheck },
     { key: "settings", label: "Profile & Settings", icon: Settings },
   ];
@@ -352,6 +354,7 @@ export default function Sidebar({
             </p>
           )}
           <button
+            onClick={handleWithdraw}
             className="mt-3 w-full rounded-xl py-1.5 text-[12px] font-semibold transition-all duration-300 hover:brightness-110 hover:shadow-lg active:scale-[0.98]"
             style={{
               background: `linear-gradient(135deg, ${C.goldSoft}, ${C.gold})`,
