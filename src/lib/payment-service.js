@@ -1,3 +1,4 @@
+// src/lib/payment-service.js
 import { prisma } from "@/lib/prisma";
 import { notify } from "@/lib/notifications";
 
@@ -19,6 +20,10 @@ export async function markPaymentSuccess(paymentId) {
   }
 
   const deal = payment.deal;
+  // Resolve the buyer up front so it's consistent for the deal update below
+  // and the notification further down, whether or not this deal already had
+  // a buyer attached.
+  const resolvedBuyerId = deal.buyerId || payment.buyerId;
   const now = new Date();
   const totalDays = deal.estimatedDeliveryDays;
   const expectedDeliveryDate = new Date(now.getTime() + totalDays * 24 * 60 * 60 * 1000);
@@ -30,7 +35,16 @@ export async function markPaymentSuccess(paymentId) {
 
   await prisma.deal.update({
     where: { id: deal.id },
-    data: { status: "FUNDS_HELD", expectedDeliveryDate },
+    data: {
+      status: "FUNDS_HELD",
+      expectedDeliveryDate,
+      // Register the paying account as the buyer on this deal so it shows up
+      // under "Pending Products to Pick Up" on their dashboard. Normally this
+      // is already set by /api/payments/initiate, but we enforce it here too
+      // since payment success is the real source of truth — this makes it
+      // work no matter which path marked the payment successful.
+      ...(deal.buyerId ? {} : { buyerId: resolvedBuyerId }),
+    },
   });
 
   await prisma.escrow.upsert({
@@ -51,7 +65,7 @@ export async function markPaymentSuccess(paymentId) {
     },
   });
 
-  await notify(deal.buyerId, {
+  await notify(resolvedBuyerId, {
     title: "Payment secured in escrow",
     message: `Your payment for "${deal.product.name}" is locked in escrow until delivery is confirmed.`,
     type: "SUCCESS",

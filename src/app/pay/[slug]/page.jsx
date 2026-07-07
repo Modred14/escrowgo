@@ -466,8 +466,8 @@ function OrderSummary({ slug }) {
               — Africa's #1 payment platform
             </p>
             <div className="mt-3 inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 shadow-sm">
-              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-slate-900 text-[11px] font-bold text-amber-300">
-                N
+              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-gray-100 p-1 text-[11px] font-bold text-amber-300">
+                <img src="/nomba.png" alt="Nomba" className="h-full w-full object-contain" />
               </span>
               <span className="text-[13px] font-semibold text-slate-700">
                 Nomba secure checkout
