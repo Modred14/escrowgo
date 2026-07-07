@@ -12,17 +12,15 @@ import {
   ChevronRight,
   Menu,
   X,
+  PartyPopper,
+  Loader2,
+  Sparkles,
+  PackageCheck,
 } from "lucide-react";
 import { useCountUp, formatNaira, C } from "./hooks";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
-
-const NAV_ITEMS = [
-  { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { key: "wallet", label: "Wallet & Transactions", icon: Wallet },
-  { key: "security", label: "Security", icon: ShieldCheck },
-  { key: "settings", label: "Profile & Settings", icon: Settings },
-];
+import toast from "react-hot-toast";
 
 function NavItem({ icon: Icon, label, active, delay, onClick }) {
   return (
@@ -55,6 +53,101 @@ function NavItem({ icon: Icon, label, active, delay, onClick }) {
   );
 }
 
+function CourierWelcomeModal({ open, onClose, onGoToDelivery }) {
+  if (!open) return null;
+  return (
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm animate-fadeIn"
+      onClick={onClose}
+    >
+      <div
+        className="relative w-full max-w-sm overflow-hidden rounded-3xl p-7 text-center shadow-2xl animate-scaleIn"
+        style={{
+          background: `linear-gradient(160deg, ${C.inkSoft} 0%, ${C.ink} 75%)`,
+          border: "1px solid rgba(198,156,63,0.35)",
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div
+          className="pointer-events-none absolute inset-0 opacity-60"
+          style={{
+            background: `radial-gradient(circle at 50% -10%, rgba(198,156,63,0.25), transparent 60%)`,
+          }}
+        />
+
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute right-4 top-4 z-10 flex h-8 w-8 items-center justify-center rounded-full text-white/40 transition-all duration-200 hover:bg-white/10 hover:text-white"
+          aria-label="Close"
+        >
+          <X size={16} />
+        </button>
+
+        <div className="relative flex flex-col items-center">
+          <div
+            className="pulse-seal flex h-16 w-16 items-center justify-center rounded-full"
+            style={{
+              background: `linear-gradient(135deg, ${C.goldSoft}, ${C.gold})`,
+              boxShadow: "0 10px 30px -8px rgba(198,156,63,0.6)",
+            }}
+          >
+            <PartyPopper size={28} style={{ color: C.ink }} strokeWidth={2.2} />
+          </div>
+
+          <span
+            className="mt-4 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em]"
+            style={{
+              backgroundColor: "rgba(198,156,63,0.15)",
+              color: C.goldSoft,
+            }}
+          >
+            <Sparkles size={11} />
+            Courier account activated
+          </span>
+
+          <h2
+            className="font-serif mt-4 text-[24px] font-semibold tracking-tight"
+            style={{ color: C.cream }}
+          >
+            Congratulations!
+          </h2>
+          <p
+            className="mt-2 text-[13.5px] leading-relaxed"
+            style={{ color: "rgba(251,247,239,0.6)" }}
+          >
+            You&apos;re officially an EscrowGo courier. Start accepting
+            pickups, confirm handoffs with QR scanning, and earn on every
+            delivery you complete.
+          </p>
+
+          <button
+            type="button"
+            onClick={onGoToDelivery}
+            className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl py-3 text-[13.5px] font-semibold transition-all duration-300 hover:brightness-110 hover:shadow-lg active:scale-[0.98]"
+            style={{
+              background: `linear-gradient(135deg, ${C.goldSoft}, ${C.gold})`,
+              color: C.ink,
+              boxShadow: "0 10px 24px -8px rgba(198,156,63,0.6)",
+            }}
+          >
+            <Truck size={16} />
+            Go to Delivery Dashboard
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="mt-3 text-[12.5px] font-medium transition-colors duration-200 hover:text-white"
+            style={{ color: "rgba(251,247,239,0.4)" }}
+          >
+            Maybe later
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Sidebar({
   activePage,
   onNavigate,
@@ -63,10 +156,14 @@ export default function Sidebar({
   open,
   setOpen,
 }) {
-  const { data: session, status } = useSession();
+  const { data: session, status, update } = useSession();
   const [balanceVisible, setBalanceVisible] = useState(true);
   const [balance, setBalance] = useState(0);
   const [balanceLoading, setBalanceLoading] = useState(true);
+  const [becomingCourier, setBecomingCourier] = useState(false);
+  const [showCourierModal, setShowCourierModal] = useState(false);
+
+  const isCourier = session?.user?.role === "DELIVERY_AGENT";
 
   useEffect(() => {
     let cancelled = false;
@@ -99,6 +196,17 @@ export default function Sidebar({
   });
   const currentPage = activePage ?? page;
   const handleNavigate = onNavigate ?? setPage;
+
+  const NAV_ITEMS = [
+    { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { key: "wallet", label: "Wallet & Transactions", icon: Wallet },
+    ...(isCourier
+      ? [{ key: "delivery", label: "Delivery", icon: Truck }]
+      : []),
+    { key: "security", label: "Security", icon: ShieldCheck },
+    { key: "settings", label: "Profile & Settings", icon: Settings },
+  ];
+
   useEffect(() => {
     if (!isOpen) return;
     const prev = document.body.style.overflow;
@@ -108,8 +216,58 @@ export default function Sidebar({
     };
   }, [isOpen]);
 
+  async function handleBecomeCourier() {
+    if (becomingCourier || isCourier) return;
+    setBecomingCourier(true);
+    try {
+      const res = await fetch("/api/delivery/become-courier", {
+        method: "POST",
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        throw new Error(json.error || "Something went wrong.");
+      }
+      await update({
+        role: "DELIVERY_AGENT",
+        location: json.deliveryAgent?.location,
+        vehicleType: json.deliveryAgent?.vehicleType,
+      });
+      setShowCourierModal(true);
+    } catch (err) {
+      toast.error(err.message || "Could not activate your courier account.");
+    } finally {
+      setBecomingCourier(false);
+    }
+  }
+
   return (
     <>
+      <style jsx global>{`
+        @keyframes scaleIn {
+          from {
+            opacity: 0;
+            transform: scale(0.92) translateY(8px);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+          }
+        }
+        .animate-scaleIn {
+          animation: scaleIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+      `}</style>
+
+      <CourierWelcomeModal
+        open={showCourierModal}
+        onClose={() => setShowCourierModal(false)}
+        onGoToDelivery={() => {
+          setShowCourierModal(false);
+          handleNavigate("delivery");
+          setIsOpen(false);
+        }}
+      />
+
       <aside
         role="dialog"
         aria-modal={isOpen}
@@ -227,43 +385,98 @@ export default function Sidebar({
           ))}
         </nav>
 
-        <div
-          className="group relative mt-4 shrink-0 overflow-hidden rounded-2xl p-4 opacity-0 animate-riseIn transition-all duration-300 hover:border-[rgba(198,156,63,0.55)]"
-          style={{
-            border: "1px solid rgba(198,156,63,0.3)",
-            backgroundColor: "rgba(198,156,63,0.06)",
-            animationDelay: "470ms",
-          }}
-        >
-          <div className="flex items-center gap-2">
-            <div
-              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg"
-              style={{ backgroundColor: "rgba(198,156,63,0.18)" }}
-            >
-              <Truck size={13} style={{ color: C.gold }} />
+        {isCourier ? (
+          <div
+            className="group relative mt-4 shrink-0 overflow-hidden rounded-2xl p-4 opacity-0 animate-riseIn transition-all duration-300"
+            style={{
+              border: "1px solid rgba(31,157,85,0.35)",
+              backgroundColor: "rgba(31,157,85,0.08)",
+              animationDelay: "470ms",
+            }}
+          >
+            <div className="flex items-center gap-2">
+              <div
+                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg"
+                style={{ backgroundColor: "rgba(31,157,85,0.18)" }}
+              >
+                <PackageCheck size={13} style={{ color: C.green }} />
+              </div>
+              <span
+                className="text-[12px] font-semibold uppercase tracking-wide"
+                style={{ color: C.green }}
+              >
+                Courier Active
+              </span>
             </div>
-            <span
-              className="text-[12px] font-semibold uppercase tracking-wide"
-              style={{ color: C.goldSoft }}
+            <p
+              className="mt-2.5 text-[12px] leading-relaxed"
+              style={{ color: "rgba(251,247,239,0.5)" }}
             >
-              Become a Courier
-            </span>
+              You&apos;re verified to accept pickups and deliveries. Head to
+              your Delivery tab to get started.
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                handleNavigate("delivery");
+                setIsOpen(false);
+              }}
+              className="mt-3 inline-flex items-center gap-1 text-[12px] font-semibold transition-all duration-300 group-hover:gap-2"
+              style={{ color: C.green }}
+            >
+              Open Delivery tab <ArrowRight size={12} />
+            </button>
           </div>
-          <p
-            className="mt-2.5 text-[12px] leading-relaxed"
-            style={{ color: "rgba(251,247,239,0.5)" }}
+        ) : (
+          <div
+            className="group relative mt-4 shrink-0 overflow-hidden rounded-2xl p-4 opacity-0 animate-riseIn transition-all duration-300 hover:border-[rgba(198,156,63,0.55)]"
+            style={{
+              border: "1px solid rgba(198,156,63,0.3)",
+              backgroundColor: "rgba(198,156,63,0.06)",
+              animationDelay: "470ms",
+            }}
           >
-            Accept delivery requests, verify handoffs with QR-code scanning, and
-            earn on every completed order.
-          </p>
-          <a
-            href="#"
-            className="mt-3 inline-flex items-center gap-1 text-[12px] font-semibold transition-all duration-300 group-hover:gap-2"
-            style={{ color: C.gold }}
-          >
-            Become a courier <ArrowRight size={12} />
-          </a>
-        </div>
+            <div className="flex items-center gap-2">
+              <div
+                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg"
+                style={{ backgroundColor: "rgba(198,156,63,0.18)" }}
+              >
+                <Truck size={13} style={{ color: C.gold }} />
+              </div>
+              <span
+                className="text-[12px] font-semibold uppercase tracking-wide"
+                style={{ color: C.goldSoft }}
+              >
+                Become a Courier
+              </span>
+            </div>
+            <p
+              className="mt-2.5 text-[12px] leading-relaxed"
+              style={{ color: "rgba(251,247,239,0.5)" }}
+            >
+              Accept delivery requests, verify handoffs with QR-code scanning,
+              and earn on every completed order.
+            </p>
+            <button
+              type="button"
+              onClick={handleBecomeCourier}
+              disabled={becomingCourier}
+              className="mt-3 inline-flex items-center gap-1 text-[12px] font-semibold transition-all duration-300 group-hover:gap-2 disabled:cursor-wait disabled:opacity-70"
+              style={{ color: C.gold }}
+            >
+              {becomingCourier ? (
+                <>
+                  <Loader2 size={12} className="animate-spin" />
+                  Activating…
+                </>
+              ) : (
+                <>
+                  Become a courier <ArrowRight size={12} />
+                </>
+              )}
+            </button>
+          </div>
+        )}
       </aside>
 
       {isOpen && (

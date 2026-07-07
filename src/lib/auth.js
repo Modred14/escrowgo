@@ -71,6 +71,10 @@ export const authOptions = {
         if (session.country !== undefined) token.country = session.country;
         if (session.city !== undefined) token.city = session.city;
         if (session.image !== undefined) token.image = session.image;
+        if (session.role !== undefined) token.role = session.role;
+        if (session.location !== undefined) token.location = session.location;
+        if (session.vehicleType !== undefined)
+          token.vehicleType = session.vehicleType;
       }
 
       return token;

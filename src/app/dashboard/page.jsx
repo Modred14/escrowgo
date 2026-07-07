@@ -8,8 +8,9 @@ import WalletTransactions from "./WalletTransactions";
 import { C } from "./hooks";
 import SecurityContent from "./SecurityContent";
 import ProfileSettingsContent from "./ProfileSettingsContent";
+import DeliveryContent from "./DeliveryContent";
 
-const VALID_TABS = ["dashboard", "wallet", "security", "settings"];
+const VALID_TABS = ["dashboard", "wallet", "delivery", "security", "settings"];
 
 function AppLayoutInner() {
  const router = useRouter();
@@ -126,6 +127,7 @@ function AppLayoutInner() {
      <div key={page} className="animate-fadeIn">
           {page === "dashboard" && <DashboardContent onNavigate={setPage} />}
           {page === "wallet" && <WalletTransactions />}
+          {page === "delivery" && <DeliveryContent />}
           {page === "security" && <SecurityContent />}
           {page === "settings" && <ProfileSettingsContent />}
         </div>
