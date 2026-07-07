@@ -79,7 +79,7 @@ export async function POST(req) {
       orderReference,
       amount: totalAmount,
       currency: "NGN",
-      callbackUrl: `${getBaseUrl(req)}/pay/${payment.id}`,
+      callbackUrl: `${getBaseUrl(req)}/deal/${deal.slug}/complete`,
       customerEmail: session.user.email,
       description: `escrowgo deal: ${deal.product.name}`,
     });
