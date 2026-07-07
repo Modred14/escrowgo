@@ -50,7 +50,11 @@ if (!res.ok || json.code !== "00") {
 async function createNombaCheckout({ orderReference, amount, customerEmail, callbackUrl, productName }) {
   const token = await getNombaAccessToken();
 
-  const res = await fetch(`${NOMBA_BASE_URL}/v1/checkout/order`, {
+  // Nomba sandbox uses /sandbox/checkout/order; production uses /v1/checkout/order
+  const isSandbox = NOMBA_BASE_URL.includes("sandbox.nomba.com");
+  const checkoutPath = isSandbox ? "/sandbox/checkout/order" : "/v1/checkout/order";
+
+  const res = await fetch(`${NOMBA_BASE_URL}${checkoutPath}`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
