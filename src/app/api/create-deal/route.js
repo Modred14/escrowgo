@@ -1,4 +1,3 @@
-// src/app/api/create-deal/route.js
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import crypto from "crypto";
@@ -50,11 +49,7 @@ if (!res.ok || json.code !== "00") {
 async function createNombaCheckout({ orderReference, amount, customerEmail, callbackUrl, productName }) {
   const token = await getNombaAccessToken();
 
-  // Nomba sandbox uses /sandbox/checkout/order; production uses /v1/checkout/order
-  const isSandbox = NOMBA_BASE_URL.includes("sandbox.nomba.com");
-  const checkoutPath = isSandbox ? "/sandbox/checkout/order" : "/v1/checkout/order";
-
-  const res = await fetch(`${NOMBA_BASE_URL}${checkoutPath}`, {
+  const res = await fetch(`${NOMBA_BASE_URL}/v1/checkout/order`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -152,17 +147,6 @@ function formatLocationString(loc) {
   return [loc.city, loc.stateName, loc.countryCode].filter(Boolean).join(", ");
 }
 
-function getBaseUrl(request) {
-  const envUrl = process.env.NEXT_PUBLIC_APP_URL;
-  if (envUrl && /^https?:\/\//.test(envUrl)) return envUrl.replace(/\/$/, "");
-  const origin = request.headers.get("origin");
-  if (origin) return origin.replace(/\/$/, "");
-  const host = request.headers.get("host");
-  const proto = request.headers.get("x-forwarded-proto") || "https";
-  if (host) return `${proto}://${host}`;
-  return "http://localhost:3000";
-}
-
 function slugify(text) {
   return text
     .toLowerCase()
@@ -243,7 +227,7 @@ export async function POST(request) {
       orderReference,
       amount: total,
       customerEmail: buyerEmail,
-      callbackUrl: `${getBaseUrl(request)}/deal/${slug}/complete`,
+      callbackUrl: `${process.env.NEXT_PUBLIC_APP_URL}/deal/${slug}/complete`,
       productName,
     });
 console.log("NOMBA RESPONSE:", JSON.stringify(nombaData, null, 2));
