@@ -21,7 +21,11 @@ export default function OrderCompletePage() {
   const { slug } = useParams();
   const searchParams = useSearchParams();
   const router = useRouter();
-  const orderReference = searchParams.get("orderId");
+  // Nomba appends "orderReference" (the value we generated at checkout) to the
+  // callback redirect — that's what's stored as payment.providerRef in our DB.
+  // "orderId" is Nomba's own internal id and was never stored anywhere here.
+  const orderReference =
+    searchParams.get("orderReference") || searchParams.get("orderId");
 
   const [state, setState] = useState({ loading: true, error: "", data: null });
   const [qrDataUrl, setQrDataUrl] = useState("");
