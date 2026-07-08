@@ -10,8 +10,9 @@ export async function GET(request, { params }) {
     const { slug } = await params;
     const { searchParams } = new URL(request.url);
     const orderReference = searchParams.get("orderReference");
+    const orderId = searchParams.get("orderId");
 
-    if (!orderReference) {
+    if (!orderReference && !orderId) {
       return NextResponse.json(
         { error: "Missing order reference" },
         { status: 400 },
@@ -27,8 +28,13 @@ export async function GET(request, { params }) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
+    // Nomba's redirect carries both orderId and orderReference, and which one
+    // matches payment.providerRef has been inconsistent in practice — so we
+    // accept a match against either.
     const payment = deal.payments?.find(
-      (p) => p.providerRef === orderReference,
+      (p) =>
+        (orderReference && p.providerRef === orderReference) ||
+        (orderId && p.providerRef === orderId),
     );
     if (!payment) {
       return NextResponse.json(

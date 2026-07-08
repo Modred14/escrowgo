@@ -21,25 +21,27 @@ export default function OrderCompletePage() {
   const { slug } = useParams();
   const searchParams = useSearchParams();
   const router = useRouter();
-  // Nomba appends "orderReference" (the value we generated at checkout) to the
-  // callback redirect — that's what's stored as payment.providerRef in our DB.
-  // "orderId" is Nomba's own internal id and was never stored anywhere here.
-  const orderReference =
-    searchParams.get("orderReference") || searchParams.get("orderId");
+  // Nomba's redirect carries both orderId and orderReference, and in practice
+  // which one matches payment.providerRef can vary — so we send both to the
+  // backend and let it match against either.
+  const orderId = searchParams.get("orderId");
+  const orderReference = searchParams.get("orderReference");
+  const hasRef = Boolean(orderId || orderReference);
 
   const [state, setState] = useState({ loading: true, error: "", data: null });
   const [qrDataUrl, setQrDataUrl] = useState("");
 
  useEffect(() => {
-    if (!slug || !orderReference) return;
+    if (!slug || !hasRef) return;
     let cancelled = false;
     let pollTimer = null;
 
     async function checkStatus() {
       try {
-        const res = await fetch(
-          `/api/deals/${slug}/complete?orderReference=${encodeURIComponent(orderReference)}`,
-        );
+        const qs = new URLSearchParams();
+        if (orderReference) qs.set("orderReference", orderReference);
+        if (orderId) qs.set("orderId", orderId);
+        const res = await fetch(`/api/deals/${slug}/complete?${qs.toString()}`);
         const data = await res.json();
         if (!res.ok) throw new Error(data?.error || "Failed to check payment status");
         if (cancelled) return;
@@ -73,7 +75,7 @@ export default function OrderCompletePage() {
       cancelled = true;
       if (pollTimer) clearTimeout(pollTimer);
     };
-  }, [slug, orderReference]);
+  }, [slug, orderReference, orderId, hasRef]);
 
   const handleDownload = () => {
     if (!qrDataUrl) return;
