@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import {
   Wallet,
   ArrowDownToLine,
@@ -214,7 +215,15 @@ function QrCodeModal({ purchase, onClose }) {
 
   if (!purchase) return null;
 
-  return (
+  // Rendered via portal (see below) so this fixed-position overlay attaches
+  // to <body> instead of a card ancestor. Several parent cards use
+  // `animate-riseIn`, whose `forwards` fill-mode leaves a lingering
+  // `transform: translateY(0)` on the element after the entrance animation
+  // finishes. Any transform on an ancestor turns `position: fixed` into a
+  // containing-block-relative position instead of viewport-relative, so
+  // without the portal this modal was getting clipped by that ancestor's
+  // `overflow-hidden` and rendering squashed/inline instead of full-size.
+  const modal = (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
       onClick={onClose}
@@ -272,6 +281,9 @@ function QrCodeModal({ purchase, onClose }) {
       </div>
     </div>
   );
+
+  if (typeof document === "undefined") return null;
+  return createPortal(modal, document.body);
 }
 function handleWithdraw() {
   toast.error("Withdrawal is not allowed in demo mode.");

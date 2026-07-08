@@ -1,33 +1,39 @@
 # EscrowGo
 
+**Built for the DevCareer x Nomba Hackathon 2026**
+
 > **Escrow, not "trust me."** Secure peer-to-peer trading for buyers and sellers who've never met — money is locked the second the buyer pays and only released on proof of delivery, so no one has to go first.
+
+> ⚠️ **This deployment is running in LIVE Nomba payment mode, not test/mock mode.** Payments made through the checkout flow move real money. See [Section 6](#6-payments--nomba-live-mode) before testing the pay flow.
 
 Escrow + delivery coordination for buyers and sellers who haven't met yet. Payment is locked the moment the buyer pays, and only released to the seller once delivery is confirmed by a one-time QR scan. If delivery never happens by the agreed date, the buyer is refunded automatically.
 
-Built as a hackathon MVP — JavaScript only (no TypeScript), Next.js App Router, Tailwind, NextAuth, Prisma + Neon Postgres, Nomba TEST payments, Cloudinary uploads, QR generation/verification, deployed on Netlify.
+Built as a hackathon MVP — JavaScript only (no TypeScript), Next.js App Router, Tailwind, NextAuth, Prisma + Neon Postgres, live Nomba payments, Cloudinary uploads, QR generation/verification, deployed on Netlify.
 
 **🔗 Live demo:** `https://escrow-go.netlify.app` &nbsp;·&nbsp; **📂 Repo:** you're in it &nbsp;·&nbsp; **🎥 Demo video:** _add link here_
 
 ### Table of contents
-[For judges](#-for-reviewers--access-without-signing-up) · [How it works](#1-how-the-flow-works) · [Tech stack](#2-tech-stack) · [Structure](#3-project-structure) · [Local setup](#4-local-setup) · [Demo accounts](#5-demo-accounts-after-seeding) · [Payments](#6-payments--nomba-test-mode) · [API routes](#7-api-routes) · [Testing guide](#11-manual-end-to-end-testing-guide) · [Design notes](#12-notes--design-decisions)
+[For judges](#-for-reviewers--access-without-signing-up) · [How it works](#1-how-the-flow-works) · [Tech stack](#2-tech-stack) · [Structure](#3-project-structure) · [Local setup](#4-local-setup) · [Demo accounts](#5-demo-accounts-after-seeding) · [Payments](#6-payments--nomba-live-mode) · [API routes](#7-api-routes) · [Testing guide](#11-manual-end-to-end-testing-guide) · [Design notes](#12-notes--design-decisions)
 
 ---
 
 ## 🔑 For reviewers — access without signing up
 
-You do **not** need to register an account or bring your own API keys to evaluate this project. Everything below works out of the box in **mock payment mode**, which is the default.
+You do **not** need to register an account or bring your own API keys to evaluate this project.
 
-Sign in at `/auth/login` with either of these (both share the password `password123`):
+**Login page:** `/auth/login`
 
-| Account | Email | State |
-|---|---|---|
-| Test user 1 | `testuser1@EscrowGo.test` | Blank slate — a genuinely brand-new account, identical to what `/auth/register` produces |
-| Test user 2 | `testuser2@EscrowGo.test` | Blank slate — use alongside Test user 1 to trade with each other from scratch |
+| Account | Email | Password | State |
+|---|---|---|---|
+| Test user 1 | `testuser1@EscrowGo.test` | `password123` | Blank slate — a genuinely brand-new account, identical to what `/auth/register` produces |
+| Test user 2 | `testuser2@EscrowGo.test` | `password123` | Blank slate — use alongside Test user 1 to trade with each other from scratch |
+
+Every seeded account (see `prisma/seed.js`) shares the same password: **`password123`**.
 
 - Log in as Test user 1, create a deal, copy the payment link, open it as Test user 2 in another tab/incognito window, pay, deliver, scan, release — the full flow, start to finish, with no seed data in the way and without ever touching the `/auth/register` form (see **Section 11**).
 - Either account can also become a courier on the fly via the **"Become a Courier"** card in the dashboard sidebar, to try the EscrowGo-Delivery path instead of Self Delivery.
 - Both accounts are created by `npm run db:seed`. If you're evaluating a fresh local/self-hosted copy rather than the live demo link, run that command once after setup (see **Section 4**) and both logins will exist.
-- No payment provider account is needed: `PAYMENTS_MOCK_MODE="true"` by default, so **"Pay Securely" → "Confirm Test Payment"** fully exercises the escrow flow (hold → release → refund) without touching Nomba.
+- ⚠️ `PAYMENTS_MOCK_MODE` is currently set to `"false"` on this deployment — the **"Pay Securely"** flow goes through live Nomba checkout and moves real money. See **Section 6** before running through the payment step.
 - No Cloudinary account is needed to *browse* the app; it's only required if you want to upload your own product photos when creating a deal.
 
 ---
@@ -51,7 +57,7 @@ Sign in at `/auth/login` with either of these (both share the password `password
 | Auth | NextAuth (Credentials provider, JWT sessions) |
 | Database | PostgreSQL via Neon |
 | ORM | Prisma |
-| Payments | Nomba TEST Checkout API (with a built-in mock mode) |
+| Payments | Nomba Checkout API — live mode on this deployment (mock mode available for local dev) |
 | Images | Cloudinary (unsigned client upload) |
 | PDF export | pdfkit (seller earnings report) |
 | QR | `qrcode` (generation) + `jsqr` / `html5-qrcode` (camera scanning) |
@@ -105,8 +111,8 @@ npm install
 # 2. Configure environment
 cp .env.example .env
 # then fill in DATABASE_URL and NEXTAUTH_SECRET at minimum.
-# Everything else has a working default (mock payments, no Cloudinary needed
-# unless you want to upload your own images) — see section 6.
+# This deployment runs live Nomba payments by default (PAYMENTS_MOCK_MODE="false")
+# — see section 6. Cloudinary is optional unless you want to upload your own images.
 
 # 3. Push the schema to your Neon database
 npm run db:push
@@ -150,18 +156,20 @@ They're `role: USER` accounts with nothing attached, produced by the exact same 
 
 ---
 
-## 6. Payments — Nomba TEST mode
+## 6. Payments — Nomba LIVE mode
 
-EscrowGo ships with two modes, controlled by `PAYMENTS_MOCK_MODE` in `.env`:
+EscrowGo supports two modes, controlled by `PAYMENTS_MOCK_MODE` in `.env`. **This deployment currently runs with `PAYMENTS_MOCK_MODE="false"` — live mode, not test/sandbox mode.**
 
-### Mock mode (default, `PAYMENTS_MOCK_MODE="true"`)
-No Nomba account needed. Clicking **Pay Securely** takes the buyer to an in-app test-checkout screen (`/pay/[slug]`) with a **Confirm Test Payment** button. This calls the exact same escrow/notification logic a real webhook would (`lib/payment-service.js`), so the whole flow — escrow held, delivery unlocked, QR generated, release, refund — works identically to production. This guarantees your demo works even with zero external dependencies. Mock mode also automatically kicks in if `NOMBA_CLIENT_ID`/`NOMBA_CLIENT_SECRET` are left blank, regardless of the flag.
+> ⚠️ **Real money warning:** Clicking **Pay Securely** on this deployment sends the buyer through actual Nomba checkout and moves real funds. It is **not** the mock "Confirm Test Payment" screen described below. Only complete the pay step with a card/account you intend to actually charge.
 
-### Live Nomba TEST mode
-1. Get TEST credentials from the [Nomba developer dashboard](https://nomba.com/business/developers): `NOMBA_CLIENT_ID`, `NOMBA_CLIENT_SECRET`, `NOMBA_ACCOUNT_ID`.
-2. Set `PAYMENTS_MOCK_MODE="false"` and fill in those values plus `NOMBA_WEBHOOK_SECRET`.
-3. `lib/nomba.js` will exchange credentials for a bearer token, create a hosted checkout order, and redirect the buyer to Nomba's sandbox checkout page.
-4. After payment, Nomba calls your webhook at `/api/webhooks/nomba` (see section 8 for exposing this locally).
+### Live mode (current default here, `PAYMENTS_MOCK_MODE="false"`)
+1. Requires real Nomba credentials in `.env`: `NOMBA_CLIENT_ID`, `NOMBA_CLIENT_SECRET`, `NOMBA_ACCOUNT_ID`, `NOMBA_WEBHOOK_SECRET`.
+2. `lib/nomba.js` exchanges credentials for a bearer token, creates a hosted checkout order, and redirects the buyer to Nomba's live checkout page.
+3. After payment, Nomba calls the webhook at `/api/webhooks/nomba` (see section 8 for exposing this locally), which triggers escrow creation via `lib/payment-service.js`.
+4. Every other part of the flow — delivery, QR release, refunds — behaves exactly as described in this README once the payment webhook lands.
+
+### Mock mode (optional, for local/offline development — `PAYMENTS_MOCK_MODE="true"`)
+No Nomba account needed. Clicking **Pay Securely** instead takes the buyer to an in-app test-checkout screen (`/pay/[slug]`) with a **Confirm Test Payment** button, which calls the exact same escrow/notification logic a real webhook would. Useful for local development without touching Nomba at all. Mock mode also kicks in automatically if `NOMBA_CLIENT_ID`/`NOMBA_CLIENT_SECRET` are left blank, regardless of the flag. **This is not the mode currently active on this deployment.**
 
 Either way, `lib/payment-service.js` is the single source of truth for what happens on a successful payment — escrow creation, delivery record setup, expected-delivery-date calculation, and notifications. The webhook and the mock-completion endpoint both call into it, so there's no duplicated logic to drift out of sync.
 
@@ -209,7 +217,7 @@ Either way, `lib/payment-service.js` is the single source of truth for what happ
 
 ## 8. Testing webhooks locally with Cloudflare Tunnel
 
-If you're running live Nomba TEST payments, Nomba needs a public URL to send webhooks to.
+If you're running live Nomba payments (the default on this deployment), Nomba needs a public URL to send webhooks to. Not required if you're developing locally in mock mode.
 
 ```bash
 # 1. Install cloudflared
@@ -267,7 +275,7 @@ Use two browser profiles (or one normal + one incognito window) — one for each
 3. Try buyer location `Jos` (not in the mock coverage list) — the sidebar flips to "Not covered" and the deal will be force-created as Self Delivery.
 4. Submit → copy the generated payment link.
 5. Open that link in the other profile as the **buyer** (log in as `testuser2@EscrowGo.test`) → review product, seller info, delivery estimate, escrow explanation → **Pay Securely**.
-6. In mock mode you land on an in-app test-checkout screen (`/pay/[slug]`) → **Confirm Test Payment**. Status flips to `FUNDS_HELD` on the deal page (auto-refreshes every few seconds), and you land on `/deal/[slug]/complete` showing your release QR code.
+6. On this deployment (live mode) you'll be taken through actual Nomba checkout — only proceed with a card/account you intend to charge. (If you've switched `PAYMENTS_MOCK_MODE` to `"true"` for local testing instead, you'll land on an in-app test-checkout screen at `/pay/[slug]` with a **Confirm Test Payment** button.) Either way, status flips to `FUNDS_HELD` on the deal page (auto-refreshes every few seconds), and you land on `/deal/[slug]/complete` showing your release QR code.
 7. **Self Delivery deal**: log back in as `testuser1` (the seller) on the deal page → **Mark as picked up** → **Mark as delivered**. The buyer's QR is now active for scanning.
 8. **EscrowGo Delivery deal**: in a third profile (or reuse either account), use the **"Become a Courier"** card in the dashboard sidebar to activate a courier profile, then go to **Dashboard → Delivery tab** → Available → **Accept** → Assigned → **Mark picked up** → **Mark delivered**.
 9. Log in as `testuser1` (the seller, or whichever account is the assigned courier) → on the dashboard home tab, click **"Scan Delivery QR Code"** → allow camera access and scan the buyer's QR, or use the manual code field (the buyer's `Wallet` tab and deal page both show the raw code value for easy copy-pasting in a demo). Escrow releases → `PAYMENT_RELEASED`.
