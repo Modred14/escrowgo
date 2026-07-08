@@ -1,5 +1,8 @@
+// src/app/api/deals/[slug]/complete/route.js
 import { NextResponse } from "next/server";
 import crypto from "crypto";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { verifyTransactionStatus } from "@/lib/nomba";
 import { markPaymentSuccess } from "@/lib/payment-service";
@@ -27,6 +30,29 @@ export async function GET(request, { params }) {
 
     if (!deal) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
+    }
+
+    // Deals created via the seller "invoice" flow (/api/create-deal) are
+    // created with no buyerId — the seller only knows the buyer's email at
+    // that point, not their account. That flow also creates the Payment
+    // record itself without a buyerId. If nothing ever attaches the paying
+    // account to the deal, markPaymentSuccess's `deal.buyerId || payment.buyerId`
+    // fallback resolves to nothing, deal.buyerId stays null forever, and the
+    // buyer's own QR code/transaction never shows up under their wallet
+    // (/api/wallet/transactions filters by buyerId). This page is the first
+    // place the actual logged-in buyer is known, so attach them here — but
+    // never let the seller accidentally become their own buyer.
+    const session = await getServerSession(authOptions);
+    if (
+      !deal.buyerId &&
+      session?.user?.id &&
+      session.user.id !== deal.sellerId
+    ) {
+      await prisma.deal.update({
+        where: { id: deal.id },
+        data: { buyerId: session.user.id },
+      });
+      deal.buyerId = session.user.id;
     }
 
     // Nomba's redirect carries both orderId and orderReference, and which one
