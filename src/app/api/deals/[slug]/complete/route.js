@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { prisma } from "@/lib/prisma";
 import { verifyTransactionStatus } from "@/lib/nomba";
+import { markPaymentSuccess } from "@/lib/payment-service";
 
 export const runtime = "nodejs";
 
@@ -52,10 +53,14 @@ export async function GET(request, { params }) {
         });
 
         if (providerStatus === "SUCCESS") {
-          await prisma.payment.update({
-            where: { id: payment.id },
-            data: { status: "SUCCESS" },
-          });
+          // markPaymentSuccess is idempotent and handles everything a
+          // successful payment needs: deal status, expected delivery date,
+          // and — critically — creating the escrow and delivery records.
+          // Calling it here (not just a bare payment.update) matters because
+          // this polling path is often what confirms payment before any
+          // webhook does, and skipping it left deals with no escrow/delivery
+          // row at all, which broke QR scanning down the line.
+          await markPaymentSuccess(payment.id);
           payment.status = "SUCCESS"; // reflect locally for the rest of this handler
         } else if (providerStatus === "FAILED") {
           await prisma.payment.update({

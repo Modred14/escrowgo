@@ -440,6 +440,15 @@ export default function DealPage() {
                         <p className="text-xs font-semibold uppercase tracking-wide text-ink/40">
                           Self-delivery controls
                         </p>
+                        <p className="text-center text-[11px] leading-relaxed text-ink/40">
+                          When you hand the item to the buyer, ask them to
+                          show their QR code and scan it from your{" "}
+                          <a href="/dashboard" className="font-semibold text-vault hover:underline">
+                            Dashboard
+                          </a>{" "}
+                          — that releases escrow immediately. The steps below
+                          are optional status updates for the buyer.
+                        </p>
                         {deal.delivery.status === "UNASSIGNED" &&
                           deal.status === "FUNDS_HELD" && (
                             <button

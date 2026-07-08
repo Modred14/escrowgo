@@ -62,14 +62,16 @@ export async function POST(req) {
     return NextResponse.json({ error: message }, { status: 403 });
   }
 
-  if (!["DELIVERED"].includes(deal.status)) {
-    return NextResponse.json(
-      {
-        error:
-          "This deal must be marked as delivered before escrow can be released.",
-      },
-      { status: 400 },
-    );
+  // Scanning the buyer's QR at the moment of physical handoff *is* the proof
+  // of delivery — so this single action both marks the delivery complete and
+  // releases escrow, rather than requiring a separate "mark as delivered"
+  // step beforehand.
+  if (!["FUNDS_HELD", "OUT_FOR_DELIVERY", "DELIVERED"].includes(deal.status)) {
+    const message =
+      deal.status === "PENDING_PAYMENT"
+        ? "Payment for this deal hasn't been confirmed yet."
+        : "This deal has already been completed.";
+    return NextResponse.json({ error: message }, { status: 400 });
   }
 
   const now = new Date();
@@ -78,9 +80,25 @@ export async function POST(req) {
     where: { id: qrCode.id },
     data: { isUsed: true, usedAt: now },
   });
-  await prisma.escrow.update({
+  if (deal.delivery) {
+    await prisma.delivery.update({
+      where: { id: deal.delivery.id },
+      data: {
+        status: "DELIVERED",
+        deliveredAt: deal.delivery.deliveredAt || now,
+        pickedUpAt: deal.delivery.pickedUpAt || now,
+      },
+    });
+  }
+  await prisma.escrow.upsert({
     where: { dealId: deal.id },
-    data: { status: "RELEASED", releasedAt: now },
+    update: { status: "RELEASED", releasedAt: now },
+    create: {
+      dealId: deal.id,
+      amount: deal.product.price,
+      status: "RELEASED",
+      releasedAt: now,
+    },
   });
   await prisma.deal.update({
     where: { id: deal.id },
