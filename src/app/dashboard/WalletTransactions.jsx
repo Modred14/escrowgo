@@ -1,4 +1,3 @@
-// src/app/dashboard/WalletTransactions.jsx
 "use client";
 import React, { useState, useEffect } from "react";
 import {
@@ -139,10 +138,9 @@ function StatusBadge({ status }) {
 
 // Small tappable QR preview. Renders a 56x56 thumbnail from the deal's
 // release code; taps invoke onOpen so the parent can show the full-size
-// modal. Deals without any QR code fall back to a plain status icon and
-// aren't clickable. Used codes still render (dimmed) so buyers can look
-// back at a past release QR after completing the deal.
-function QrThumb({ code, isUsed, onOpen }) {
+// modal. Deals without an active (unused) QR code fall back to a plain
+// status icon and aren't clickable.
+function QrThumb({ code, onOpen }) {
   const [dataUrl, setDataUrl] = useState(null);
 
   useEffect(() => {
@@ -178,26 +176,14 @@ function QrThumb({ code, isUsed, onOpen }) {
     <button
       type="button"
       onClick={onOpen}
-      className="relative flex h-14 w-14 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg border transition-transform duration-200 hover:scale-105 active:scale-95"
+      className="flex h-14 w-14 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg border transition-transform duration-200 hover:scale-105 active:scale-95"
       style={{ borderColor: C.line }}
       aria-label="View full QR code"
     >
       {dataUrl ? (
-        <img
-          src={dataUrl}
-          alt="QR code preview"
-          className="h-full w-full"
-          style={isUsed ? { opacity: 0.45 } : undefined}
-        />
+        <img src={dataUrl} alt="QR code preview" className="h-full w-full" />
       ) : (
         <div className="skeleton h-full w-full" />
-      )}
-      {isUsed && (
-        <span
-          className="absolute inset-x-0 bottom-0 bg-black/60 py-[1px] text-center text-[8px] font-semibold uppercase tracking-wide text-white"
-        >
-          Used
-        </span>
       )}
     </button>
   );
@@ -281,9 +267,7 @@ function QrCodeModal({ purchase, onClose }) {
           {purchase.qrCode?.code}
         </p>
         <p className="mt-2 text-[12px]" style={{ color: C.textMuted }}>
-          {purchase.qrCode?.isUsed
-            ? "This code has already been used to release payment."
-            : "Show this to the seller or courier to release payment."}
+          Show this to the seller or courier to release payment.
         </p>
       </div>
     </div>
@@ -333,10 +317,8 @@ function PurchasesList({ purchases, loading }) {
 
         {!loading &&
           purchases.map((p, i) => {
-            // Show the QR whenever one exists on the deal, whether or not
-            // it has already been used to release payment — buyers should
-            // still be able to look back at a past release code.
-            const code = p.qrCode?.code ?? null;
+            const activeCode =
+              p.qrCode && !p.qrCode.isUsed ? p.qrCode.code : null;
             return (
               <div
                 key={p.id}
@@ -344,11 +326,7 @@ function PurchasesList({ purchases, loading }) {
                 style={{ animationDelay: `${460 + i * 60}ms` }}
               >
                 <div className="flex min-w-0 items-center gap-3">
-                  <QrThumb
-                    code={code}
-                    isUsed={!!p.qrCode?.isUsed}
-                    onOpen={() => setSelected(p)}
-                  />
+                  <QrThumb code={activeCode} onOpen={() => setSelected(p)} />
                   <div className="min-w-0">
                     <p
                       className="truncate text-[13.5px] font-medium"
