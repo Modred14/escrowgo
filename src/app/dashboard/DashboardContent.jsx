@@ -16,7 +16,7 @@ import { RadialBarChart, RadialBar, PolarAngleAxis } from "recharts";
 import { useCountUp, formatNaira, C } from "./hooks";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { QrCode, ScanLine, X } from "lucide-react";
+import { QrCode, ScanLine, X, AlertTriangle } from "lucide-react";
 import toast from "react-hot-toast";
 
 import jsQR from "jsqr";
@@ -288,8 +288,20 @@ const [scanResult, setScanResult] = useState(null);
 
 const handleScan = useCallback(async (scannedValue) => {
   try {
-    const code = (scannedValue || "").trim();
-    if (!code) throw new Error("This doesn't look like a valid EscrowGo QR code");
+    const raw = (scannedValue || "").trim();
+    if (!raw) throw new Error("This doesn't look like a valid EscrowGo QR code");
+
+    // The QR encodes a full URL like https://.../verify/<slug>?code=<hex>.
+    // Pull just the "code" param out of it; fall back to the raw scanned
+    // text if it isn't a URL (e.g. an older QR that only had the bare code).
+    let code = raw;
+    try {
+      const url = new URL(raw);
+      const extracted = url.searchParams.get("code");
+      if (extracted) code = extracted;
+    } catch {
+      // not a URL — use raw as-is
+    }
 
     const res = await fetch("/api/qr/verify", {
       method: "POST",
@@ -297,6 +309,8 @@ const handleScan = useCallback(async (scannedValue) => {
       body: JSON.stringify({ code }),
     });
     const data = await res.json();
+
+    setQrModalOpen(false);
 
     if (!res.ok) {
       setScanResult({ success: false, message: data.error || "Verification failed" });
@@ -306,9 +320,10 @@ const handleScan = useCallback(async (scannedValue) => {
     setScanResult({
       success: true,
       message: `Delivery confirmed for "${data.deal?.productName}". Funds released.`,
+      deal: data.deal,
     });
-    setQrModalOpen(false);
   } catch (err) {
+    setQrModalOpen(false);
     setScanResult({ success: false, message: err.message || "Could not read this QR code" });
   }
 }, []);
@@ -476,6 +491,81 @@ const handleScan = useCallback(async (scannedValue) => {
             >
               Cancel
             </button>
+          </div>
+        </div>
+      )}
+      {scanResult && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm animate-fadeIn"
+          onClick={() => setScanResult(null)}
+        >
+          <div
+            className="relative w-full max-w-sm overflow-hidden rounded-3xl bg-white p-6 text-center shadow-2xl animate-scaleIn"
+            style={{ border: `1px solid ${C.line}` }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setScanResult(null)}
+              className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full transition-colors duration-200 hover:bg-slate-100"
+              style={{ color: C.textMuted }}
+            >
+              <X className="h-4 w-4" />
+            </button>
+
+            <div
+              className="mx-auto flex h-16 w-16 items-center justify-center rounded-full"
+              style={{
+                backgroundColor: scanResult.success ? C.greenSoft : "#FEE2E2",
+              }}
+            >
+              {scanResult.success ? (
+                <CheckCircle2 className="h-8 w-8" style={{ color: C.green }} />
+              ) : (
+                <AlertTriangle className="h-8 w-8 text-red-500" />
+              )}
+            </div>
+
+            <p className="mt-4 text-[15px] font-semibold" style={{ color: C.ink }}>
+              {scanResult.success ? "Escrow released" : "Verification failed"}
+            </p>
+            <p className="mt-1.5 text-[13px] leading-relaxed" style={{ color: C.textMuted }}>
+              {scanResult.message}
+            </p>
+
+            <div className="mt-6 flex flex-col gap-2">
+              {scanResult.success && scanResult.deal?.slug && (
+                <Link
+                  href={`/deal/${scanResult.deal.slug}`}
+                  onClick={() => setScanResult(null)}
+                  className="w-full rounded-xl py-2.5 text-center text-[13px] font-semibold text-white transition-transform duration-200 hover:scale-[1.01] active:scale-[0.99]"
+                  style={{ backgroundColor: C.ink }}
+                >
+                  View deal
+                </Link>
+              )}
+              {!scanResult.success && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setScanResult(null);
+                    setQrModalOpen(true);
+                  }}
+                  className="w-full rounded-xl py-2.5 text-[13px] font-semibold text-white transition-transform duration-200 hover:scale-[1.01] active:scale-[0.99]"
+                  style={{ backgroundColor: C.gold }}
+                >
+                  Try again
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => setScanResult(null)}
+                className="w-full rounded-xl py-2.5 text-[13px] font-semibold transition-colors duration-200 hover:bg-slate-100"
+                style={{ color: C.textMuted }}
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}

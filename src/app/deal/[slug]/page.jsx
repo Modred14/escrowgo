@@ -464,14 +464,14 @@ export default function DealPage() {
                         {deal.delivery.status === "DELIVERED" && (
                           <p className="text-center text-xs leading-relaxed text-ink/50">
                             Delivered. Ask the buyer to show their QR code,
-                            then scan it on the{" "}
+                            then scan it from your{" "}
                             <a
-                              href="/scanner"
+                              href="/dashboard"
                               className="font-semibold text-vault hover:underline"
                             >
-                              Scanner
+                              Dashboard
                             </a>{" "}
-                            page.
+                            using the "Scan Delivery QR Code" card.
                           </p>
                         )}
                       </div>
