@@ -14,7 +14,19 @@ export default function ScannerPage() {
   const [lastCode, setLastCode] = useState(null);
 
   const handleResult = useCallback(
-    async (code) => {
+    async (raw) => {
+      // The QR encodes a full URL like https://.../verify/<slug>?code=<hex>.
+      // Pull just the "code" param out of it; fall back to the raw scanned
+      // text if it isn't a URL (e.g. an older QR that only had the bare code).
+      let code = raw;
+      try {
+        const url = new URL(raw);
+        const extracted = url.searchParams.get("code");
+        if (extracted) code = extracted;
+      } catch {
+        // not a URL — use raw as-is
+      }
+
       if (verifying || code === lastCode) return;
       setLastCode(code);
       setVerifying(true);
