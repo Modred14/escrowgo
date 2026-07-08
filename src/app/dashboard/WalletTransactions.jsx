@@ -326,10 +326,7 @@ function PurchasesList({ purchases, loading }) {
                 style={{ animationDelay: `${460 + i * 60}ms` }}
               >
                 <div className="flex min-w-0 items-center gap-3">
-                  <QrThumb
-                    code={activeCode}
-                    onOpen={() => setSelected(p)}
-                  />
+                  <QrThumb code={activeCode} onOpen={() => setSelected(p)} />
                   <div className="min-w-0">
                     <p
                       className="truncate text-[13.5px] font-medium"
@@ -456,13 +453,12 @@ export default function WalletTransactions() {
             )}
             <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <button
-               onClick={handleWithdraw}
+                onClick={handleWithdraw}
                 className="inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-[13px] font-semibold transition-all duration-300 hover:brightness-95 active:scale-[0.98] sm:w-auto"
                 style={{ backgroundColor: C.ink, color: C.goldSoft }}
               >
                 <ArrowUpFromLine size={14} /> Withdraw money
               </button>
-            
             </div>
           </div>
 
@@ -631,7 +627,6 @@ export default function WalletTransactions() {
                     className="mt-0.5 truncate text-[12px]"
                     style={{ color: C.textMuted }}
                   >
-                    
                     {row.courier && row.courier !== "Self delivery" && (
                       <> · courier: {row.courier}</>
                     )}
@@ -659,90 +654,94 @@ export default function WalletTransactions() {
           )}
         </div>
 
-       {/* Tablet & up: full table */}
-<div className="hidden overflow-x-auto md:block">
-  <table className="w-full table-fixed border-collapse">
-    <thead>
-      <tr>
-        {["Product", "Courier", "Total amount", "Delivery status"].map(
-          (h) => (
-            <th
-              key={h}
-              className="w-1/4 px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.08em]"
-              style={{ color: C.goldDeep }}
-            >
-              {h}
-            </th>
-          ),
-        )}
-      </tr>
-    </thead>
-    <tbody>
-      {loading &&
-        Array.from({ length: 4 }).map((_, i) => (
-          <tr key={i} className="border-t" style={{ borderColor: C.line }}>
-            <td className="w-1/4 px-5 py-3.5">
-              <div className="skeleton h-3.5 w-28 rounded-md" />
-            </td>
-            <td className="w-1/4 px-5 py-3.5">
-              <div className="skeleton h-3.5 w-24 rounded-md" />
-            </td>
-            <td className="w-1/4 px-5 py-3.5">
-              <div className="skeleton h-3.5 w-20 rounded-md" />
-            </td>
-            <td className="w-1/4 px-5 py-3.5">
-              <div className="skeleton h-5 w-20 rounded-full" />
-            </td>
-          </tr>
-        ))}
-      {!loading &&
-        filteredSales.map((row, i) => (
-          <tr
-            key={row.id}
-            className="opacity-0 animate-riseIn border-t transition-colors duration-200 hover:bg-[#FBF7EF]"
-            style={{
-              borderColor: C.line,
-              animationDelay: `${420 + i * 60}ms`,
-            }}
-          >
-            <td
-              className="w-1/4 truncate px-5 py-3.5 text-[13.5px]"
-              style={{ color: C.inkFaint }}
-            >
-              {row.product}
-            </td>
-            <td
-              className="w-1/4 truncate px-5 py-3.5 text-[13.5px]"
-              style={{ color: C.inkFaint }}
-            >
-              {row.courier}
-            </td>
-            <td
-              className="w-1/4 truncate px-5 py-3.5 text-[13.5px]"
-              style={{ color: C.textMuted }}
-            >
-              {formatNaira(row.amount)}
-            </td>
-            <td className="w-1/4 px-5 py-3.5">
-              <StatusBadge status={row.status} />
-            </td>
-          </tr>
-        ))}
-      {!loading && filteredSales.length === 0 && (
-        <tr>
-          <td
-            colSpan={4}
-            className="px-5 py-8 text-center text-[13px]"
-            style={{ color: C.textMuted }}
-          >
-            No transactions match
-            {query && ` "${query}"`}.
-          </td>
-        </tr>
-      )}
-    </tbody>
-  </table>
-</div>
+        {/* Tablet & up: full table */}
+        <div className="hidden overflow-x-auto md:block">
+          <table className="w-full table-fixed border-collapse">
+            <thead>
+              <tr>
+                {["Product", "Courier", "Total amount", "Delivery status"].map(
+                  (h) => (
+                    <th
+                      key={h}
+                      className="w-1/4 px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.08em]"
+                      style={{ color: C.goldDeep }}
+                    >
+                      {h}
+                    </th>
+                  ),
+                )}
+              </tr>
+            </thead>
+            <tbody>
+              {loading &&
+                Array.from({ length: 4 }).map((_, i) => (
+                  <tr
+                    key={i}
+                    className="border-t"
+                    style={{ borderColor: C.line }}
+                  >
+                    <td className="w-1/4 px-5 py-3.5">
+                      <div className="skeleton h-3.5 w-28 rounded-md" />
+                    </td>
+                    <td className="w-1/4 px-5 py-3.5">
+                      <div className="skeleton h-3.5 w-24 rounded-md" />
+                    </td>
+                    <td className="w-1/4 px-5 py-3.5">
+                      <div className="skeleton h-3.5 w-20 rounded-md" />
+                    </td>
+                    <td className="w-1/4 px-5 py-3.5">
+                      <div className="skeleton h-5 w-20 rounded-full" />
+                    </td>
+                  </tr>
+                ))}
+              {!loading &&
+                filteredSales.map((row, i) => (
+                  <tr
+                    key={row.id}
+                    className="opacity-0 animate-riseIn border-t transition-colors duration-200 hover:bg-[#FBF7EF]"
+                    style={{
+                      borderColor: C.line,
+                      animationDelay: `${420 + i * 60}ms`,
+                    }}
+                  >
+                    <td
+                      className="w-1/4 truncate px-5 py-3.5 text-[13.5px]"
+                      style={{ color: C.inkFaint }}
+                    >
+                      {row.product}
+                    </td>
+                    <td
+                      className="w-1/4 truncate px-5 py-3.5 text-[13.5px]"
+                      style={{ color: C.inkFaint }}
+                    >
+                      {row.courier}
+                    </td>
+                    <td
+                      className="w-1/4 truncate px-5 py-3.5 text-[13.5px]"
+                      style={{ color: C.textMuted }}
+                    >
+                      {formatNaira(row.amount)}
+                    </td>
+                    <td className="w-1/4 px-5 py-3.5">
+                      <StatusBadge status={row.status} />
+                    </td>
+                  </tr>
+                ))}
+              {!loading && filteredSales.length === 0 && (
+                <tr>
+                  <td
+                    colSpan={4}
+                    className="px-5 py-8 text-center text-[13px]"
+                    style={{ color: C.textMuted }}
+                  >
+                    No transactions match
+                    {query && ` "${query}"`}.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* Buyer-side: purchases with release QR codes */}

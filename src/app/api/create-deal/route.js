@@ -61,7 +61,7 @@ async function createNombaCheckout({ orderReference, amount, customerEmail, call
         orderReference,
         amount: amount.toFixed(2),
         currency: "NGN",
-        customerEmail: customerEmail || undefined,
+        customerEmail,
         callbackUrl,
         orderMetaData: { productName },
       },
@@ -169,7 +169,21 @@ export async function POST(request) {
     const description = (formData.get("description") || "").toString().trim();
     const price = Number(formData.get("price"));
     const deliveryOption = (formData.get("deliveryOption") || "").toString();
-    const buyerEmail = (formData.get("buyerEmail") || "").toString().trim() || null;
+    const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const rawBuyerEmail = (formData.get("buyerEmail") || "").toString().trim();
+    // The create-deal form doesn't currently collect a buyer email (the buyer
+    // pays via a shared link later), so fall back to the seller's own email —
+    // Nomba's checkout order API requires a valid email to be present.
+    const buyerEmail = EMAIL_REGEX.test(rawBuyerEmail)
+      ? rawBuyerEmail
+      : session.user.email;
+
+    if (!buyerEmail) {
+      return NextResponse.json(
+        { error: "A valid email is required to create the payment checkout" },
+        { status: 400 },
+      );
+    }
 
     let buyerLocation;
     let sellerLocation;
