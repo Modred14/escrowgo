@@ -98,16 +98,29 @@ export async function verifyTransactionStatus({ orderReference }) {
   }
 
   const token = await getAccessToken();
-  const res = await fetch(
-    `${BASE_URL}/v1/transactions/accounts/single?orderReference=${orderReference}`,
-    {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        accountId: process.env.NOMBA_ACCOUNT_ID,
+
+  async function query(paramName) {
+    const res = await fetch(
+      `${BASE_URL}/v1/transactions/accounts/single?${paramName}=${orderReference}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          accountId: process.env.NOMBA_ACCOUNT_ID,
+        },
       },
-    },
-  );
+    );
+    return res;
+  }
+
+  // Nomba's verify endpoint 404s if the value you send doesn't match the
+  // param name's expected type (orderReference vs orderId), even though both
+  // are accepted in principle. Try orderReference first, then fall back to
+  // orderId with the same value before giving up.
+  let res = await query("orderReference");
+  if (res.status === 404) {
+    res = await query("orderId");
+  }
 
   if (!res.ok) {
     const text = await res.text();

@@ -77,6 +77,7 @@ export async function GET(request, { params }) {
         return NextResponse.json({
           verified: false,
           status: payment.status || "PENDING",
+          debugError: err.message,
         });
       }
     }
