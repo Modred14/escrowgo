@@ -1,3 +1,4 @@
+// src/app/api/wallet/summary/route.js
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -9,15 +10,24 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const escrows = await prisma.escrow.findMany({
-    where: {
-      status: "RELEASED",
-      deal: { sellerId: session.user.id },
-    },
-    select: { amount: true },
-  });
+  const [escrows, withdrawals] = await Promise.all([
+    prisma.escrow.findMany({
+      where: {
+        status: "RELEASED",
+        deal: { sellerId: session.user.id },
+      },
+      select: { amount: true },
+    }),
+    // Only successfully-paid-out withdrawals reduce the spendable balance.
+    prisma.withdrawal.findMany({
+      where: { userId: session.user.id, status: "SUCCESS" },
+      select: { amount: true },
+    }),
+  ]);
 
-  const balance = escrows.reduce((sum, e) => sum + e.amount, 0);
+  const moneyIn = escrows.reduce((sum, e) => sum + e.amount, 0);
+  const totalWithdrawn = withdrawals.reduce((sum, w) => sum + w.amount, 0);
+  const balance = moneyIn - totalWithdrawn;
 
   return NextResponse.json({ balance });
 }

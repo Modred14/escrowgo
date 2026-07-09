@@ -54,6 +54,12 @@ enum NotificationType {
   ERROR
 }
 
+enum WithdrawalStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String
@@ -75,6 +81,7 @@ model User {
   payments      Payment[]
   notifications Notification[]
   deliveryAgent DeliveryAgent?
+  withdrawals   Withdrawal[]
 
   @@map("users")
 }
@@ -202,6 +209,29 @@ model QRCode {
   createdAt DateTime  @default(now())
 
   @@map("qr_codes")
+}
+
+// A single withdrawal-to-bank request. Created as PENDING right before we
+// call the Nomba transfer API, then flipped to SUCCESS/FAILED once we get a
+// response. Only SUCCESS withdrawals count against the seller's wallet
+// balance (see /api/wallet/summary and /api/wallet/transactions).
+model Withdrawal {
+  id            String           @id @default(cuid())
+  userId        String
+  user          User             @relation(fields: [userId], references: [id])
+  amount        Float
+  bankCode      String
+  bankName      String?
+  accountNumber String
+  accountName   String
+  status        WithdrawalStatus @default(PENDING)
+  merchantTxRef String           @unique
+  providerRef   String?
+  failureReason String?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  @@map("withdrawals")
 }
 
 model Notification {

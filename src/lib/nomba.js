@@ -131,6 +131,144 @@ export async function verifyTransactionStatus({ orderReference }) {
   return { status: data?.data?.status, mock: false, raw: data };
 }
 
+let cachedBanks = null;
+let banksCachedAt = 0;
+
+/**
+ * Fetches the list of banks Nomba can pay out to. Nomba says bank codes
+ * rarely change, so we cache the list in-memory for an hour instead of
+ * hitting the API on every withdraw-modal open.
+ */
+export async function fetchBanks() {
+  if (isMockMode()) {
+    return [
+      { name: "Access Bank", code: "044" },
+      { name: "Guaranty Trust Bank", code: "058" },
+      { name: "Zenith Bank", code: "057" },
+      { name: "First Bank of Nigeria", code: "011" },
+      { name: "United Bank for Africa", code: "033" },
+      { name: "Opay", code: "999992" },
+      { name: "Kuda Bank", code: "090267" },
+      { name: "Moniepoint MFB", code: "50515" },
+    ];
+  }
+
+  if (cachedBanks && Date.now() < banksCachedAt + 60 * 60 * 1000) {
+    return cachedBanks;
+  }
+
+  const token = await getAccessToken();
+  const res = await fetch(`${BASE_URL}/v1/transfers/banks`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      accountId: process.env.NOMBA_ACCOUNT_ID,
+    },
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Nomba fetch banks failed: ${res.status} ${text}`);
+  }
+
+  const data = await res.json();
+  const list = data?.data?.results || data?.data || [];
+  cachedBanks = list.map((b) => ({ name: b.name, code: b.code }));
+  banksCachedAt = Date.now();
+  return cachedBanks;
+}
+
+/**
+ * Verifies a recipient's bank account before a transfer and returns the
+ * account holder's name, so the withdrawal UI can autofill/confirm it.
+ */
+export async function lookupBankAccount({ accountNumber, bankCode }) {
+  if (isMockMode()) {
+    return { accountNumber, accountName: "Demo Account (Mock Mode)" };
+  }
+
+  const token = await getAccessToken();
+  const res = await fetch(`${BASE_URL}/v1/transfers/bank/lookup`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+      accountId: process.env.NOMBA_ACCOUNT_ID,
+    },
+    body: JSON.stringify({ accountNumber, bankCode }),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Nomba account lookup failed: ${res.status} ${text}`);
+  }
+
+  const data = await res.json();
+  return {
+    accountNumber: data?.data?.accountNumber || accountNumber,
+    accountName: data?.data?.accountName,
+  };
+}
+
+/**
+ * Pays out from the Nomba merchant balance to an external bank account.
+ * Used for user withdrawals from their EscrowGo wallet.
+ */
+export async function transferToBank({
+  amount,
+  accountNumber,
+  accountName,
+  bankCode,
+  merchantTxRef,
+  senderName,
+  narration,
+}) {
+  if (isMockMode()) {
+    return {
+      status: "SUCCESS",
+      providerRef: `MOCK-WD-${merchantTxRef}`,
+      mock: true,
+    };
+  }
+
+  const token = await getAccessToken();
+  const res = await fetch(`${BASE_URL}/v2/transfers/bank`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+      accountId: process.env.NOMBA_ACCOUNT_ID,
+    },
+    body: JSON.stringify({
+      amount,
+      accountNumber,
+      accountName,
+      bankCode,
+      merchantTxRef,
+      senderName,
+      narration,
+    }),
+  });
+
+  const data = await res.json().catch(() => ({}));
+
+  if (!res.ok) {
+    return {
+      status: "FAILED",
+      providerRef: data?.data?.id || null,
+      message: data?.message || data?.description || `Transfer failed (${res.status})`,
+      mock: false,
+    };
+  }
+
+  return {
+    status: data?.data?.status || "PENDING",
+    providerRef: data?.data?.id || null,
+    message: data?.message || data?.description,
+    mock: false,
+  };
+}
+
 export function verifyWebhookSignature(rawBody, signature) {
   if (isMockMode()) return true;
   if (!signature || !process.env.NOMBA_WEBHOOK_SECRET) {

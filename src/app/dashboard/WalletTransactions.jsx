@@ -1,5 +1,6 @@
+// src/app/dashboard/WalletTransactions.jsx
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import {
   Wallet,
@@ -21,6 +22,7 @@ import {
   X,
 } from "lucide-react";
 import { useCountUp, formatNaira, C } from "./hooks";
+import WithdrawModal from "./WithdrawModal";
 
 const STATUS_STYLES = {
   "Awaiting Payment": { bg: "#F1F0EC", fg: C.textMuted, icon: Clock3 },
@@ -49,27 +51,24 @@ function useWalletData() {
   });
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    let cancelled = false;
-    async function load() {
-      try {
-        const res = await fetch("/api/wallet/transactions");
-        if (!res.ok) throw new Error("Failed to load wallet data");
-        const json = await res.json();
-        if (!cancelled) setData(json);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
+  const load = useCallback(async () => {
+    try {
+      const res = await fetch("/api/wallet/transactions");
+      if (!res.ok) throw new Error("Failed to load wallet data");
+      const json = await res.json();
+      setData(json);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
-    load();
-    return () => {
-      cancelled = true;
-    };
   }, []);
 
-  return { ...data, loading };
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  return { ...data, loading, reload: load };
 }
 function MiniStat({
   icon: Icon,
@@ -285,9 +284,6 @@ function QrCodeModal({ purchase, onClose }) {
   if (typeof document === "undefined") return null;
   return createPortal(modal, document.body);
 }
-function handleWithdraw() {
-  toast.error("Withdrawal is not allowed in demo mode.");
-}
 // Buyer-side list of QR release codes. Small preview per row; tapping opens
 // the full QR in a modal. Purely presentational — the underlying data
 // (status, qrCode.isUsed) is refetched from /api/wallet/transactions on
@@ -382,9 +378,11 @@ export default function WalletTransactions() {
     sales,
     purchases,
     loading,
+    reload,
   } = useWalletData();
   const [mounted, setMounted] = useState(false);
   const [query, setQuery] = useState("");
+  const [showWithdrawModal, setShowWithdrawModal] = useState(false);
 
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 100);
@@ -465,7 +463,7 @@ export default function WalletTransactions() {
             )}
             <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <button
-                onClick={handleWithdraw}
+                onClick={() => setShowWithdrawModal(true)}
                 className="inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-[13px] font-semibold transition-all duration-300 hover:brightness-95 active:scale-[0.98] sm:w-auto"
                 style={{ backgroundColor: C.ink, color: C.goldSoft }}
               >
@@ -758,6 +756,13 @@ export default function WalletTransactions() {
 
       {/* Buyer-side: purchases with release QR codes */}
       <PurchasesList purchases={purchases} loading={loading} />
+
+      <WithdrawModal
+        open={showWithdrawModal}
+        onClose={() => setShowWithdrawModal(false)}
+        balance={balance}
+        onSuccess={reload}
+      />
     </div>
   );
 }

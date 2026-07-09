@@ -1,3 +1,4 @@
+// src/app/api/wallet/transactions/route.js
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -40,12 +41,18 @@ export async function GET() {
 
   const userId = session.user.id;
 
-  const [releasedEscrows, deals, purchaseDeals] = await Promise.all([
+  const [releasedEscrows, withdrawals, deals, purchaseDeals] = await Promise.all([
     // Only escrow that has actually been RELEASED to the seller counts as
     // real balance. Money still held in escrow (FUNDS_HELD/OUT_FOR_DELIVERY/
     // DELIVERED-but-unscanned) must NOT show up as spendable balance.
     prisma.escrow.findMany({
       where: { status: "RELEASED", deal: { sellerId: userId } },
+      select: { amount: true },
+    }),
+    // Only successfully-paid-out withdrawals reduce spendable balance;
+    // PENDING/FAILED ones don't count until (if) Nomba confirms them.
+    prisma.withdrawal.findMany({
+      where: { userId, status: "SUCCESS" },
       select: { amount: true },
     }),
     prisma.deal.findMany({
@@ -73,9 +80,7 @@ export async function GET() {
   ]);
 
   const moneyIn = releasedEscrows.reduce((sum, e) => sum + e.amount, 0);
-
-  // No withdrawal-tracking model exists yet — placeholder until one is added.
-  const totalWithdrawn = 0;
+  const totalWithdrawn = withdrawals.reduce((sum, w) => sum + w.amount, 0);
 
   const totalTransactions = deals.length;
 

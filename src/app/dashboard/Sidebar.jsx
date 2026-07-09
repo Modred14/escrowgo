@@ -1,5 +1,6 @@
+// src/app/dashboard/Sidebar.jsx
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   LayoutDashboard,
   Wallet,
@@ -21,10 +22,7 @@ import { useCountUp, formatNaira, C } from "./hooks";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
 import toast from "react-hot-toast";
-
-function handleWithdraw() {
-  toast.error("Withdrawal is not allowed in demo mode.");
-}
+import WithdrawModal from "./WithdrawModal";
 
 function NavItem({ icon: Icon, label, active, delay, onClick }) {
   return (
@@ -166,28 +164,26 @@ export default function Sidebar({
   const [balanceLoading, setBalanceLoading] = useState(true);
   const [becomingCourier, setBecomingCourier] = useState(false);
   const [showCourierModal, setShowCourierModal] = useState(false);
+  const [showWithdrawModal, setShowWithdrawModal] = useState(false);
 
   const isCourier = session?.user?.role === "DELIVERY_AGENT";
 
-  useEffect(() => {
-    let cancelled = false;
-    async function loadBalance() {
-      try {
-        const res = await fetch("/api/wallet/summary");
-        if (!res.ok) throw new Error("Failed to load wallet balance");
-        const json = await res.json();
-        if (!cancelled) setBalance(json.balance);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        if (!cancelled) setBalanceLoading(false);
-      }
+  const loadBalance = useCallback(async () => {
+    try {
+      const res = await fetch("/api/wallet/summary");
+      if (!res.ok) throw new Error("Failed to load wallet balance");
+      const json = await res.json();
+      setBalance(json.balance);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setBalanceLoading(false);
     }
-    loadBalance();
-    return () => {
-      cancelled = true;
-    };
   }, []);
+
+  useEffect(() => {
+    loadBalance();
+  }, [loadBalance]);
 
   const [internalOpen, setInternalOpen] = useState(false);
   const isControlled = open !== undefined && setOpen !== undefined;
@@ -268,6 +264,13 @@ export default function Sidebar({
           handleNavigate("delivery");
           setIsOpen(false);
         }}
+      />
+
+      <WithdrawModal
+        open={showWithdrawModal}
+        onClose={() => setShowWithdrawModal(false)}
+        balance={balance}
+        onSuccess={loadBalance}
       />
 
       <aside
@@ -354,7 +357,7 @@ export default function Sidebar({
             </p>
           )}
           <button
-            onClick={handleWithdraw}
+            onClick={() => setShowWithdrawModal(true)}
             className="mt-3 w-full rounded-xl py-1.5 text-[12px] font-semibold transition-all duration-300 hover:brightness-110 hover:shadow-lg active:scale-[0.98]"
             style={{
               background: `linear-gradient(135deg, ${C.goldSoft}, ${C.gold})`,
