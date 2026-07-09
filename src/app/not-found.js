@@ -35,7 +35,7 @@ export default function NotFound() {
         <div className="e404-ring-spin absolute inset-0 rounded-full border border-dashed border-brass/40" />
         <div className="e404-ring-spin-rev absolute inset-2 rounded-full border border-dashed border-mint/25" />
         <div className="e404-seal-pulse absolute inset-3 rounded-full bg-vault-light/20 blur-xl" />
-        <div className="relative flex h-16 w-16 items-center justify-center rounded-full bg-vault shadow-seal">
+        <div className="relative flex h-16 w-16 items-center justify-center rounded-full shadow-seal">
           <img src="/logo.png"/>
         </div>
       </div>
