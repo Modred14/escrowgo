@@ -7,6 +7,11 @@ const bricolage = Bricolage_Grotesque({
   variable: "--font-bricolage",
 });
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+};
 
 export const metadata = {
   metadataBase: new URL(
