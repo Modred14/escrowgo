@@ -131,8 +131,6 @@ export default function WithdrawModal({ open, onClose, balance = 0, onSuccess })
   const canContinue =
     amountValid && selectedBank && /^\d{10}$/.test(accountNumber) && !!accountName && !lookupLoading;
 
-  if (!open) return null;
-
   function handleClose() {
     if (submitting) return;
     onClose?.();
@@ -197,6 +195,10 @@ export default function WithdrawModal({ open, onClose, balance = 0, onSuccess })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pin, step]);
+
+  // IMPORTANT: this early return must come after every hook above it, or
+  // hook order breaks between "closed" and "open" renders (Rules of Hooks).
+  if (!open) return null;
 
   const modal = (
     <div
