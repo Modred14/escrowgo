@@ -43,6 +43,60 @@ export async function POST(req) {
     });
   }
 
+  // Payout events (withdrawals) reference a Withdrawal row via merchantTxRef,
+  // not a Payment row — handle those separately before falling back to the
+  // payment lookup, otherwise every payout webhook gets dropped as "Unknown
+  // reference" and PENDING withdrawals never resolve to SUCCESS/FAILED. That
+  // left the spendable-balance calc (which only subtracts SUCCESS
+  // withdrawals) unaware that money had already left the Nomba account,
+  // so the wallet kept showing a balance that was no longer really there —
+  // the next withdrawal attempt would then get rejected by Nomba itself for
+  // insufficient funds even though our own UI said the balance was fine.
+  if (eventType === "payout_success" || eventType === "payout_failed") {
+    const withdrawal = await prisma.withdrawal.findUnique({
+      where: { merchantTxRef: orderReference },
+    });
+
+    console.log("[webhook] withdrawal lookup result:", withdrawal ? withdrawal.id : "NOT FOUND");
+
+    if (!withdrawal) {
+      return NextResponse.json({ received: true, note: "Unknown reference" });
+    }
+
+    if (withdrawal.status !== "PENDING") {
+      // Already resolved (e.g. we got an immediate SUCCESS on the initial
+      // API response) — don't double-process.
+      return NextResponse.json({ received: true, note: "Already resolved" });
+    }
+
+    if (eventType === "payout_success") {
+      console.log("[webhook] marking withdrawal success:", withdrawal.id);
+      await prisma.withdrawal.update({
+        where: { id: withdrawal.id },
+        data: { status: "SUCCESS" },
+      });
+      await notify(withdrawal.userId, {
+        title: "Withdrawal successful",
+        message: `₦${withdrawal.amount.toLocaleString("en-NG")} has been paid out to ${withdrawal.accountName} (${withdrawal.accountNumber}).`,
+        type: "SUCCESS",
+      });
+    } else {
+      console.log("[webhook] marking withdrawal failed:", withdrawal.id);
+      await prisma.withdrawal.update({
+        where: { id: withdrawal.id },
+        data: { status: "FAILED", failureReason: "Payout failed at provider" },
+      });
+      await notify(withdrawal.userId, {
+        title: "Withdrawal failed",
+        message: `Your withdrawal of ₦${withdrawal.amount.toLocaleString("en-NG")} could not be completed and was not deducted from your balance.`,
+        type: "ERROR",
+      });
+    }
+
+    console.log("[webhook] done processing, returning 200");
+    return NextResponse.json({ received: true });
+  }
+
   const payment = await prisma.payment.findUnique({
     where: { providerRef: orderReference },
   });
