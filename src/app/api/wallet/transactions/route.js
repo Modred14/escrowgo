@@ -49,10 +49,12 @@ export async function GET() {
       where: { status: "RELEASED", deal: { sellerId: userId } },
       select: { amount: true },
     }),
-    // Only successfully-paid-out withdrawals reduce spendable balance;
-    // PENDING/FAILED ones don't count until (if) Nomba confirms them.
+    // PENDING withdrawals also reduce spendable balance; Nomba treats that
+    // money as committed/sent the moment it accepts the payout, well before
+    // our webhook confirms it as SUCCESS. Only FAILED ones don't count,
+    // since that money never actually left.
     prisma.withdrawal.findMany({
-      where: { userId, status: "SUCCESS" },
+      where: { userId, status: { in: ["SUCCESS", "PENDING"] } },
       select: { amount: true },
     }),
     prisma.deal.findMany({

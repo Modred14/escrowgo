@@ -10,22 +10,33 @@ import { lookupBankAccount, transferToBank } from "@/lib/nomba";
 
 // Same "spendable balance" definition used by /api/wallet/summary and
 // /api/wallet/transactions: money released to the seller from escrow, minus
-// whatever has already been successfully paid out.
+// whatever has already been paid out or is in flight.
+//
+// IMPORTANT: PENDING withdrawals must also be subtracted, not just SUCCESS.
+// Nomba treats the money as committed/sent the instant it accepts the
+// payout — our own row just hasn't been confirmed SUCCESS by the webhook
+// yet. If we only subtract SUCCESS, the balance stays inflated while a
+// withdrawal is PENDING, so a user can submit another withdrawal that our
+// own check happily approves — but Nomba's real account balance has
+// already been reduced by the first payout, so the second one bounces back
+// as a genuine "insufficient funds" error from the provider, even though
+// our UI said the balance was fine. Only FAILED withdrawals are safe to
+// exclude, since that money never actually left.
 async function getSpendableBalance(userId) {
-  const [releasedEscrows, successfulWithdrawals] = await Promise.all([
+  const [releasedEscrows, unavailableWithdrawals] = await Promise.all([
     prisma.escrow.findMany({
       where: { status: "RELEASED", deal: { sellerId: userId } },
       select: { amount: true },
     }),
     prisma.withdrawal.findMany({
-      where: { userId, status: "SUCCESS" },
+      where: { userId, status: { in: ["SUCCESS", "PENDING"] } },
       select: { amount: true },
     }),
   ]);
 
   const moneyIn = releasedEscrows.reduce((sum, e) => sum + e.amount, 0);
-  const totalWithdrawn = successfulWithdrawals.reduce((sum, w) => sum + w.amount, 0);
-  return moneyIn - totalWithdrawn;
+  const totalCommitted = unavailableWithdrawals.reduce((sum, w) => sum + w.amount, 0);
+  return moneyIn - totalCommitted;
 }
 
 export async function POST(req) {
