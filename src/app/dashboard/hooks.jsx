@@ -27,7 +27,14 @@ export function useCountUp(
 }
 
 export function formatNaira(n) {
-  return "₦" + " " + Math.round(n).toLocaleString("en-NG");
+  return (
+    "₦" +
+    " " +
+    Number(n).toLocaleString("en-NG", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })
+  );
 }
 
 export const C = {

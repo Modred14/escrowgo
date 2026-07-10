@@ -393,6 +393,7 @@ export default function WalletTransactions() {
   const balanceCount = useCountUp(balance, {
     start: mounted && !loading,
     duration: 1600,
+    decimals: 2,
   });
   const filteredSales = sales.filter(
     (s) =>

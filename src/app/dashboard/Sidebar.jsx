@@ -193,6 +193,7 @@ export default function Sidebar({
   const balanceCount = useCountUp(balance, {
     start: !balanceLoading,
     duration: 1600,
+    decimals: 2,
   });
   const currentPage = activePage ?? page;
   const handleNavigate = onNavigate ?? setPage;

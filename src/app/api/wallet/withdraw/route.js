@@ -74,7 +74,14 @@ export async function POST(req) {
     return NextResponse.json({ error: "Incorrect PIN." }, { status: 401 });
   }
 
-  const balance = await getSpendableBalance(userId);
+  // Round to the same precision the UI's formatNaira() now displays
+  // (2 decimal places / kobo). Comparing against the raw, un-rounded float
+  // here caused false "insufficient balance" rejections: e.g. a true
+  // balance of 4999.999999998 displays as "₦4,999.99"/"₦5,000.00", but a
+  // strict numericAmount > rawBalance check could reject a withdrawal for
+  // the exact amount the user was shown.
+  const rawBalance = await getSpendableBalance(userId);
+  const balance = Math.round(rawBalance * 100) / 100;
   if (numericAmount > balance) {
     return NextResponse.json(
       { error: "That's more than your available balance." },
