@@ -1,4 +1,3 @@
-// src/app/api/deals/[slug]/complete/route.js
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { getServerSession } from "next-auth";
@@ -32,16 +31,7 @@ export async function GET(request, { params }) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
-    // Deals created via the seller "invoice" flow (/api/create-deal) are
-    // created with no buyerId — the seller only knows the buyer's email at
-    // that point, not their account. That flow also creates the Payment
-    // record itself without a buyerId. If nothing ever attaches the paying
-    // account to the deal, markPaymentSuccess's `deal.buyerId || payment.buyerId`
-    // fallback resolves to nothing, deal.buyerId stays null forever, and the
-    // buyer's own QR code/transaction never shows up under their wallet
-    // (/api/wallet/transactions filters by buyerId). This page is the first
-    // place the actual logged-in buyer is known, so attach them here — but
-    // never let the seller accidentally become their own buyer.
+  
     const session = await getServerSession(authOptions);
     if (
       !deal.buyerId &&
@@ -55,9 +45,6 @@ export async function GET(request, { params }) {
       deal.buyerId = session.user.id;
     }
 
-    // Nomba's redirect carries both orderId and orderReference, and which one
-    // matches payment.providerRef has been inconsistent in practice — so we
-    // accept a match against either.
     const payment = deal.payments?.find(
       (p) =>
         (orderReference && p.providerRef === orderReference) ||
@@ -79,15 +66,8 @@ export async function GET(request, { params }) {
         });
 
         if (providerStatus === "SUCCESS") {
-          // markPaymentSuccess is idempotent and handles everything a
-          // successful payment needs: deal status, expected delivery date,
-          // and — critically — creating the escrow and delivery records.
-          // Calling it here (not just a bare payment.update) matters because
-          // this polling path is often what confirms payment before any
-          // webhook does, and skipping it left deals with no escrow/delivery
-          // row at all, which broke QR scanning down the line.
           await markPaymentSuccess(payment.id);
-          payment.status = "SUCCESS"; // reflect locally for the rest of this handler
+          payment.status = "SUCCESS";
         } else if (providerStatus === "FAILED") {
           await prisma.payment.update({
             where: { id: payment.id },

@@ -1,4 +1,3 @@
-// src/app/dashboard/DeliveryContent.jsx
 "use client";
 import React, { useState, useEffect } from "react";
 import {
@@ -289,7 +288,6 @@ export default function DeliveryContent() {
   const { data: session } = useSession();
   const [mounted, setMounted] = useState(false);
 
-  // Zero-state for now — this will be wired up to /api/delivery data next.
   const [totalDeliveries] = useState(0);
   const [delivered] = useState(0);
   const [inTransit] = useState(0);
@@ -304,10 +302,6 @@ export default function DeliveryContent() {
 
   const [totalSales] = useState(0);
 
-  // Available pickup requests — empty for now. Once wired to the real API,
-  // each item should look like:
-  // { id, title, deliveryType, icon, orderId, timeAgo, pickupLocation,
-  //   pickupAddress, dropoffLocation, dropoffAddress, payout, etaMinutes }
   const [pickups, setPickups] = useState([]);
 
   useEffect(() => {

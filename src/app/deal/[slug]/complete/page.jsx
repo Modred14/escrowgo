@@ -21,9 +21,6 @@ export default function OrderCompletePage() {
   const { slug } = useParams();
   const searchParams = useSearchParams();
   const router = useRouter();
-  // Nomba's redirect carries both orderId and orderReference, and in practice
-  // which one matches payment.providerRef can vary — so we send both to the
-  // backend and let it match against either.
   const orderId = searchParams.get("orderId");
   const orderReference = searchParams.get("orderReference");
   const hasRef = Boolean(orderId || orderReference);

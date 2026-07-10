@@ -105,10 +105,6 @@ model Deal {
 
   status                DealStatus     @default(PENDING_PAYMENT)
 
-  // Set by /api/cron/refund-check when an EscrowGo Delivery order passes its
-  // expectedDeliveryDate while the courier already has the item — the delay
-  // is EscrowGo's fault, so we don't auto-refund, we flag it for a human to
-  // resolve instead. Also used by the wallet page to show "In Dispute".
   flaggedForReviewAt    DateTime?
 
   product               Product?
@@ -211,10 +207,6 @@ model QRCode {
   @@map("qr_codes")
 }
 
-// A single withdrawal-to-bank request. Created as PENDING right before we
-// call the Nomba transfer API, then flipped to SUCCESS/FAILED once we get a
-// response. Only SUCCESS withdrawals count against the seller's wallet
-// balance (see /api/wallet/summary and /api/wallet/transactions).
 model Withdrawal {
   id            String           @id @default(cuid())
   userId        String

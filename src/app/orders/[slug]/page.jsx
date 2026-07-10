@@ -123,7 +123,6 @@ function SuccessContent() {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
       timeoutRef.current = setTimeout(() => setCopied(false), 2200);
     } catch {
-      // clipboard can fail silently on old/insecure browsers
     }
   };
 

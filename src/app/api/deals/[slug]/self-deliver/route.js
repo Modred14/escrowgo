@@ -81,7 +81,6 @@ export async function POST(request, { params }) {
       return NextResponse.json({ success: true, status: "OUT_FOR_DELIVERY" });
     }
 
-    // action === "DELIVERED"
     if (deal.delivery.status !== "PICKED_UP") {
       return NextResponse.json(
         { error: "Mark this delivery as picked up first." },

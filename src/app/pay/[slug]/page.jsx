@@ -185,7 +185,6 @@ function MockCheckout({ paymentId }) {
 
   useEffect(() => {
     load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [paymentId]);
 
   async function handleConfirm() {
@@ -520,7 +519,7 @@ function PaymentReturn({ paymentId }) {
 
   useEffect(() => {
     let attempts = 0;
-    const MAX = 20; // poll for up to ~20 s
+    const MAX = 20; 
 
     async function poll() {
       try {
@@ -554,7 +553,6 @@ function PaymentReturn({ paymentId }) {
     poll();
     pollRef.current = setInterval(poll, 1000);
     return () => clearInterval(pollRef.current);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [paymentId]);
 
   if (error) return CenteredError(error);
@@ -585,11 +583,11 @@ function PayRouter() {
   const { slug } = useParams();
   const searchParams = useSearchParams();
   const isMock = searchParams.get("mock") === "1";
-  // Nomba appends ?orderReference=... when redirecting the customer back after payment.
+  
   const orderReference = searchParams.get("orderReference");
 
   if (isMock) return <MockCheckout paymentId={slug} />;
-  // When Nomba redirects back, slug is the paymentId and orderReference is set.
+  
   if (orderReference) return <PaymentReturn paymentId={slug} />;
   return <OrderSummary slug={slug} />;
 }

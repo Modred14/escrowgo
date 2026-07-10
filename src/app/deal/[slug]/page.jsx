@@ -1,4 +1,3 @@
-// src/app/deal/[slug]/page.jsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -133,7 +132,6 @@ export default function DealPage() {
     load();
     const interval = setInterval(load, 8000);
     return () => clearInterval(interval);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug]);
 
   useEffect(() => {
@@ -496,7 +494,6 @@ export default function DealPage() {
                         Show this to the seller or courier to release payment.
                       </p>
                       {qrDataUrl && (
-                        // eslint-disable-next-line @next/next/no-img-element
                         <img
                           src={qrDataUrl}
                           alt="Release QR code"

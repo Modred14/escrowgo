@@ -1,4 +1,3 @@
-// src/app/api/wallet/banks/lookup/route.js
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";

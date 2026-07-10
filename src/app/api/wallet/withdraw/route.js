@@ -1,4 +1,3 @@
-// src/app/api/wallet/withdraw/route.js
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import bcrypt from "bcryptjs";
@@ -8,20 +7,6 @@ import { prisma } from "@/lib/prisma";
 import { notify } from "@/lib/notifications";
 import { lookupBankAccount, transferToBank } from "@/lib/nomba";
 
-// Same "spendable balance" definition used by /api/wallet/summary and
-// /api/wallet/transactions: money released to the seller from escrow, minus
-// whatever has already been paid out or is in flight.
-//
-// IMPORTANT: PENDING withdrawals must also be subtracted, not just SUCCESS.
-// Nomba treats the money as committed/sent the instant it accepts the
-// payout — our own row just hasn't been confirmed SUCCESS by the webhook
-// yet. If we only subtract SUCCESS, the balance stays inflated while a
-// withdrawal is PENDING, so a user can submit another withdrawal that our
-// own check happily approves — but Nomba's real account balance has
-// already been reduced by the first payout, so the second one bounces back
-// as a genuine "insufficient funds" error from the provider, even though
-// our UI said the balance was fine. Only FAILED withdrawals are safe to
-// exclude, since that money never actually left.
 async function getSpendableBalance(userId) {
   const [releasedEscrows, unavailableWithdrawals] = await Promise.all([
     prisma.escrow.findMany({
@@ -67,8 +52,6 @@ export async function POST(req) {
     select: { id: true, name: true, pin: true },
   });
 
-  // No PIN set yet — send the user to Security to create one instead of
-  // silently failing or accepting an unprotected withdrawal.
   if (!user?.pin) {
     return NextResponse.json(
       {
@@ -85,12 +68,6 @@ export async function POST(req) {
     return NextResponse.json({ error: "Incorrect PIN." }, { status: 401 });
   }
 
-  // Round to the same precision the UI's formatNaira() now displays
-  // (2 decimal places / kobo). Comparing against the raw, un-rounded float
-  // here caused false "insufficient balance" rejections: e.g. a true
-  // balance of 4999.999999998 displays as "₦4,999.99"/"₦5,000.00", but a
-  // strict numericAmount > rawBalance check could reject a withdrawal for
-  // the exact amount the user was shown.
   const rawBalance = await getSpendableBalance(userId);
   const balance = Math.round(rawBalance * 100) / 100;
   if (numericAmount > balance) {
@@ -100,9 +77,6 @@ export async function POST(req) {
     );
   }
 
-  // Re-verify the recipient account server-side rather than trusting
-  // whatever name the client sent up, so a tampered request can't redirect
-  // funds to a mismatched name.
   let verifiedAccountName;
   try {
     const lookup = await lookupBankAccount({ accountNumber, bankCode });
@@ -168,11 +142,6 @@ export async function POST(req) {
     );
   }
 
-  // Nomba can return either an immediate SUCCESS or a PENDING that later
-  // resolves via webhook/refund. We treat both as "money is on its way" for
-  // the user-facing response, but only mark our own record SUCCESS when
-  // Nomba already confirms it — PENDING stays PENDING and won't count
-  // against balance twice if the user retries after a refund.
   const finalStatus = result.status === "SUCCESS" ? "SUCCESS" : "PENDING";
   await prisma.withdrawal.update({
     where: { id: withdrawal.id },

@@ -12,7 +12,6 @@ export default function DealCard({ deal, viewerRole }) {
     >
       <div className="relative h-36 w-full bg-paper-dim">
         {image ? (
-          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={image}
             alt={deal.product?.name}

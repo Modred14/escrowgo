@@ -1,4 +1,3 @@
-// src/app/api/delivery/become-courier/route.js
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -24,7 +23,6 @@ export async function POST() {
       return NextResponse.json({ error: "Account not found." }, { status: 404 });
     }
 
-    // Already a courier — nothing to do, just confirm.
     if (user.role === "DELIVERY_AGENT" && user.deliveryAgent) {
       return NextResponse.json({
         success: true,
@@ -40,8 +38,6 @@ export async function POST() {
       where: { id: user.id },
       data: {
         role: "DELIVERY_AGENT",
-        // Only create a DeliveryAgent row if one doesn't already exist
-        // (covers the edge case of a user whose role drifted without one).
         ...(user.deliveryAgent
           ? {}
           : {

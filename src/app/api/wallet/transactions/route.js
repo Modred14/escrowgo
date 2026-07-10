@@ -1,16 +1,8 @@
-// src/app/api/wallet/transactions/route.js
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-// DealStatus -> UI status mapping.
-// NOTE: schema has no real "dispute" flag — FUNDS_HELD/OUT_FOR_DELIVERY are
-// shown as "In Dispute" only as a placeholder for "in progress, not settled".
-
-// DealStatus -> UI status mapping. Only genuinely flagged deals show as
-// "In Dispute" (flaggedForReviewAt is set by the delivery-deadline cron).
-// Everything else reflects its real, current state.
 function toUiStatus(deal) {
   if (deal.flaggedForReviewAt) return "In Dispute";
   switch (deal.status) {
@@ -42,17 +34,10 @@ export async function GET() {
   const userId = session.user.id;
 
   const [releasedEscrows, withdrawals, deals, purchaseDeals] = await Promise.all([
-    // Only escrow that has actually been RELEASED to the seller counts as
-    // real balance. Money still held in escrow (FUNDS_HELD/OUT_FOR_DELIVERY/
-    // DELIVERED-but-unscanned) must NOT show up as spendable balance.
     prisma.escrow.findMany({
       where: { status: "RELEASED", deal: { sellerId: userId } },
       select: { amount: true },
     }),
-    // PENDING withdrawals also reduce spendable balance; Nomba treats that
-    // money as committed/sent the moment it accepts the payout, well before
-    // our webhook confirms it as SUCCESS. Only FAILED ones don't count,
-    // since that money never actually left.
     prisma.withdrawal.findMany({
       where: { userId, status: { in: ["SUCCESS", "PENDING"] } },
       select: { amount: true },
@@ -67,9 +52,6 @@ export async function GET() {
       },
       orderBy: { createdAt: "desc" },
     }),
-    // Buyer-side: every deal this user has paid for (or is attached to as
-    // buyer), including its QR code, so the buyer's own transaction history
-    // can list their release codes without visiting each deal page.
     prisma.deal.findMany({
       where: { buyerId: userId },
       include: {

@@ -1,4 +1,3 @@
-// src/app/dashboard/DashboardContent.jsx
 "use client";
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
@@ -291,16 +290,13 @@ const handleScan = useCallback(async (scannedValue) => {
     const raw = (scannedValue || "").trim();
     if (!raw) throw new Error("This doesn't look like a valid EscrowGo QR code");
 
-    // The QR encodes a full URL like https://.../verify/<slug>?code=<hex>.
-    // Pull just the "code" param out of it; fall back to the raw scanned
-    // text if it isn't a URL (e.g. an older QR that only had the bare code).
     let code = raw;
     try {
       const url = new URL(raw);
       const extracted = url.searchParams.get("code");
       if (extracted) code = extracted;
     } catch {
-      // not a URL — use raw as-is
+      
     }
 
     const res = await fetch("/api/qr/verify", {

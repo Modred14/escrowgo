@@ -1,4 +1,3 @@
-// src/app/api/payments/initiate/route.js
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -9,7 +8,6 @@ import { randomToken } from "@/lib/utils";
 function getBaseUrl(req) {
   const envUrl = process.env.NEXT_PUBLIC_APP_URL;
   if (envUrl && /^https?:\/\//.test(envUrl)) return envUrl.replace(/\/$/, "");
-  // Fallback: derive from the incoming request so callbackUrl is never "undefined/..."
   const origin = req.headers.get("origin");
   if (origin) return origin.replace(/\/$/, "");
   const host = req.headers.get("host");
@@ -37,7 +35,7 @@ export async function POST(req) {
       return NextResponse.json({ error: "Sellers cannot pay for their own deal." }, { status: 400 });
     }
 
-    // --- Duplicate payment prevention -------------------------------------
+    
     if (deal.status !== "PENDING_PAYMENT") {
       return NextResponse.json({ error: "This deal has already been paid for." }, { status: 409 });
     }
@@ -53,7 +51,7 @@ export async function POST(req) {
         checkoutUrl: existingPending.checkoutUrl || `/pay/${existingPending.id}`,
       });
     }
-    // ------------------------------------------------------------------------
+
 
     if (deal.buyerId && deal.buyerId !== session.user.id) {
       return NextResponse.json({ error: "A different buyer is already attached to this deal." }, { status: 403 });

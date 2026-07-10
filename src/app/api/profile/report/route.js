@@ -59,7 +59,7 @@ function renderPdf(data) {
     doc.on("end", () => resolve(Buffer.concat(chunks)));
     doc.on("error", reject);
 
-    // --- Header
+
     doc
       .fillColor(INK)
       .font("Helvetica-Bold")
@@ -77,7 +77,7 @@ function renderPdf(data) {
 
     doc.moveTo(50, 100).lineTo(545, 100).strokeColor(LINE).stroke();
 
-    // --- Seller block
+  
     let y = 118;
     doc.fillColor(INK).font("Helvetica-Bold").fontSize(16).text(data.seller.name, 50, y);
     y += 22;
@@ -94,7 +94,7 @@ function renderPdf(data) {
     doc.text(`EscrowGo member since ${formatDate(data.seller.memberSince)}`, 50, y);
     y += 30;
 
-    // --- Trust score badge
+
     if (data.hasEnoughData) {
       doc
         .roundedRect(400, 112, 145, 60, 8)
@@ -125,7 +125,7 @@ function renderPdf(data) {
     doc.moveTo(50, y).lineTo(545, y).strokeColor(LINE).stroke();
     y += 24;
 
-    // --- Stats grid (2 columns x 3 rows)
+    
     const stats = [
       ["Completed transactions", `${data.completedCount}`],
       ["Total transactions (paid)", `${data.totalTransactions}`],
@@ -155,7 +155,7 @@ function renderPdf(data) {
     doc.moveTo(50, y).lineTo(545, y).strokeColor(LINE).stroke();
     y += 20;
 
-    // --- Recent completed transactions
+    
     doc.fillColor(INK).font("Helvetica-Bold").fontSize(12).text("Recently completed", 50, y);
     y += 20;
 
@@ -200,7 +200,7 @@ function renderPdf(data) {
       y += 20;
     }
 
-    // --- Footer / methodology disclosure
+   
     const footerY = 740;
     doc.moveTo(50, footerY).lineTo(545, footerY).strokeColor(LINE).stroke();
     doc

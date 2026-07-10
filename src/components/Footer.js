@@ -3,12 +3,6 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowUp, ArrowUpRight } from "lucide-react";
 import { FaInstagram, FaLinkedin } from "react-icons/fa";
 import Image from "next/image";
-/**
- * Footer — EscrowGo
- * Drop-in section for a landing page. Requires Tailwind + lucide-react.
- *
- * <Footer /> — no props required.
- */
 
 const LINK_GROUPS = [
   {

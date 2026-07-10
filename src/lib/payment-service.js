@@ -1,13 +1,6 @@
-// src/lib/payment-service.js
 import { prisma } from "@/lib/prisma";
 import { notify } from "@/lib/notifications";
 
-/**
- * Marks a payment as successful and fans out every downstream effect:
- * escrow creation, delivery record setup, expected-delivery date,
- * and notifications to both parties. Idempotent — safe to call twice
- * (e.g. once from the webhook, once from a manual status refresh).
- */
 export async function markPaymentSuccess(paymentId) {
   const payment = await prisma.payment.findUnique({
     where: { id: paymentId },
@@ -20,9 +13,6 @@ export async function markPaymentSuccess(paymentId) {
   }
 
   const deal = payment.deal;
-  // Resolve the buyer up front so it's consistent for the deal update below
-  // and the notification further down, whether or not this deal already had
-  // a buyer attached.
   const resolvedBuyerId = deal.buyerId || payment.buyerId;
   const now = new Date();
   const totalDays = deal.estimatedDeliveryDays;
@@ -38,11 +28,6 @@ export async function markPaymentSuccess(paymentId) {
     data: {
       status: "FUNDS_HELD",
       expectedDeliveryDate,
-      // Register the paying account as the buyer on this deal so it shows up
-      // under "Pending Products to Pick Up" on their dashboard. Normally this
-      // is already set by /api/payments/initiate, but we enforce it here too
-      // since payment success is the real source of truth — this makes it
-      // work no matter which path marked the payment successful.
       ...(deal.buyerId ? {} : { buyerId: resolvedBuyerId }),
     },
   });

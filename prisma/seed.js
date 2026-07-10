@@ -68,13 +68,6 @@ async function main() {
     include: { deliveryAgent: true },
   });
 
-  // --- Two blank-slate accounts, identical to what /api/auth/register produces
-  // for any brand-new signup (role: USER, no deliveryAgent, no deals, no
-  // notifications) — just with credentials that don't require going through
-  // the register form. Reviewers use these to try the *actual* new-user
-  // journey (create a deal, pay one, become a courier, etc.) without
-  // touching the seller/buyer demo accounts above, which already carry
-  // pre-loaded deal history for the guided walkthrough.
   const testUser1 = await prisma.user.create({
     data: { name: "Omirin Favour", email: "testuser1@escrowgo.test", password, role: "USER", phone: "08077778888" },
   });
@@ -188,17 +181,6 @@ async function main() {
   await prisma.notification.create({
     data: { userId: seller.id, title: "Welcome to escrowgo", message: "Create your first secure deal anytime.", type: "INFO" },
   });
-
-  console.log("\nSeed complete. Demo accounts (all use password: password123):");
-  console.log("  Admin    -> admin@escrowgo.test        (pre-loaded, guided walkthrough)");
-  console.log("  Seller   -> seller@escrowgo.test        (pre-loaded, guided walkthrough)");
-  console.log("  Buyer    -> buyer@escrowgo.test         (pre-loaded, guided walkthrough)");
-  console.log("  Courier  -> courier@escrowgo.test       (pre-loaded, guided walkthrough)");
-  console.log("  Test user 1 -> testuser1@escrowgo.test  (blank slate, real new-user journey)");
-  console.log("  Test user 2 -> testuser2@escrowgo.test  (blank slate, real new-user journey)");
-  console.log(`\nDeal ready for /scanner demo: "${deal3.product.name}"`);
-  console.log(`  Release QR code value -> ${demoCode}`);
-  console.log("  (paste this into the manual code field on /scanner while logged in as the seller)\n");
 }
 
 main()

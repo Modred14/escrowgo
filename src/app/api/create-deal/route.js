@@ -9,7 +9,7 @@ export const runtime = "nodejs";
 
 const NOMBA_BASE_URL = process.env.NOMBA_BASE_URL || "https://api.nomba.com";
 const MAX_IMAGES = 3;
-const MAX_RAW_IMAGE_BYTES = 15 * 1024 * 1024; // matches the "less than 15MB" hint on the form
+const MAX_RAW_IMAGE_BYTES = 15 * 1024 * 1024; 
 
 let cachedNombaToken = null;
 let cachedNombaTokenExpiry = 0;
@@ -171,9 +171,6 @@ export async function POST(request) {
     const deliveryOption = (formData.get("deliveryOption") || "").toString();
     const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const rawBuyerEmail = (formData.get("buyerEmail") || "").toString().trim();
-    // The create-deal form doesn't currently collect a buyer email (the buyer
-    // pays via a shared link later), so fall back to the seller's own email —
-    // Nomba's checkout order API requires a valid email to be present.
     const buyerEmail = EMAIL_REGEX.test(rawBuyerEmail)
       ? rawBuyerEmail
       : session.user.email;

@@ -1,4 +1,3 @@
-// src/app/api/wallet/summary/route.js
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -18,10 +17,7 @@ export async function GET() {
       },
       select: { amount: true },
     }),
-    // PENDING withdrawals are already committed at Nomba's end (money is
-    // sent/in-flight the moment they accept the payout, before our webhook
-    // confirms it) — they must reduce the displayed balance too, or this
-    // page shows money that isn't really spendable anymore.
+  
     prisma.withdrawal.findMany({
       where: { userId: session.user.id, status: { in: ["SUCCESS", "PENDING"] } },
       select: { amount: true },

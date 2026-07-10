@@ -1,4 +1,3 @@
-// src/app/dashboard/WithdrawModal.jsx
 "use client";
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { createPortal } from "react-dom";
@@ -15,9 +14,6 @@ import {
 } from "lucide-react";
 import { formatNaira, C } from "./hooks";
 
-// Steps: form (amount/bank/account) -> pin (enter PIN) -> no-pin (must set
-// one first) -> success. Rendered via portal so it always sits above the
-// dashboard, whether it's opened from the sidebar or the wallet tab.
 export default function WithdrawModal({ open, onClose, balance = 0, onSuccess }) {
   const [step, setStep] = useState("form");
 
@@ -26,20 +22,20 @@ export default function WithdrawModal({ open, onClose, balance = 0, onSuccess })
   const [banksLoading, setBanksLoading] = useState(false);
   const [bankQuery, setBankQuery] = useState("");
   const [bankPickerOpen, setBankPickerOpen] = useState(false);
-  const [selectedBank, setSelectedBank] = useState(null); // { name, code }
+  const [selectedBank, setSelectedBank] = useState(null); 
   const [accountNumber, setAccountNumber] = useState("");
   const [accountName, setAccountName] = useState("");
   const [lookupLoading, setLookupLoading] = useState(false);
   const [lookupError, setLookupError] = useState("");
 
-  const [pinSet, setPinSet] = useState(null); // null = unknown yet
+  const [pinSet, setPinSet] = useState(null); 
   const [pin, setPin] = useState("");
   const [pinError, setPinError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   const pickerRef = useRef(null);
 
-  // Reset everything each time the modal is opened fresh.
+
   useEffect(() => {
     if (!open) return;
     setStep("form");
@@ -77,7 +73,7 @@ export default function WithdrawModal({ open, onClose, balance = 0, onSuccess })
     })();
   }, [open]);
 
-  // Close the bank dropdown on outside click.
+ 
   useEffect(() => {
     if (!bankPickerOpen) return;
     function onDocClick(e) {
@@ -89,8 +85,7 @@ export default function WithdrawModal({ open, onClose, balance = 0, onSuccess })
     return () => document.removeEventListener("mousedown", onDocClick);
   }, [bankPickerOpen]);
 
-  // Debounced account-name lookup once we have a 10-digit account number
-  // and a selected bank.
+
   useEffect(() => {
     setAccountName("");
     setLookupError("");
@@ -188,16 +183,13 @@ export default function WithdrawModal({ open, onClose, balance = 0, onSuccess })
     }
   }
 
-  // Auto-submit the moment the 4th digit is entered.
   useEffect(() => {
     if (step === "pin" && pin.length === 4 && !submitting) {
       submitWithdrawal(pin);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+   
   }, [pin, step]);
 
-  // IMPORTANT: this early return must come after every hook above it, or
-  // hook order breaks between "closed" and "open" renders (Rules of Hooks).
   if (!open) return null;
 
   const modal = (

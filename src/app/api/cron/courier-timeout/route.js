@@ -2,17 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { notify } from "@/lib/notifications";
 
-const TIMEOUT_MS = 3 * 24 * 60 * 60 * 1000; // 3 days
+const TIMEOUT_MS = 3 * 24 * 60 * 60 * 1000; 
 
-/**
- * Call this on a schedule with header: Authorization: Bearer <CRON_SECRET>
- *
- * If no courier has accepted an EscrowGo Delivery job within 3 days of the
- * deal becoming FUNDS_HELD (i.e. 3 days since the buyer's payment succeeded),
- * the seller is notified and the deal is automatically switched to Self
- * Delivery. From that point on, only the seller can scan the buyer's QR
- * (enforced by /api/qr/verify's deliveryOption check).
- */
 export async function GET(req) {
   return handleCourierTimeoutSweep(req);
 }

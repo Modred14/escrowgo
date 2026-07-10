@@ -1,24 +1,4 @@
-/**
- * test-webhook.js
- *
- * Sends a correctly-signed, fake "payment success" event to your escrowgo
- * webhook endpoint — useful for testing the handler's logic in isolation,
- * without waiting on a real Nomba payment.
- *
- * USAGE:
- *   node test-webhook.js <providerRef> [targetUrl]
- *
- * <providerRef>  The Payment.providerRef of a PENDING payment in your DB.
- *                Get this from Prisma Studio (npx prisma studio -> Payment table)
- *                after clicking "Pay Securely" on a deal at least once.
- *
- * [targetUrl]    Defaults to http://localhost:3000/api/webhooks/nomba
- *                Pass your Cloudflare Tunnel URL + /api/webhooks/nomba instead
- *                to test that the tunnel itself is reachable from outside.
- *
- * Set NOMBA_WEBHOOK_SECRET in your shell (or it falls back to the hackathon
- * default below) so the signature matches what your server expects.
- */
+
 const crypto = require("crypto");
 
 const orderReference = process.argv[2];

@@ -62,10 +62,6 @@ export async function POST(req) {
     return NextResponse.json({ error: message }, { status: 403 });
   }
 
-  // Scanning the buyer's QR at the moment of physical handoff *is* the proof
-  // of delivery — so this single action both marks the delivery complete and
-  // releases escrow, rather than requiring a separate "mark as delivered"
-  // step beforehand.
   if (!["FUNDS_HELD", "OUT_FOR_DELIVERY", "DELIVERED"].includes(deal.status)) {
     const message =
       deal.status === "PENDING_PAYMENT"
@@ -105,9 +101,7 @@ export async function POST(req) {
     data: { status: "PAYMENT_RELEASED" },
   });
 
-  // Courier gets paid the delivery fee at the moment escrow is actually released,
-  // not when they mark the item "delivered" — they haven't earned it until the
-  // buyer's release confirms the handoff.
+
   if (deal.deliveryOption === "ESCROWGO" && deal.delivery?.agentId) {
     await prisma.deliveryAgent.update({
       where: { id: deal.delivery.agentId },

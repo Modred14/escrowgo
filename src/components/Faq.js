@@ -1,13 +1,7 @@
 import { useState } from "react";
 import { ChevronDown, MessageCircleQuestion, ArrowUpRight } from "lucide-react";
 
-/**
- * FAQ — "Questions mostly asked"
- * Drop-in section for a landing page. Requires Tailwind + lucide-react.
- *
- * <FAQ /> — no props required.
- * Pass onContactClick to override the default "Contact us" behavior.
- */
+
 
 const FAQS = [
   {

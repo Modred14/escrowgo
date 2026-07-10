@@ -15,7 +15,6 @@ export default function NotificationBell() {
       const data = await res.json();
       setItems(data.notifications || []);
     } catch {
-      // silent — notifications are non-critical
     }
   }
 

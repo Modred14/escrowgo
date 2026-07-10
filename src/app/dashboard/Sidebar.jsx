@@ -1,4 +1,3 @@
-// src/app/dashboard/Sidebar.jsx
 "use client";
 import React, { useState, useEffect, useCallback } from "react";
 import {

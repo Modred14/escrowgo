@@ -13,10 +13,7 @@ export function isMockMode() {
 let cachedToken = null;
 let tokenExpiresAt = 0;
 
-/**
- * Nomba uses client-credential auth: exchange client id/secret for a short-lived
- * bearer token, then attach it (+ account id) to every subsequent request.
- */
+
 async function getAccessToken() {
   if (cachedToken && Date.now() < tokenExpiresAt) return cachedToken;
 
@@ -43,10 +40,7 @@ async function getAccessToken() {
   return cachedToken;
 }
 
-/**
- * Creates a hosted checkout order on Nomba and returns a checkout URL.
- * Buyer is redirected there; on completion Nomba calls our webhook.
- */
+
 export async function createCheckoutOrder({ orderReference, amount, currency, callbackUrl, customerEmail, description }) {
   if (isMockMode()) {
     return {
@@ -57,7 +51,7 @@ export async function createCheckoutOrder({ orderReference, amount, currency, ca
   }
 
   const token = await getAccessToken();
-  // Nomba sandbox uses /sandbox/checkout/order; production uses /v1/checkout/order.
+
   const isSandbox = BASE_URL?.includes("sandbox.nomba.com");
   const checkoutPath = isSandbox ? "/sandbox/checkout/order" : "/v1/checkout/order";
   const res = await fetch(`${BASE_URL}${checkoutPath}`, {
@@ -113,10 +107,7 @@ export async function verifyTransactionStatus({ orderReference }) {
     return res;
   }
 
-  // Nomba's verify endpoint 404s if the value you send doesn't match the
-  // param name's expected type (orderReference vs orderId), even though both
-  // are accepted in principle. Try orderReference first, then fall back to
-  // orderId with the same value before giving up.
+  
   let res = await query("orderReference");
   if (res.status === 404) {
     res = await query("orderId");
@@ -134,11 +125,6 @@ export async function verifyTransactionStatus({ orderReference }) {
 let cachedBanks = null;
 let banksCachedAt = 0;
 
-/**
- * Fetches the list of banks Nomba can pay out to. Nomba says bank codes
- * rarely change, so we cache the list in-memory for an hour instead of
- * hitting the API on every withdraw-modal open.
- */
 export async function fetchBanks() {
   if (isMockMode()) {
     return [
@@ -178,10 +164,6 @@ export async function fetchBanks() {
   return cachedBanks;
 }
 
-/**
- * Verifies a recipient's bank account before a transfer and returns the
- * account holder's name, so the withdrawal UI can autofill/confirm it.
- */
 export async function lookupBankAccount({ accountNumber, bankCode }) {
   if (isMockMode()) {
     return { accountNumber, accountName: "Demo Account (Mock Mode)" };
@@ -210,10 +192,7 @@ export async function lookupBankAccount({ accountNumber, bankCode }) {
   };
 }
 
-/**
- * Pays out from the Nomba merchant balance to an external bank account.
- * Used for user withdrawals from their EscrowGo wallet.
- */
+
 export async function transferToBank({
   amount,
   accountNumber,
@@ -296,11 +275,7 @@ export function verifyWebhookSignature(rawBody, signature) {
   }
 }
 
-/**
- * Best-effort refund call against Nomba's transaction API.
- * In mock mode (or on any sandbox failure) we still mark the refund as
- * succeeded locally so the escrow/refund flow can be demoed end to end.
- */
+
 export async function refundTransaction({ providerRef, amount }) {
   if (isMockMode()) {
     return { success: true, mock: true };

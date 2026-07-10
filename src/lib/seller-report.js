@@ -2,11 +2,7 @@ import { prisma } from "@/lib/prisma";
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
-/**
- * Every number here is computed live from the current database state —
- * nothing is cached or snapshotted. Call this right before rendering the
- * PDF (or from a JSON endpoint) and it always reflects "right now".
- */
+
 export async function getSellerReportData(userId) {
   const user = await prisma.user.findUnique({
     where: { id: userId },
@@ -20,8 +16,6 @@ export async function getSellerReportData(userId) {
     orderBy: { createdAt: "asc" },
   });
 
-  // Only deals that were actually paid for count as real transactions —
-  // an abandoned PENDING_PAYMENT link says nothing about credibility.
   const paidDeals = deals.filter((d) => d.status !== "PENDING_PAYMENT");
   const completedDeals = deals.filter((d) => d.status === "PAYMENT_RELEASED");
   const cancelledOrRefunded = deals.filter((d) => ["CANCELLED", "REFUNDED"].includes(d.status));
@@ -43,7 +37,6 @@ export async function getSellerReportData(userId) {
     0,
   );
 
-  // On-time + average delivery time, computed from paidAt -> releasedAt.
   let onTimeCount = 0;
   let onTimeEligible = 0;
   let deliveryDurationsDays = [];
@@ -66,9 +59,6 @@ export async function getSellerReportData(userId) {
       ? deliveryDurationsDays.reduce((a, b) => a + b, 0) / deliveryDurationsDays.length
       : null;
 
-  // Trust score: a plain, disclosed weighted average of the three ratios
-  // above — not a black-box number. Only shown once there's enough real
-  // transaction history to mean anything.
   const HAS_ENOUGH_DATA = totalTransactions >= 3;
   let trustScore = null;
   if (HAS_ENOUGH_DATA) {

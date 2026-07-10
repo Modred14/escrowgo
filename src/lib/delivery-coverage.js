@@ -1,5 +1,4 @@
-// Mock escrowgo delivery network coverage for the MVP.
-// In production this would call a logistics-partner API.
+
 export const COVERED_LOCATIONS = [
   "Lagos",
   "Abuja",
@@ -25,10 +24,7 @@ export function isCovered(location) {
   return COVERED_LOCATIONS.some((city) => normalize(city) === normalize(location));
 }
 
-/**
- * Checks coverage for both ends of a delivery and returns fee + buffer info.
- * This is the single source of truth for the "escrowgo Delivery" business logic.
- */
+
 export function checkDeliveryCoverage({ sellerLocation, buyerLocation, estimatedDeliveryDays }) {
   const sellerCovered = isCovered(sellerLocation);
   const buyerCovered = isCovered(buyerLocation);

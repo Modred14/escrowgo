@@ -3,24 +3,6 @@ import { prisma } from "@/lib/prisma";
 import { refundTransaction } from "@/lib/nomba";
 import { notify } from "@/lib/notifications";
 
-/**
- * Call this on a schedule (e.g. Netlify Scheduled Function or an external
- * cron pinger) with header:  Authorization: Bearer <CRON_SECRET>
- *
- * Logic for every deal still awaiting delivery whose expectedDeliveryDate has passed:
- *
- * - Self Delivery: this is on the seller. Refund the buyer, mark the deal
- *   CANCELLED, and the QR is implicitly expired (a cancelled deal can never
- *   reach DELIVERED again, so /api/qr/verify will always reject it).
- *
- * - EscrowGo Delivery where a courier already has the item (accepted/picked
- *   up/delivered but never scanned): the delay is EscrowGo's fault, not the
- *   buyer's or seller's, so we do NOT auto-refund here. Instead we flag the
- *   deal for manual/admin review so a human resolves who gets made whole.
- *
- * - EscrowGo Delivery still UNASSIGNED past the deadline: that's the
- *   courier-timeout case, handled by /api/cron/courier-timeout, not here.
- */
 export async function GET(req) {
   return handleRefundSweep(req);
 }
@@ -57,7 +39,7 @@ async function handleRefundSweep(req) {
       ["ACCEPTED", "PICKED_UP", "DELIVERED"].includes(deal.delivery?.status);
 
     if (courierHasItem) {
-      if (deal.flaggedForReviewAt) continue; // already flagged, don't re-notify every run
+      if (deal.flaggedForReviewAt) continue;
 
       await prisma.deal.update({
         where: { id: deal.id },
