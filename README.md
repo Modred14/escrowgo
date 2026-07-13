@@ -25,8 +25,8 @@ You do **not** need to register an account or bring your own API keys to evaluat
 
 | Account | Email | Password | State |
 |---|---|---|---|
-| Test user 1 | `testuser1@EscrowGo.test` | `password123` | Blank slate — a genuinely brand-new account, identical to what `/auth/register` produces |
-| Test user 2 | `testuser2@EscrowGo.test` | `password123` | Blank slate — use alongside Test user 1 to trade with each other from scratch |
+| Test user 1 | `testuser1@escrowgo.test` | `password123` | Blank slate — a genuinely brand-new account, identical to what `/auth/register` produces |
+| Test user 2 | `testuser2@escrowgo.test` | `password123` | Blank slate — use alongside Test user 1 to trade with each other from scratch |
 
 Every seeded account (see `prisma/seed.js`) shares the same password: **`password123`**.
 
@@ -117,7 +117,7 @@ cp .env.example .env
 # 3. Push the schema to your Neon database
 npm run db:push
 
-# 4. Seed demo data (creates testuser1@EscrowGo.test / testuser2@EscrowGo.test)
+# 4. Seed demo data (creates testuser1@escrowgo.test.test / testuser2@escrowgo.test)
 npm run db:seed
 
 # 5. Run the dev server
@@ -149,8 +149,8 @@ Both accounts use password `password123`.
 
 | Account | Email | State |
 |---|---|---|
-| Test user 1 | `testuser1@EscrowGo.test` | Blank slate — no deals, exactly like a fresh signup |
-| Test user 2 | `testuser2@EscrowGo.test` | Blank slate — no deals, exactly like a fresh signup |
+| Test user 1 | `testuser1@escrowgo.test` | Blank slate — no deals, exactly like a fresh signup |
+| Test user 2 | `testuser2@escrowgo.test` | Blank slate — no deals, exactly like a fresh signup |
 
 They're `role: USER` accounts with nothing attached, produced by the exact same `prisma.user.create` shape that `/api/auth/register` uses for a real signup (see `prisma/seed.js`), so they have every feature a brand-new user has: create a deal as seller, pay as buyer, convert to a courier via the **"Become a Courier"** card in the dashboard sidebar, set a security PIN, etc.
 
@@ -270,11 +270,11 @@ Point any scheduler at it — a free [cron-job.org](https://cron-job.org) ping e
 
 Use two browser profiles (or one normal + one incognito window) — one for each test account.
 
-1. **Log in** as `testuser1@EscrowGo.test` (password `password123`).
+1. **Log in** as `testuser1@escrowgo.test` (password `password123`).
 2. Go to **Create Secure Deal** → fill in a product, upload 2 images, set seller location `Lagos`, buyer location `Abuja`, delivery option `EscrowGo Delivery`. Watch the live sidebar confirm coverage and show the delivery fee + buffer.
 3. Try buyer location `Jos` (not in the mock coverage list) — the sidebar flips to "Not covered" and the deal will be force-created as Self Delivery.
 4. Submit → copy the generated payment link.
-5. Open that link in the other profile as the **buyer** (log in as `testuser2@EscrowGo.test`) → review product, seller info, delivery estimate, escrow explanation → **Pay Securely**.
+5. Open that link in the other profile as the **buyer** (log in as `testuser2@escrowgo.test`) → review product, seller info, delivery estimate, escrow explanation → **Pay Securely**.
 6. On this deployment (live mode) you'll be taken through actual Nomba checkout — only proceed with a card/account you intend to charge. (If you've switched `PAYMENTS_MOCK_MODE` to `"true"` for local testing instead, you'll land on an in-app test-checkout screen at `/pay/[slug]` with a **Confirm Test Payment** button.) Either way, status flips to `FUNDS_HELD` on the deal page (auto-refreshes every few seconds), and you land on `/deal/[slug]/complete` showing your release QR code.
 7. **Self Delivery deal**: log back in as `testuser1` (the seller) on the deal page → **Mark as picked up** → **Mark as delivered**. The buyer's QR is now active for scanning.
 8. **EscrowGo Delivery deal**: in a third profile (or reuse either account), use the **"Become a Courier"** card in the dashboard sidebar to activate a courier profile, then go to **Dashboard → Delivery tab** → Available → **Accept** → Assigned → **Mark picked up** → **Mark delivered**.

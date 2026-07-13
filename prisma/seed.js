@@ -1,8 +1,10 @@
-/* eslint-disable no-console */
+require("dotenv").config()
 const { PrismaClient } = require("@prisma/client");
+const { PrismaNeon } = require("@prisma/adapter-neon");
 const bcrypt = require("bcryptjs");
 
-const prisma = new PrismaClient();
+const adapter = new PrismaNeon({ connectionString: process.env.DATABASE_URL });
+const prisma = new PrismaClient({ adapter });
 
 const PRODUCT_IMAGES_PHONE = [
   "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=800&q=80",
