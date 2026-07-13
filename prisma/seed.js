@@ -1,7 +1,11 @@
-require("dotenv").config()
+require("dotenv").config();
 const { PrismaClient } = require("@prisma/client");
 const { PrismaNeon } = require("@prisma/adapter-neon");
+const { neonConfig } = require("@neondatabase/serverless");
+const ws = require("ws");
 const bcrypt = require("bcryptjs");
+
+neonConfig.webSocketConstructor = ws;
 
 const adapter = new PrismaNeon({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
@@ -41,6 +45,7 @@ async function main() {
   await prisma.delivery.deleteMany();
   await prisma.escrow.deleteMany();
   await prisma.payment.deleteMany();
+  await prisma.withdrawal.deleteMany();  
   await prisma.product.deleteMany();
   await prisma.deal.deleteMany();
   await prisma.deliveryAgent.deleteMany();
